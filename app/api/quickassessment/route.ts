@@ -2,7 +2,7 @@ import {createAnthropic} from '@ai-sdk/anthropic';
 import {generateText}  from "ai" ;
 import { auth } from '@clerk/nextjs/server';
 import { db } from '@/lib/prisma';
-
+import { currentUser } from '@clerk/nextjs/server';
 
 
 
@@ -34,8 +34,7 @@ export async function POST(request : Request): Promise<Response>{
   const {userId}=await  auth() ;
 
   if(!userId){
-
-    return new Response(JSON.stringify({error : "unauthorised", sessionId : userId}), {
+   return new Response(JSON.stringify({error : "unauthorised", sessionId : userId}), {
       status : 401, headers : {"Content-Type" : "application/json"}
     })
   }
@@ -43,26 +42,42 @@ export async function POST(request : Request): Promise<Response>{
   //2. get user from database
   const user = await db.user.findUnique({
     where : {clerkId : userId}
-  })
-  if(!user){
-    return new Response(JSON.stringify({error : "User not found"}), {
-      status : 404, headers : {"Content-Type" : "application/json"}
-    })
-  }
+  }) 
+
 
   //3. Check trial expiry (30 days per user)
-  const signUpDate = user.signupDate || new Date()
+  const signUpDate = user?.signupDate || new Date()
 const trialEnd = new Date(signUpDate);
 trialEnd.setDate(trialEnd.getDate() + 30);
 const trialActive = new Date() < trialEnd;
 
-if(!trialActive && user.plan === "free"){
+
+
+const ClerkUser = await  currentUser();
+const email = ClerkUser?.emailAddresses[0]?.emailAddress
+console.log(email)
+  if(!user){
+    await db.user.create({
+      data : {
+      clerkId: userId,
+    email: email || "no-email.wsc.com",
+    plan : "free",
+    signupDate: new Date(),
+    generationCount: 0,
+      }
+    })
+    // return new Response(JSON.stringify({error : "User not found"}), {
+    //   status : 404, headers : {"Content-Type" : "application/json"}
+    // })
+  }
+if(!trialActive && user?.plan === "free"){
   return new Response(JSON.stringify({error : "Trial expired"}), {
     status : 403, headers : {"Content-Type" :"application/json"}
   })
 }
 //4.  Check generation limit (5 for free trail) 
-if(user.plan === "free" && user.generationCount >=5){
+
+if(user?.plan === "free" && user?.generationCount >=5){
   return new Response(JSON.stringify({error : "Generation limit Reached"}), 
 {status : 403, headers : {"Content-Type" : "application/json"}})
 }
@@ -96,7 +111,7 @@ if(user.plan === "free" && user.generationCount >=5){
     //8. Save generation to DB
     await db.generation.create({
       data:{
-        userId : user.id,
+        userId : user?.id || "0",
         type : "quick",
         prompt,
         output : text

@@ -2,7 +2,7 @@ import { db } from "@/lib/prisma";
 import { WebhookEvent } from "@clerk/nextjs/server";
 
 export async function POST(request : Request){
-    const payload : WebhookEvent = await request .json();
+    const payload : WebhookEvent = await request.json();
     if(payload.type === "user.created"){
         const {id, email_addresses} = payload.data;
 
