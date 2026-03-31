@@ -31,7 +31,7 @@ export async function POST(request : Request): Promise<Response>{
   //1. Check if the user is an authorised user
   const cookieHeader = request?.headers.get("cookie");
   console.log("Cookies", cookieHeader ? "YES YOU CANT EAT YUMMY COOKIES" : "NO I CANT")
-  const {userId}=  auth() as {userId : string | null};
+  const {userId}=await  auth() ;
 
   if(!userId){
 
