@@ -1,0 +1,36 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model User {
+  id              String       @id @default(cuid())
+  clerkId         String       @unique
+  email           String       @unique
+  signupDate      DateTime     @default(now())
+  plan            String       @default("free")
+  trialExpired    Boolean      @default(false)
+  generationCount Int          @default(0)
+  tokenBalance    Int          @default(0)
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+  generations     Generation[]
+}
+
+model Generation {
+  id        String   @id @default(cuid())
+  userId    String
+  type      String   // "quick" or "critical"
+  prompt    String
+  output    String
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+}
