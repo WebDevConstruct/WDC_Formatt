@@ -7,7 +7,8 @@ export default function Dashboard() {
 console.log(user);  
 if (!isLoaded) return <div>Bouncer is checking your ID...</div>; 
 
-
+console.log("SignedIn", isSignedIn);
+//console.log()
 if (!isSignedIn) return <div>Access Denied. Please Sign In.</div>;
   return (
     <main className="min-h-screen bg-[#F5F5DC] text-[#2D2D2D] font-sans">

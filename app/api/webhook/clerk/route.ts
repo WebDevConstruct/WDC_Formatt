@@ -5,17 +5,20 @@ import { WebhookEvent } from "@clerk/nextjs/server";
 export async function POST(request : Request){
     const payload : WebhookEvent = await request.json();
     if(payload.type === "user.created"){
-        const {id, email_addresses} = payload.data;
+        const {id, email_addresses, username} = payload.data;
 
         await db.user.create({
             data : {
                 clerkId : id,
-                email : email_addresses[0].email_address
+                email : email_addresses[0].email_address,
+                username : username || "",
+                department : "unassigned",
+                 
             }
         })
     }
     return new Response(JSON.stringify({success : true, userCreated : true}), {
         status : 200,
-         headers : {"Content-Type" : "app;ication/json"}
+         headers : {"Content-Type" : "application/json"}
     })
 }

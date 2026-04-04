@@ -12,7 +12,7 @@ export default function LandingPage() {
           <Link href="/signin" className="hidden sm:block text-[#5C4033] font-bold hover:text-[#8B0000] transition-colors">
             Sign In
           </Link>
-          <Link href="/signup" className="bg-[#8B0000] text-[#F5F5DC] px-5 py-2 rounded-lg font-bold text-sm hover:bg-[#A52A2A] transition-all">
+          <Link href="/sign-up" className="bg-[#8B0000] text-[#F5F5DC] px-5 py-2 rounded-lg font-bold text-sm hover:bg-[#A52A2A] transition-all">
             Join Beta
           </Link>
         </div>
@@ -41,7 +41,7 @@ export default function LandingPage() {
 
           {/* Call to Action - Responsive Layout */}
           <div className="flex flex-col sm:flex-row gap-4 lg:gap-8 justify-center items-center pt-8 w-full max-w-sm mx-auto sm:max-w-none">
-            <Link href="/signup" 
+            <Link href="/sign-up" 
               className="w-full sm:w-72 bg-[#8B0000] hover:bg-[#A52A2A] text-[#F5F5DC] text-lg lg:text-xl font-bold py-5 md:py-6 rounded-2xl shadow-2xl 
               transition-all duration-300 hover:scale-[1.03] 
               active:scale-95 text-center flex items-center justify-center"

@@ -6,9 +6,9 @@ import { createRouteMatcher } from '@clerk/nextjs/server';
 const isPublicRoute = createRouteMatcher([
   '/', 
    '/signin(.*)', 
-   '/signup(.*)',
- 
-   "/api/webhook(.*)"
+   '/sign-up(.*)',
+ "/api/webhook(.*)",
+ "/waitlist(.*)"
  
  // Ensure the (.*) is there to catch sub-routes
 ])

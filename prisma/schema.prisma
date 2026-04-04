@@ -9,30 +9,73 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = "file:./dev.db"
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
+// 2. LOBBY AREA: Student Profiles
 model User {
-  id              String       @id @default(cuid())
-  clerkId         String       @unique
-  email           String       @unique
-  signupDate      DateTime     @default(now())
-  plan            String       @default("free")
-  trialExpired    Boolean      @default(false)
-  generationCount Int          @default(0)
-  tokenBalance    Int          @default(0)
-  createdAt       DateTime     @default(now())
-  updatedAt       DateTime     @updatedAt
-  generations     Generation[]
+  clerkId         String    @id @map("clerk_id")
+  email           String
+  username  String   @unique // <--- Add this "Surgical" anchor
+  university      String?   @default("University")
+  department      String
+  planTier        String?   @default("free") @map("plan_tier")
+  expiresAt       DateTime? @map("access_expires_at")
+  generationsUsed Int       @default(0) @map("generation_used")
+  isWaitlisted    Boolean   @default(false) @map("is_waitlisted")
+  createdAt       DateTime? @default(now()) @map("created_at")
+
+  // Relationships
+   tasks            Task[]
+  generations       Generation[]
+  @@map("user")
 }
 
+// 3. THE 3-PAGE REPORT: Document Schema
+model Task {
+  id                 String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  studentId          String?  @map("student_id")
+  title              String?  @default("New Document")
+  topic              String
+  intent             String
+  relateToDepartment Boolean? @default(false) @map("relate_to_department")
+  formatting         Json     // Prisma handles jsonb as Json
+  refinementCount    Int?     @default(0) @map("refinement_count")
+  maxRefinements     Int?     @default(3) @map("max_refinements")
+  status             String?  @default("draft")
+  isCurrent          Boolean? @default(true) @map("is_current")
+  createdAt          DateTime? @default(now()) @map("created_at")
+  updatedAt          DateTime? @default(now()) @updatedAt @map("updated_at")
+
+  // Relations
+user                 User? @relation(fields: [studentId], references : [clerkId])
+  @@map("task")
+}
+
+// 4. WAITLIST: Phase 1 Access Control
+model Waitlist {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email     String   @unique
+  isClaimed Boolean? @default(false) @map("is_claimed")
+  createdAt DateTime? @default(now()) @map("created_at")
+
+  @@map("waitlist")
+}
 model Generation {
-  id        String   @id @default(cuid())
-  userId    String
+  // Use UUID to match Task and Waitlist for consistency
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  
+  userId    String   @map("user_id") // The Foreign Key
   type      String   // "quick" or "critical"
   prompt    String
   output    String
-  createdAt DateTime @default(now())
-  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // THE HANDSHAKE
+  user      User     @relation(fields: [userId], references: [clerkId])
+  
+  @@map("generations")
 }
+
+
