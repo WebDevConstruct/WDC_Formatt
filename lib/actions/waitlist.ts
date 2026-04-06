@@ -16,42 +16,49 @@ export async function verifyWaitlistInvite(email : string){
     }
 }
 
-// The institution initialization error
-export async function initialiazeWaitlistStudent(clerkId : string, email : string){
-    const normalizedEmail= email.toLowerCase().trim()
-const now = new Date();
-const thirtyDaysFromNow = new Date(now.getTime());
-const existingUser = await db.user.findUnique(
-    {where : {clerkId : clerkId}}
-)
-// Check if the user already exists in the database, if they
-//  exists no need to validate and initialize their accounts 
-if(existingUser){
-          return {success : true, message : "user invited"}
-    }
-try{
-    // Verify if the user is on the waitlist through their email
-    const invite = await verifyWaitlistInvite(email);
-if(!invite.allowed){
-    throw new Error(invite.error || "Not allowed to claim invite")
-}
-    await db.$transaction([
-     db.user.create({
-         email : email?.toLowerCase(),
-        planTier : "free",
-        expiresAt : thirtyDaysFromNow,
-        isWaitlisted : true,
-        department : "unassigned",
-        clerkId : clerkId
-    }),
-      db.waitlist.update({
-        where : {email : normalizedEmail},
-        data : {isClaimed : true}
-      })
-])
+// // The institution initialization error
+// export async function initialiazeWaitlistStudent(clerkId : string, email : string){
+//     const ClerkUser = await currentUser();
+//     const username = ClerkUser?.username
+//     const normalizedEmail= email.toLowerCase().trim()
+// const now = new Date();
+// const thirtyDaysFromNow = new Date(now.getTime());
+// const existingUser = await db.user.findUnique(
+//     {where : {clerkId : clerkId}}
+// )
+// // Check if the user already exists in the database, if they
+// //  exists no need to validate and initialize their accounts 
+// if(existingUser){
+//  return new Response(JSON?.stringify({success : true, message : "user invited"}), {
+//     status : 404, headers : {"Content-Type" : "application/json"}
+//  })
+//     }
+// try{
+//     // Verify if the user is on the waitlist through their email
+//     const invite = await verifyWaitlistInvite(email);
+// if(!invite.allowed){
+//     throw new Error(invite.error || "Not allowed to claim invite")
+// }
+//     await db.$transaction([
+//      db.user.create({
+//          username : username,
+//          email : email?.toLowerCase(),
+//         planTier : "free",
+//         expiresAt : thirtyDaysFromNow,
+//         isWaitlisted : true,
+//         department : ,
+//         clerkId : clerkId,
+//         university : "UNILAG",
+//         generationUsed : 3
+//     }),
+//       db.waitlist.update({
+//         where : {email : normalizedEmail},
+//         data : {isClaimed : true}
+//       })
+// ])
 
     
-} catch (error) {
- console.error("Surgical Unit error:", error)
-}
-}
+// } catch (error) {
+//  console.error("Surgical Unit error:", error)
+// }
+// }

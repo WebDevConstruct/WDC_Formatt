@@ -1,22 +1,35 @@
 "use client";
-
 import { useSignUp } from "@clerk/nextjs"; 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { verifyWaitlistInvite } from "@/lib/actions/waitlist";
 import Link from "next/link";
+//import InstitutionalPopup from "@/app/components/UserContext";
+import { useRouter } from "next/navigation";
+import { useUser } from "@clerk/nextjs";
 
+const DEPARTMENTS = [
+  "Accounting",
+  "Actuarial Science",
+  " Finance",
+  "Business Administration",
+  "Employment Relations & HRM",
+  "Insurance", 
+  "Operations Management",
+  "Taxation"
+];
 export default function PremiumSignUp() {
   // CLEAN DESTRUCTURING: Only the essentials
-  const { signUp, fetchStatus, errors  } = useSignUp(); 
-  
+  const { signUp, fetchStatus, } = useSignUp(); 
   const [step, setStep] = useState(1);
   const [email, setEmail] = useState("");
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState("");
   const [code, setCode] = useState("");
   const [localError, setLocalError] = useState("");
-  //const router = useRouter();
+ const router = useRouter();
+   const [departmentChosen, setDepartmentChosen] = useState("");
+   const {user} = useUser()
 
   // 1. THE MODERN GUARD: Replacing the old 'isLoaded'
   if (fetchStatus === "fetching") {
@@ -35,7 +48,7 @@ export default function PremiumSignUp() {
       if (check.allowed) {
         setStep(2);
       } else {
-        setLocalError("Email not authorized for Class of 2027 Pilot.");
+        setLocalError("Email not authorized as a waitlist invitee.");
       }
     } catch (err) {
       setLocalError("Verification server unreachable.");
@@ -43,59 +56,87 @@ export default function PremiumSignUp() {
   };
 
   // --- PHASE 2: Create Credentials (Clerk) ---
+
+// Step
+const handleSync = async () => {
+    
+  //  setIsSyncing(true);
+    const body ={
+      clerkId : user?.id,
+      department : departmentChosen
+    }
+
+    try {
+     const response =  await fetch("/api/scholars", {
+        method : "POST",
+        headers : {"Content-Type" : "application/json"},
+        body : JSON.stringify(body)
+      })
+      if(response.status === 200){
+          router.replace("/dashboard")
+  }else if(response?.status === 404){
+        alert("User authentication failed.")
+      }
+
+    //  window.location.reload(); 
+    } catch (err) {
+      console.error("Sync Error:", err);
+    //  setIsSyncing(false);
+    }
+  };
   const handleEstablishSession = async () => {
     if (!signUp) return;
     try {
-
-    const {error : emailError} = 
+ const {error : emailError} = 
       await signUp?.create({ emailAddress : email , username : username  })
-
+      //Checking if the email Used for SignUp already exists
       if(emailError){
-        console.log("EmailError", emailError)
-      setLocalError("Check your email for a verification code.")
+     //   console.log("EmailError", emailError)
+      setLocalError("Email already in use or invalid.")
       return;
       } 
-      const {error :passwordError} = await signUp?.password({password : password});
+//PassWord 
+        const {error :passwordError} = await signUp?.password({password : password});
       if(passwordError){
-        
-      setLocalError("Password must be atleast 8 digits")
-      return;
+        setLocalError("Password must be at least 8 digits")
       }
-   await signUp?.verifications?.sendEmailCode();
-  
-      setStep(3); 
-    } catch (err) {
+ const {error : EmailSentError} =  await signUp?.verifications?.sendEmailCode();
+ if(!EmailSentError){
+  setStep(3)
+ }
+      
+  } catch (err) {
       setLocalError("Initialization failed.");
     }
   };
 
   // --- PHASE 3: Verify OTP ---
+  
   const handleVerifyOTP = async () => {
     if (!signUp) return;
     try {
       const {error : verificationError} = await signUp?.verifications?.verifyEmailCode({code});
       if(verificationError){
-        setLocalError("Invalid verification code.")
+        setLocalError("Invalid verification code.");
       }
-    //  console.log("SignUpState", signUp?.status)
-    if(!verificationError && fetchStatus === "idle" && signUp.status === "complete"){
-       
-      console.log(signUp?.status);
-     const {error : finalizeError} =  await signUp?.finalize();
-     if(finalizeError){
-      return;
-     }
-       return window.location.href = "/dashboard";
-    }
-
-
+     
       
+       const {error : finalizeError} =  await signUp?.finalize();
       
-      
-    } catch (err) {
+       if(finalizeError){
+       return alert("Error Completing signup")
+       }
+       if(!finalizeError){
+         await handleSync();
+         }
+     
+} catch (err) {
       setLocalError("Authorization code rejected.");
     }
   };
+
+  //The
+  
 
   return (
     <div className="min-h-screen bg-[#FDFCF0] flex items-center justify-center p-6 selection:bg-[#8B0000] selection:text-white font-sans">
@@ -129,10 +170,15 @@ export default function PremiumSignUp() {
               >
                 Verify Identity →
               </button>
-
-              <Link href="/signin" className="text-right mt-3 text-md font-medium text-[#8B0000]">
+      <div className="flex w-full justify-between">
+              <Link href="/signin" className="text-right mt-3 text-md font-medium text-black">
               Sign in instead
               </Link>
+               <Link href="/waitlist" className="text-right mt-3 text-md font-medium text-black">
+                Join Waitlist 
+              </Link>
+
+              </div>
 
             </motion.div>
           )}
@@ -143,20 +189,42 @@ export default function PremiumSignUp() {
                 <span className="font-mono text-xs text-[#8B0000]">{email}</span>
                 <span className="text-[8px] uppercase font-black text-green-700">Matched</span>
               </div>
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-col gap-5">
                <input 
                 type="username" 
                 placeholder="John"
                 onChange={(e) => setUsername(e.target.value)}
-                className="w-full border-b border-[#8B0000]/20 p-4 outline-none font-mono text-sm bg-transparent focus:border-[#8B0000]"
+                className="w-full border-b border-[#8B0000]/20 p-4 outline-none 
+                font-mono text-sm bg-transparent focus:border-[#8B0000]"
               />
               <input 
                 type="password" 
                 placeholder="ASSIGN PASSWORD"
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full border-b border-[#8B0000]/20 p-4 outline-none font-mono text-sm bg-transparent focus:border-[#8B0000]"
+                className="w-full border-b border-[#8B0000]/20 p-4 outline-none 
+                font-mono text-sm bg-transparent focus:border-[#8B0000]"
               />
-              
+
+              {/* Department */}
+               <div className="border-b-2 border-[#8B0000]/30 pb-2 focus-within:border-[#8B0000] transition-all relative">
+              <label className="block text-[10px] font-black uppercase tracking-widest text-[#8B0000] mb-3">Select Department</label>
+              <select onChange={(e)=> {
+                    setDepartmentChosen(e.currentTarget.value)
+              }}
+               required name="department" 
+                className="w-full bg-transparent outline-none font-serif text-xl text-[#8B0000] cursor-pointer appearance-none">
+                <option value="" disabled selected>Choose your field...
+
+                </option>
+                {DEPARTMENTS.map(dept =>(
+                  <option key={dept} value={dept} className="bg-[#FDFCF0] text-[#8B0000]">{dept}</option>
+                ))}
+              </select>
+              {/* Custom Down Arrow for Dropdown */}
+              <div className="absolute right-0 bottom-4 pointer-events-none text-[#8B0000]">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M6 9l6 6 6-6"/></svg>
+              </div>
+            </div>
               <button 
                 onClick={handleEstablishSession}
                 className="w-full bg-[#1A1A1A] text-white p-5 text-[11px] font-black uppercase tracking-widest hover:bg-[#8B0000] transition-colors"
@@ -183,10 +251,13 @@ export default function PremiumSignUp() {
               </button>
             </motion.div>
           )}
+        
         </AnimatePresence>
+       
 
         {localError && (
-          <p className="text-red-700 text-[9px] uppercase mt-6 text-center font-black tracking-tighter animate-pulse">
+          <p className="text-red-700 text-[12px] lg:text-[15px] 
+          uppercase mt-6 text-center font-black tracking-tighter animate-pulse">
             {localError}
           </p>
         )}

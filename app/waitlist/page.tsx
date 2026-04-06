@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-
+import Link from "next/link";
 
 export default function WaitlistPage() {
   const [email, setEmail] = useState("");
@@ -56,7 +56,7 @@ try {
             Waitlist <span className="not-italic text-[#8B0000]">Portal</span>
           </h1>
           <p className="text-[10px] text-gray-500 uppercase mt-2 tracking-tight">
-            Class of 2027 Institutional Pilot • Limited to 200 Scholars
+             Pilot • Limited to 200 Scholars
           </p>
         </header>
 
@@ -70,12 +70,12 @@ try {
             >
               <div className="relative">
                 <label className="text-[8px] uppercase font-black text-[#8B0000]/60 absolute -top-1.5 left-2 bg-[#FDFCF0] px-1">
-                  University Email
+                   Email
                 </label>
                 <input 
                   required
                   type="email"
-                  placeholder="SCHOLAR@UNILAG.EDU.NG"
+                  placeholder="email@service.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value.toUpperCase())}
                   className="w-full bg-transparent border border-[#8B0000]/20 p-4 outline-none font-mono text-xs focus:border-[#8B0000] transition-colors placeholder:opacity-20"
@@ -88,6 +88,11 @@ try {
               >
                 {status === "loading" ? "Recording Entry..." : "Request Access →"}
               </button>
+
+                <p className="text-left mt-3 text-md 
+                font-medium text-black">
+                             Already on the waitlist? <Link href="/sign-up" className="text-[#8B0000]">
+                             Sign up instead</Link></p>
             </motion.form>
           ) : (
             <motion.div 
@@ -100,7 +105,7 @@ try {
                 Entry Logged
               </div>
               <p className="text-[11px] text-gray-600 leading-relaxed">
-                Your credentials have been queued for the <span className="text-[#8B0000] font-bold">Class of 2027</span> verification sweep. Watch your inbox for authorization.
+                Your credentials have been queued for the <span className="text-[#8B0000] font-bold">PILOT</span> verification sweep. Watch your inbox for authorization.
               </p>
             </motion.div>
           )}

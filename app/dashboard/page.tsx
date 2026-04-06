@@ -1,14 +1,12 @@
 'use client';
-
-
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   Zap, Clock, FileText, 
-  History, ShieldCheck, Crown, 
+  History, Crown, 
 } from "lucide-react";
-import { useUser } from "@clerk/nextjs";
+import { useUser, UserButton} from "@clerk/nextjs";
 import { Card } from "@/components/ui/card";
 export default function Dashboard() {
   // Dummy PDF history
@@ -18,7 +16,7 @@ export default function Dashboard() {
     {id : 3, name: "Operational Efficiency Review.pdf", date: "2024-06-05"}
   ]
   // Plans
-  const activePlans = ["Token Bundle", "Critical Accessment", "Pay per use"];
+ 
 
 const [index, setIndex] = useState(0);
 
@@ -29,16 +27,25 @@ const [index, setIndex] = useState(0);
     "Why does Fischer believe the Nigeria financial environment is not developed enough..."
   ];
 
+
+  
+  const {user}= useUser();
   useEffect(() => {
     const timer = setInterval(() => {
       setIndex((prev) => (prev + 1) % ADMIN_PROMPTS.length);
     }, 6000);
-    return () => clearInterval(timer);
+ 
+  function ToBeReturned () {
+      clearInterval(timer);
+    }
+ return ToBeReturned();
   }, []);
 
-  const {user, isSignedIn} = useUser();
-  const {username} = user || {}
-if(!isSignedIn) console.log("User not Signed In")
+
+  const {username} = user || {};
+  //console.log(user);
+
+//if(!isSignedIn) console.log("User not Signed In")
 
   return (
     <div className="min-h-screen bg-[#F5F5DC] text-[#5C4033] selection:bg-[#8B0000] selection:text-[#F5F5DC] overflow-x-hidden">
@@ -48,29 +55,48 @@ if(!isSignedIn) console.log("User not Signed In")
       <div className="max-w-7xl mx-auto px-4 sm:px-8 py-10 space-y-10">
         
         {/* --- DYNAMIC NAVIGATION & PLAN STATUS --- */}
-        <nav className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-[#5C4033]/10 pb-8">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-[#8B0000] rounded-lg text-[#F5F5DC]">
-              <Crown className="w-6 h-6" />
-            </div>
-            <h2 className="text-xl font-black uppercase tracking-tighter text-[#8B0000]">Institution.v1</h2>
-          </div>
+   <nav className="flex justify-between items-center border-b border-[#5C4033]/10 pb-8 px-2">
+      {/* Brand & Logo */}
+      <div className="flex items-center gap-3">
+        <div className="p-2 bg-[#8B0000] rounded-lg text-[#F5F5DC] shadow-lg shadow-[#8B0000]/20">
+          <Crown className="w-6 h-6" />
+        </div>
+        <div className="hidden md:block">
+          <h2 className="text-xl font-black uppercase tracking-tighter text-[#8B0000] leading-none">
+            WDC Formatt
+          </h2>
+          
+        </div>
+      </div>
 
-          <div className="flex flex-wrap gap-2">
-            {activePlans.length > 0 ? (
-              activePlans.map((plan, i) => (
-                <div key={i} className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#A52A2A]/10 border border-[#A52A2A]/20 text-[#A52A2A] text-xs font-bold">
-                  <ShieldCheck className="w-3 h-3" />
-                  {plan}
-                </div>
-              ))
-            ) : (
-              <Link href="/plans" className="text-xs font-bold text-[#8B0000] animate-pulse">
-                No Active Plan - Click to Subscribe →
-              </Link>
-            )}
+      {/* Profile & Plan Actions */}
+      <div className="flex items-center gap-4">
+        {/* Active Plan Badges (Hidden on mobile to save space) */}
+      
+
+        {/* --- CLERK PROFILE NAVIGATION --- */}
+        <div className="flex  gap-3 pl-4 border-l border-[#5C4033]/10 items-center justify-center">
+          <div className="text-right hidden sm:block ">
+            <p className="text-xs font-black text-[#5C4033] leading-none">
+              {user?.username?.toUpperCase() || "User"}
+            </p>
+           
           </div>
-        </nav>
+          
+          <UserButton 
+            appearance={{
+              elements: {
+                userButtonAvatarBox: "w-10 h-10 border-2 border-[#8B0000] rounded-xl",
+                userButtonPopoverCard: "bg-[#F5F5DC] border border-[#5C4033]/20 shadow-2xl rounded-2xl",
+                userButtonPopoverActionButtonText: "text-[#5C4033] font-bold text-sm",
+                userButtonPopoverActionButtonIcon: "text-[#8B0000]",
+                userButtonPopoverFooter: "hidden" // Keeps it clean for the pilot
+              }
+            }}
+          />
+        </div>
+      </div>
+    </nav>
 
         {/* --- HEADER & ADMINISTRATIVE REVEAL --- */}
         <div className="space-y-6">
@@ -112,7 +138,7 @@ if(!isSignedIn) console.log("User not Signed In")
                <h3 className="text-xs font-black uppercase tracking-[0.3em] text-[#5C4033]/60">Available Module</h3>
             </div>
             
-            <Link href="/assessment/quick" className="block group">
+            <Link href="/dashboard/quickassessment" className="block group">
               <Card className="relative overflow-hidden bg-[#F5F5DC] border-2 border-[#5C4033] p-1 shadow-[8px_8px_0px_0px_rgba(92,64,51,1)] transition-all group-hover:shadow-[12px_12px_0px_0px_rgba(139,0,0,1)] group-hover:border-[#8B0000] group-hover:-translate-x-1 group-hover:-translate-y-1">
                 <div className="bg-[#8B0000]/5 p-8 md:p-12 space-y-8">
                   <div className="flex justify-between items-start">
@@ -135,8 +161,10 @@ if(!isSignedIn) console.log("User not Signed In")
                   </div>
 
                   <div className="pt-8 flex items-center gap-4">
-                    <button className="bg-[#8B0000] text-[#F5F5DC] px-8 py-4 rounded-xl font-black uppercase text-sm tracking-widest shadow-lg shadow-[#8B0000]/30 group-hover:bg-[#5C4033] transition-colors">
-                      Begin Evaluation
+                    <button className="bg-[#8B0000] text-[#F5F5DC] px-8 
+                    py-4 rounded-xl font-black uppercase
+                     text-sm tracking-widest shadow-lg shadow-[#8B0000]/30 group-hover:bg-[#5C4033] transition-colors">
+                      Get Started
                     </button>
                     <span className="text-[#8B0000] font-black hidden sm:inline">PREPARING SERVER...</span>
                   </div>

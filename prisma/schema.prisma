@@ -13,44 +13,58 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+ enum Status {
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+//enum TypoGraphy {
+ // BOLD
+ // UNDERLINE
+//}
+
 // 2. LOBBY AREA: Student Profiles
+//The Expired At for now should be removed as the 30 days set is system set, not user customised
 model User {
   clerkId         String    @id @map("clerk_id")
   email           String
-  username  String   @unique // <--- Add this "Surgical" anchor
+  username        String   @unique // <--- Add this "Surgical" anchor
   university      String?   @default("University")
   department      String
   planTier        String?   @default("free") @map("plan_tier")
   expiresAt       DateTime? @map("access_expires_at")
   generationsUsed Int       @default(0) @map("generation_used")
-  isWaitlisted    Boolean   @default(false) @map("is_waitlisted")
+  isWaitlisted    Boolean   @default(true) @map("is_waitlisted")
   createdAt       DateTime? @default(now()) @map("created_at")
 
   // Relationships
-   tasks            Task[]
+  
   generations       Generation[]
   @@map("user")
 }
 
 // 3. THE 3-PAGE REPORT: Document Schema
-model Task {
+model Generation {
   id                 String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   studentId          String?  @map("student_id")
   title              String?  @default("New Document")
-  topic              String
+  prompt             String
   intent             String
-  relateToDepartment Boolean? @default(false) @map("relate_to_department")
+  relateToDepartment Boolean? @default(true) @map("relate_to_department")
   formatting         Json     // Prisma handles jsonb as Json
   refinementCount    Int?     @default(0) @map("refinement_count")
   maxRefinements     Int?     @default(3) @map("max_refinements")
-  status             String?  @default("draft")
   isCurrent          Boolean? @default(true) @map("is_current")
   createdAt          DateTime? @default(now()) @map("created_at")
   updatedAt          DateTime? @default(now()) @updatedAt @map("updated_at")
+  generatedContent String   @db.Text  // <--- This saves the raw AI text
+  status            Status
+
 
   // Relations
 user                 User? @relation(fields: [studentId], references : [clerkId])
-  @@map("task")
+  @@map("generations")
+ 
 }
 
 // 4. WAITLIST: Phase 1 Access Control
@@ -62,20 +76,6 @@ model Waitlist {
 
   @@map("waitlist")
 }
-model Generation {
-  // Use UUID to match Task and Waitlist for consistency
-  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  
-  userId    String   @map("user_id") // The Foreign Key
-  type      String   // "quick" or "critical"
-  prompt    String
-  output    String
-  createdAt DateTime @default(now()) @map("created_at")
 
-  // THE HANDSHAKE
-  user      User     @relation(fields: [userId], references: [clerkId])
-  
-  @@map("generations")
-}
 
 

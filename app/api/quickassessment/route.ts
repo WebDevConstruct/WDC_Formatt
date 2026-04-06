@@ -5,15 +5,13 @@ import { db } from '@/lib/prisma';
 import { currentUser } from '@clerk/nextjs/server';
 
 
-
 type requestTypes = {
+     
     prompt : string,
-    title : string,
-    titleFormat : string,
-    subTitles ?: string,
-    subTitleFormat ?: string,
-    paragraphs ?: string,
-    paragraphFormat ?: string
+    intent : string,
+    wordCount : number,
+    courseType ?: string,
+   
 } 
 
 
@@ -23,7 +21,7 @@ type requestTypes = {
 const anthropic = createAnthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
 });
-
+//const {title, hFormat, shFormat} = useGlobalContext()
 
 
 
@@ -46,51 +44,55 @@ export async function POST(request : Request): Promise<Response>{
 
 
   //3. Check trial expiry (30 days per user)
-  const signUpDate = user?.signupDate || new Date()
-const trialEnd = new Date(signUpDate);
-trialEnd.setDate(trialEnd.getDate() + 30);
-const trialActive = new Date() < trialEnd;
+  
 
 
 
 const ClerkUser = await  currentUser();
-const email = ClerkUser?.emailAddresses[0]?.emailAddress
-console.log(email)
-  if(!user){
+// console.log(ClerkUser);
+const email = ClerkUser?.emailAddresses[0]?.emailAddress;
+const username = ClerkUser?.username || "";
+
+
+  if(!user && navigator.onLine){
     await db.user.create({
       data : {
       clerkId: userId,
+      username : username,
+      department : "",
     email: email || "no-email.wsc.com",
-    plan : "free",
-    signupDate: new Date(),
-    generationCount: 0,
+    planTier : "free",
+    createdAt: new Date(),
+    generationsUsed: 0,
       }
     })
-    // return new Response(JSON.stringify({error : "User not found"}), {
-    //   status : 404, headers : {"Content-Type" : "application/json"}
-    // })
+    
   }
-if(!trialActive && user?.plan === "free"){
+  // const expiredDate = user?.expiresAt ? new Date(user.expiresAt) : new Date();
+  
+  // const trialActive = expiredDate > new Date()
+if(user?.planTier !== "free"){
   return new Response(JSON.stringify({error : "Trial expired"}), {
     status : 403, headers : {"Content-Type" :"application/json"}
   })
 }
 //4.  Check generation limit (5 for free trail) 
 
-if(user?.plan === "free" && user?.generationCount >=5){
+if(user?.planTier === "free" && user?.generationsUsed >=5){
   return new Response(JSON.stringify({error : "Generation limit Reached"}), 
 {status : 403, headers : {"Content-Type" : "application/json"}})
 }
 
 //5. Get Request Body
-  const {prompt, title, titleFormat, subTitles, subTitleFormat,
-     paragraphFormat}: requestTypes = await request.json()
+  const {prompt, wordCount, courseType, intent}: requestTypes = await request.json()
      const systemPrompt = `
     You are the WDC Formatt Finance AI. 
     Strictly follow these layout rules:
-    1. Title: "${title}" formatted as ${titleFormat}.
-    2. Use these Sub-headers: ${subTitles || "are Unknown"} formatted as ${subTitleFormat || "are Unknown"}.
-    3. Paragraph style: ${paragraphFormat || "are UnKnown"}.
+    1. You are to dervive  a title from the ${prompt}.
+    2. Get suitable sub titles from ${prompt}.
+    3. Related to the course ${courseType}.
+    4. The ${intent} you must follow.
+    5. Strictly to the word count of ${wordCount} as instructed.
     Generate the response in Markdown.
   `;
 
@@ -103,18 +105,34 @@ if(user?.plan === "free" && user?.generationCount >=5){
    
     })
     //7. Update generation Count
+    //A reliable function to count
+    //Kindly Check the length of the current generations then add the length for the update
     await db.user.update({
       where : {clerkId : userId},
-      data : {generationCount : {increment : 1}}
+      data : {generationsUsed : 3 }
     })
-
+const body ={
+ hFormat :  ["Underlines", "BOLD"],
+shFormat : ["BOLD"]
+}
+console.log(db?.user);
     //8. Save generation to DB
     await db.generation.create({
       data:{
-        userId : user?.id || "0",
-        type : "quick",
+        relateToDepartment : courseType === "main" ? true : false,
+        studentId: user?.clerkId || "0",
         prompt,
-        output : text
+        title  : "GROWTH",
+       generatedContent : text,
+       isCurrent : true,
+       createdAt : new Date(),
+       formatting : JSON.stringify(body),
+       intent : intent,
+       maxRefinements : 3,
+       refinementCount : 1,
+       updatedAt : new Date(),
+       status : "PROCESSING"
+      
       }
     })
   
