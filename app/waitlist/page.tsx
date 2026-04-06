@@ -20,6 +20,11 @@ try {
      })
      if(response.ok ){
       setStatus("success")
+     }else if(response?.status === 409){
+      alert("Email Already Exists")
+      
+     }else if(response?.status === 400){
+      alert("Wrong Email Format")
      }else{
       setStatus("error")
      }

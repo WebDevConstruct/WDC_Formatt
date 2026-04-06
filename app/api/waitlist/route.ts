@@ -1,9 +1,9 @@
 "use server"
 import { db } from "@/lib/prisma";
-import { currentUser } from "@clerk/nextjs/server";
-export async function POST(){
-    const ClerkUser = await currentUser();
-    const email = ClerkUser?.emailAddresses[0].emailAddress || ""; 
+
+export async function POST(req : Request){
+    const body = await req.json()
+   const {email} = body;
 
     const normalizedEmail = email.toLowerCase().trim();
     if(!email || !email.includes("@")){
@@ -16,6 +16,7 @@ export async function POST(){
        where : {email : normalizedEmail}
         })
         if(existingEntry){
+
             return new Response(JSON.stringify({error : "Invitee already exists", message : "You are already on the waitlist"}),
                 {status : 409, headers : {"Content-Type" : "application/json"}}
             )
