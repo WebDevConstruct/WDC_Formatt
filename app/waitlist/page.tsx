@@ -3,11 +3,11 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
-
+import { useRouter } from "next/navigation";
 export default function WaitlistPage() {
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
-
+const router = useRouter();
   const handleJoin = async (e: React.FormEvent) => {
     setStatus("idle")
       e.preventDefault();
@@ -19,7 +19,10 @@ try {
       body : JSON.stringify({email})
      })
      if(response.ok ){
-      setStatus("success")
+      setStatus("success");
+      setTimeout(()=> {
+        router.replace('/dashboard')
+      })
      }else if(response?.status === 409){
       alert("Email Already Exists")
       
@@ -110,7 +113,7 @@ try {
                 Entry Logged
               </div>
               <p className="text-[11px] text-gray-600 leading-relaxed">
-                Your credentials have been queued for the <span className="text-[#8B0000] font-bold">PILOT</span> verification sweep. Watch your inbox for authorization.
+                Your credentials have been queued for the <span className="text-[#8B0000] font-bold">PILOT</span> verification sweep. You are being redirected to the sign up
               </p>
             </motion.div>
           )}

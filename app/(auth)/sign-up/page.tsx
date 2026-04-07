@@ -4,10 +4,8 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { verifyWaitlistInvite } from "@/lib/actions/waitlist";
 import Link from "next/link";
-//import InstitutionalPopup from "@/app/components/UserContext";
 import { useRouter } from "next/navigation";
 import { useUser } from "@clerk/nextjs";
-
 const DEPARTMENTS = [
   "Accounting",
   "Actuarial Science",
@@ -30,6 +28,7 @@ export default function PremiumSignUp() {
  const router = useRouter();
    const [departmentChosen, setDepartmentChosen] = useState("");
    const {user} = useUser()
+    const clerkId = user?.id || ""
 
   // 1. THE MODERN GUARD: Replacing the old 'isLoaded'
   if (fetchStatus === "fetching") {
@@ -43,12 +42,26 @@ export default function PremiumSignUp() {
   // --- PHASE 1: Institutional Check (Neon) ---
   const handleInitialVerify = async () => {
     setLocalError("");
+
+   
     try {
       const check = await verifyWaitlistInvite(email);
-      if (check.allowed) {
+      // Checking if the Email is Valid at all
+      if(check.error === "Invalid Email format" ){
+        return  setLocalError("Invalid Email Format")
+      }
+
+// After the check of the format, we request from the neon database if it is exists
+  if (check.allowed) {
         setStep(2);
-      } else {
+      } else if(check.allowed === false && 
+        (check.error === "Email not on the the waitlist") ) {
         setLocalError("Email not authorized as a waitlist invitee.");
+      }else if(check.allowed === false && check?.error === "Invite already claimed"){
+      setLocalError("Email already used for SignUp")
+      }
+      else{
+    return setLocalError("An unexpected error ha occured")
       }
     } catch (err) {
       setLocalError("Verification server unreachable.");
@@ -57,7 +70,7 @@ export default function PremiumSignUp() {
 
   // --- PHASE 2: Create Credentials (Clerk) ---
 
-// Step
+//What if handleSync fails? ? ? ?
 const handleSync = async () => {
     
   //  setIsSyncing(true);
@@ -81,12 +94,16 @@ const handleSync = async () => {
     //  window.location.reload(); 
     } catch (err) {
       console.error("Sync Error:", err);
-    //  setIsSyncing(false);
-    }
+     }
   };
   const handleEstablishSession = async () => {
+        if(!departmentChosen || !password ||!username) {
+          return setLocalError("Fill in all the fields to proceed");
+        } else{
+          setLocalError("");
+        }
     if (!signUp) return;
-    try {
+ try {
  const {error : emailError} = 
       await signUp?.create({ emailAddress : email , username : username  })
       //Checking if the email Used for SignUp already exists
@@ -102,10 +119,9 @@ const handleSync = async () => {
       }
  const {error : EmailSentError} =  await signUp?.verifications?.sendEmailCode();
  if(!EmailSentError){
-  setStep(3)
+  setStep(3);
  }
-      
-  } catch (err) {
+ } catch (err) {
       setLocalError("Initialization failed.");
     }
   };
@@ -120,23 +136,63 @@ const handleSync = async () => {
         setLocalError("Invalid verification code.");
       }
      
-      
        const {error : finalizeError} =  await signUp?.finalize();
       
        if(finalizeError){
        return alert("Error Completing signup")
        }
        if(!finalizeError){
-         await handleSync();
+        await handleSync();
+    // const response = await initialiazeWaitlistStudent(username, email, departmentChosen);
+    // console.log(response);
+    // if(response?.ok){
+    //  return router?.replace("/dashboard")
+    // }else if(!response?.ok){
+    //     setLocalError("An error occured and a reload occurs, kindly refill your details after the reload")
+    //   await fetch("/api/delete",{
+    //     method : "DELETE",
+    //     headers : {"Content-Type" : "application/json" },
+    //     body : JSON.stringify({userId : clerkId})
+    //   })
+    //   // A fast Refresh to start the signup process
+    //   setTimeout(()=> {
+    //    window.location.reload()
+    //   },1000)
+    // }else{
+    //   setLocalError("Error : Exited with code 1")
+    // }
+
+
+
+
+
+
+
+
+
+
+  //   else if (response?.status === 500) {
+  //  setLocalError("An Internal Server error, Kindly try again in the next 5 minutes");
+  //   await fetch("/api/delete",{
+  //       method : "DELETE",
+  //       headers : {"Content-Type" : "application/json" },
+  //       body : JSON.stringify({userId : clerkId})
+  //     })
+  //     //A fast refresh to start the signup process
+  //     setTimeout(()=> {
+  //      window.location.reload()
+  //     },1000)
+  //   }
+          
          }
      
 } catch (err) {
-      setLocalError("Authorization code rejected.");
+      setLocalError("Unable to complete signUp");
     }
   };
 
   //The
-  
+  //console.log(clerkId);
 
   return (
     <div className="min-h-screen bg-[#FDFCF0] flex items-center justify-center p-6 selection:bg-[#8B0000] selection:text-white font-sans">
@@ -164,7 +220,10 @@ const handleSync = async () => {
                 className="w-full border-b border-[#8B0000]/20 p-4 outline-none font-mono text-sm bg-transparent focus:border-[#8B0000] transition-all placeholder:text-[#8B0000]/30"
               />
               <button 
-                onClick={handleInitialVerify} 
+                onClick={(e : React.FormEvent)=> {
+                  e.preventDefault();
+                  handleInitialVerify()
+                }} 
                 className="w-full bg-[#1A1A1A] text-white p-5 
                 text-[11px] font-black uppercase tracking-widest hover:bg-[#8B0000] transition-colors"
               >
@@ -208,14 +267,13 @@ const handleSync = async () => {
               {/* Department */}
                <div className="border-b-2 border-[#8B0000]/30 pb-2 focus-within:border-[#8B0000] transition-all relative">
               <label className="block text-[10px] font-black uppercase tracking-widest text-[#8B0000] mb-3">Select Department</label>
-              <select onChange={(e)=> {
+              <select value={departmentChosen} 
+               onChange={(e)=> {
                     setDepartmentChosen(e.currentTarget.value)
               }}
                required name="department" 
                 className="w-full bg-transparent outline-none font-serif text-xl text-[#8B0000] cursor-pointer appearance-none">
-                <option value="" disabled selected>Choose your field...
-
-                </option>
+                <option  disabled selected>Choose your field... </option>
                 {DEPARTMENTS.map(dept =>(
                   <option key={dept} value={dept} className="bg-[#FDFCF0] text-[#8B0000]">{dept}</option>
                 ))}
