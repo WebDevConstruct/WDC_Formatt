@@ -62,7 +62,7 @@ try{
         department : department,
         clerkId : userId || "",
         university : "UNILAG",
-        generationUsed : 0
+        generationsUsed : 0
         }
     }),
       db.waitlist.update({
