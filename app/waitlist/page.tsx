@@ -22,7 +22,7 @@ try {
       setStatus("success");
       setTimeout(()=> {
         router.replace('/dashboard')
-      })
+      },1000)
      }else if(response?.status === 409){
       alert("Email Already Exists")
       
