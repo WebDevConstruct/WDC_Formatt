@@ -21,8 +21,8 @@ try {
      if(response.ok ){
       setStatus("success");
       setTimeout(()=> {
-        router.replace('/dashboard')
-      },1000)
+        router.replace('/sign-up')
+      },5000)
      }else if(response?.status === 409){
       alert("Email Already Exists")
       

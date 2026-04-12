@@ -1,3 +1,4 @@
+ export const runtime = 'edge';
  import { db } from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
 import { currentUser } from "@clerk/nextjs/server";

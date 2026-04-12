@@ -1,3 +1,4 @@
+export const runtime = 'edge';
 import {createAnthropic} from '@ai-sdk/anthropic';
 import {generateText}  from "ai" ;
 import { auth } from '@clerk/nextjs/server';

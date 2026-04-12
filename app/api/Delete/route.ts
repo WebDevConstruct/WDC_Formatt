@@ -1,5 +1,7 @@
+export const runtime = 'edge';
 import { createClerkClient } from "@clerk/nextjs/server";
 import { auth } from "@clerk/nextjs/server";
+
 
 export async function DELETE(){
     const {userId} = await auth();
