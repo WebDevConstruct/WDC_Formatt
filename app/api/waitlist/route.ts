@@ -1,5 +1,4 @@
 "use server"
-export const runtime = 'edge';
 import { db } from "@/lib/prisma";
 
 export async function POST(req : Request){

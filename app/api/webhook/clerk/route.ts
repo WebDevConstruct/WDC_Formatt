@@ -1,4 +1,3 @@
-export const runtime = 'edge';
 export const dynamic = "force-dynamic"//Tells the builder to skip during build
 import { db } from "@/lib/prisma";
 import { WebhookEvent } from "@clerk/nextjs/server";

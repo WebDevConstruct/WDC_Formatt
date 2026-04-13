@@ -113,7 +113,8 @@ try {
                 Entry Logged
               </div>
               <p className="text-[11px] text-gray-600 leading-relaxed">
-                Your credentials have been queued for the <span className="text-[#8B0000] font-bold">PILOT</span> verification sweep. You are being redirected to the sign up
+                Your credentials have been queued for the <span className="text-[#8B0000] font-bold">PILOT</span> verification sweep. 
+                <span className="text-[12px] leading-[16px] font-bold">You are being redirected to the sign up</span>
               </p>
             </motion.div>
           )}
