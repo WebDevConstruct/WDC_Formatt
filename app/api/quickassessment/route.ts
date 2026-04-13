@@ -1,4 +1,4 @@
-export const runtime = 'edge';
+export const dynamic = "force-dynamic"
 import {createAnthropic} from '@ai-sdk/anthropic';
 import {generateText}  from "ai" ;
 import { auth } from '@clerk/nextjs/server';
@@ -14,10 +14,6 @@ type requestTypes = {
     courseType ?: string,
    
 } 
-
-
-
-
 
 const anthropic = createAnthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
