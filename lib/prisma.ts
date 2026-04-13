@@ -1,16 +1,13 @@
 // lib/db.ts
+import "dotenv/config"
 import { PrismaClient } from "@/generated/prisma";
 import {PrismaNeon} from "@prisma/adapter-neon"
 
 
 
-let Prisma : PrismaClient
 
-
-export function getPrisma(){
-
-  if(!Prisma){
-const connectionString = process.env.DATABASE_URL || "";
+ 
+const connectionString = process.env.DATABASE_URL! || "";
 //const neonPool = new Pool({connectionString})
 
 //Adapter necessary for the Edge Functions
@@ -23,12 +20,10 @@ const connectionString = process.env.DATABASE_URL || "";
     ssl : {rejectUnauthorized : false}
   })
 
-return Prisma = new PrismaClient({adapter})
-  }
-  return Prisma;
-}
 
-export const db = getPrisma()
+
+
+export const db = new PrismaClient({adapter})
 // const globalForPrisma = globalThis as unknown  as {
 //     prisma : PrismaClient | undefined
 // }
