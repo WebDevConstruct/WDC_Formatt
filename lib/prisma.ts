@@ -2,6 +2,14 @@
 import { PrismaClient } from "@/generated/prisma";
 import {PrismaNeon} from "@prisma/adapter-neon"
 
+
+
+let Prisma : PrismaClient
+
+
+export function getPrisma(){
+
+  if(!Prisma){
 const connectionString = process.env.DATABASE_URL || "";
 //const neonPool = new Pool({connectionString})
 
@@ -14,7 +22,13 @@ const connectionString = process.env.DATABASE_URL || "";
     connectionString : connectionString,
     ssl : {rejectUnauthorized : false}
   })
-  export const db = new PrismaClient({adapter}) 
+
+return Prisma = new PrismaClient({adapter})
+  }
+  return Prisma;
+}
+
+export const db = getPrisma()
 // const globalForPrisma = globalThis as unknown  as {
 //     prisma : PrismaClient | undefined
 // }
