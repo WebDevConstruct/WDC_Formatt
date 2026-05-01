@@ -28,6 +28,11 @@ export type Generation = $Result.DefaultSelection<Prisma.$GenerationPayload>
  * 
  */
 export type Waitlist = $Result.DefaultSelection<Prisma.$WaitlistPayload>
+/**
+ * Model PDFTemplate
+ * 
+ */
+export type PDFTemplate = $Result.DefaultSelection<Prisma.$PDFTemplatePayload>
 
 /**
  * Enums
@@ -197,6 +202,16 @@ export class PrismaClient<
     * ```
     */
   get waitlist(): Prisma.WaitlistDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.pDFTemplate`: Exposes CRUD operations for the **PDFTemplate** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more PDFTemplates
+    * const pDFTemplates = await prisma.pDFTemplate.findMany()
+    * ```
+    */
+  get pDFTemplate(): Prisma.PDFTemplateDelegate<ExtArgs, ClientOptions>;
 }
 
 export namespace Prisma {
@@ -633,7 +648,8 @@ export namespace Prisma {
   export const ModelName: {
     User: 'User',
     Generation: 'Generation',
-    Waitlist: 'Waitlist'
+    Waitlist: 'Waitlist',
+    PDFTemplate: 'PDFTemplate'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -649,7 +665,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "user" | "generation" | "waitlist"
+      modelProps: "user" | "generation" | "waitlist" | "pDFTemplate"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -875,6 +891,80 @@ export namespace Prisma {
           }
         }
       }
+      PDFTemplate: {
+        payload: Prisma.$PDFTemplatePayload<ExtArgs>
+        fields: Prisma.PDFTemplateFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.PDFTemplateFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PDFTemplatePayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.PDFTemplateFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PDFTemplatePayload>
+          }
+          findFirst: {
+            args: Prisma.PDFTemplateFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PDFTemplatePayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.PDFTemplateFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PDFTemplatePayload>
+          }
+          findMany: {
+            args: Prisma.PDFTemplateFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PDFTemplatePayload>[]
+          }
+          create: {
+            args: Prisma.PDFTemplateCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PDFTemplatePayload>
+          }
+          createMany: {
+            args: Prisma.PDFTemplateCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.PDFTemplateCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PDFTemplatePayload>[]
+          }
+          delete: {
+            args: Prisma.PDFTemplateDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PDFTemplatePayload>
+          }
+          update: {
+            args: Prisma.PDFTemplateUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PDFTemplatePayload>
+          }
+          deleteMany: {
+            args: Prisma.PDFTemplateDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.PDFTemplateUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.PDFTemplateUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PDFTemplatePayload>[]
+          }
+          upsert: {
+            args: Prisma.PDFTemplateUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PDFTemplatePayload>
+          }
+          aggregate: {
+            args: Prisma.PDFTemplateAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregatePDFTemplate>
+          }
+          groupBy: {
+            args: Prisma.PDFTemplateGroupByArgs<ExtArgs>
+            result: $Utils.Optional<PDFTemplateGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.PDFTemplateCountArgs<ExtArgs>
+            result: $Utils.Optional<PDFTemplateCountAggregateOutputType> | number
+          }
+        }
+      }
     }
   } & {
     other: {
@@ -986,6 +1076,7 @@ export namespace Prisma {
     user?: UserOmit
     generation?: GenerationOmit
     waitlist?: WaitlistOmit
+    pDFTemplate?: PDFTemplateOmit
   }
 
   /* Types for Logging */
@@ -4491,6 +4582,1015 @@ export namespace Prisma {
 
 
   /**
+   * Model PDFTemplate
+   */
+
+  export type AggregatePDFTemplate = {
+    _count: PDFTemplateCountAggregateOutputType | null
+    _min: PDFTemplateMinAggregateOutputType | null
+    _max: PDFTemplateMaxAggregateOutputType | null
+  }
+
+  export type PDFTemplateMinAggregateOutputType = {
+    id: string | null
+    name: string | null
+    description: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type PDFTemplateMaxAggregateOutputType = {
+    id: string | null
+    name: string | null
+    description: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type PDFTemplateCountAggregateOutputType = {
+    id: number
+    name: number
+    description: number
+    config: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type PDFTemplateMinAggregateInputType = {
+    id?: true
+    name?: true
+    description?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type PDFTemplateMaxAggregateInputType = {
+    id?: true
+    name?: true
+    description?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type PDFTemplateCountAggregateInputType = {
+    id?: true
+    name?: true
+    description?: true
+    config?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type PDFTemplateAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which PDFTemplate to aggregate.
+     */
+    where?: PDFTemplateWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PDFTemplates to fetch.
+     */
+    orderBy?: PDFTemplateOrderByWithRelationInput | PDFTemplateOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: PDFTemplateWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PDFTemplates from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PDFTemplates.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned PDFTemplates
+    **/
+    _count?: true | PDFTemplateCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: PDFTemplateMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: PDFTemplateMaxAggregateInputType
+  }
+
+  export type GetPDFTemplateAggregateType<T extends PDFTemplateAggregateArgs> = {
+        [P in keyof T & keyof AggregatePDFTemplate]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregatePDFTemplate[P]>
+      : GetScalarType<T[P], AggregatePDFTemplate[P]>
+  }
+
+
+
+
+  export type PDFTemplateGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: PDFTemplateWhereInput
+    orderBy?: PDFTemplateOrderByWithAggregationInput | PDFTemplateOrderByWithAggregationInput[]
+    by: PDFTemplateScalarFieldEnum[] | PDFTemplateScalarFieldEnum
+    having?: PDFTemplateScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: PDFTemplateCountAggregateInputType | true
+    _min?: PDFTemplateMinAggregateInputType
+    _max?: PDFTemplateMaxAggregateInputType
+  }
+
+  export type PDFTemplateGroupByOutputType = {
+    id: string
+    name: string
+    description: string | null
+    config: JsonValue
+    createdAt: Date
+    updatedAt: Date
+    _count: PDFTemplateCountAggregateOutputType | null
+    _min: PDFTemplateMinAggregateOutputType | null
+    _max: PDFTemplateMaxAggregateOutputType | null
+  }
+
+  type GetPDFTemplateGroupByPayload<T extends PDFTemplateGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<PDFTemplateGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof PDFTemplateGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], PDFTemplateGroupByOutputType[P]>
+            : GetScalarType<T[P], PDFTemplateGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type PDFTemplateSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    name?: boolean
+    description?: boolean
+    config?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["pDFTemplate"]>
+
+  export type PDFTemplateSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    name?: boolean
+    description?: boolean
+    config?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["pDFTemplate"]>
+
+  export type PDFTemplateSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    name?: boolean
+    description?: boolean
+    config?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["pDFTemplate"]>
+
+  export type PDFTemplateSelectScalar = {
+    id?: boolean
+    name?: boolean
+    description?: boolean
+    config?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type PDFTemplateOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "description" | "config" | "createdAt" | "updatedAt", ExtArgs["result"]["pDFTemplate"]>
+
+  export type $PDFTemplatePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "PDFTemplate"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      name: string
+      description: string | null
+      config: Prisma.JsonValue
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["pDFTemplate"]>
+    composites: {}
+  }
+
+  type PDFTemplateGetPayload<S extends boolean | null | undefined | PDFTemplateDefaultArgs> = $Result.GetResult<Prisma.$PDFTemplatePayload, S>
+
+  type PDFTemplateCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<PDFTemplateFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: PDFTemplateCountAggregateInputType | true
+    }
+
+  export interface PDFTemplateDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['PDFTemplate'], meta: { name: 'PDFTemplate' } }
+    /**
+     * Find zero or one PDFTemplate that matches the filter.
+     * @param {PDFTemplateFindUniqueArgs} args - Arguments to find a PDFTemplate
+     * @example
+     * // Get one PDFTemplate
+     * const pDFTemplate = await prisma.pDFTemplate.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends PDFTemplateFindUniqueArgs>(args: SelectSubset<T, PDFTemplateFindUniqueArgs<ExtArgs>>): Prisma__PDFTemplateClient<$Result.GetResult<Prisma.$PDFTemplatePayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one PDFTemplate that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {PDFTemplateFindUniqueOrThrowArgs} args - Arguments to find a PDFTemplate
+     * @example
+     * // Get one PDFTemplate
+     * const pDFTemplate = await prisma.pDFTemplate.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends PDFTemplateFindUniqueOrThrowArgs>(args: SelectSubset<T, PDFTemplateFindUniqueOrThrowArgs<ExtArgs>>): Prisma__PDFTemplateClient<$Result.GetResult<Prisma.$PDFTemplatePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first PDFTemplate that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PDFTemplateFindFirstArgs} args - Arguments to find a PDFTemplate
+     * @example
+     * // Get one PDFTemplate
+     * const pDFTemplate = await prisma.pDFTemplate.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends PDFTemplateFindFirstArgs>(args?: SelectSubset<T, PDFTemplateFindFirstArgs<ExtArgs>>): Prisma__PDFTemplateClient<$Result.GetResult<Prisma.$PDFTemplatePayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first PDFTemplate that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PDFTemplateFindFirstOrThrowArgs} args - Arguments to find a PDFTemplate
+     * @example
+     * // Get one PDFTemplate
+     * const pDFTemplate = await prisma.pDFTemplate.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends PDFTemplateFindFirstOrThrowArgs>(args?: SelectSubset<T, PDFTemplateFindFirstOrThrowArgs<ExtArgs>>): Prisma__PDFTemplateClient<$Result.GetResult<Prisma.$PDFTemplatePayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more PDFTemplates that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PDFTemplateFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all PDFTemplates
+     * const pDFTemplates = await prisma.pDFTemplate.findMany()
+     * 
+     * // Get first 10 PDFTemplates
+     * const pDFTemplates = await prisma.pDFTemplate.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const pDFTemplateWithIdOnly = await prisma.pDFTemplate.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends PDFTemplateFindManyArgs>(args?: SelectSubset<T, PDFTemplateFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PDFTemplatePayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a PDFTemplate.
+     * @param {PDFTemplateCreateArgs} args - Arguments to create a PDFTemplate.
+     * @example
+     * // Create one PDFTemplate
+     * const PDFTemplate = await prisma.pDFTemplate.create({
+     *   data: {
+     *     // ... data to create a PDFTemplate
+     *   }
+     * })
+     * 
+     */
+    create<T extends PDFTemplateCreateArgs>(args: SelectSubset<T, PDFTemplateCreateArgs<ExtArgs>>): Prisma__PDFTemplateClient<$Result.GetResult<Prisma.$PDFTemplatePayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many PDFTemplates.
+     * @param {PDFTemplateCreateManyArgs} args - Arguments to create many PDFTemplates.
+     * @example
+     * // Create many PDFTemplates
+     * const pDFTemplate = await prisma.pDFTemplate.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends PDFTemplateCreateManyArgs>(args?: SelectSubset<T, PDFTemplateCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many PDFTemplates and returns the data saved in the database.
+     * @param {PDFTemplateCreateManyAndReturnArgs} args - Arguments to create many PDFTemplates.
+     * @example
+     * // Create many PDFTemplates
+     * const pDFTemplate = await prisma.pDFTemplate.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many PDFTemplates and only return the `id`
+     * const pDFTemplateWithIdOnly = await prisma.pDFTemplate.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends PDFTemplateCreateManyAndReturnArgs>(args?: SelectSubset<T, PDFTemplateCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PDFTemplatePayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a PDFTemplate.
+     * @param {PDFTemplateDeleteArgs} args - Arguments to delete one PDFTemplate.
+     * @example
+     * // Delete one PDFTemplate
+     * const PDFTemplate = await prisma.pDFTemplate.delete({
+     *   where: {
+     *     // ... filter to delete one PDFTemplate
+     *   }
+     * })
+     * 
+     */
+    delete<T extends PDFTemplateDeleteArgs>(args: SelectSubset<T, PDFTemplateDeleteArgs<ExtArgs>>): Prisma__PDFTemplateClient<$Result.GetResult<Prisma.$PDFTemplatePayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one PDFTemplate.
+     * @param {PDFTemplateUpdateArgs} args - Arguments to update one PDFTemplate.
+     * @example
+     * // Update one PDFTemplate
+     * const pDFTemplate = await prisma.pDFTemplate.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends PDFTemplateUpdateArgs>(args: SelectSubset<T, PDFTemplateUpdateArgs<ExtArgs>>): Prisma__PDFTemplateClient<$Result.GetResult<Prisma.$PDFTemplatePayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more PDFTemplates.
+     * @param {PDFTemplateDeleteManyArgs} args - Arguments to filter PDFTemplates to delete.
+     * @example
+     * // Delete a few PDFTemplates
+     * const { count } = await prisma.pDFTemplate.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends PDFTemplateDeleteManyArgs>(args?: SelectSubset<T, PDFTemplateDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more PDFTemplates.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PDFTemplateUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many PDFTemplates
+     * const pDFTemplate = await prisma.pDFTemplate.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends PDFTemplateUpdateManyArgs>(args: SelectSubset<T, PDFTemplateUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more PDFTemplates and returns the data updated in the database.
+     * @param {PDFTemplateUpdateManyAndReturnArgs} args - Arguments to update many PDFTemplates.
+     * @example
+     * // Update many PDFTemplates
+     * const pDFTemplate = await prisma.pDFTemplate.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more PDFTemplates and only return the `id`
+     * const pDFTemplateWithIdOnly = await prisma.pDFTemplate.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends PDFTemplateUpdateManyAndReturnArgs>(args: SelectSubset<T, PDFTemplateUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PDFTemplatePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one PDFTemplate.
+     * @param {PDFTemplateUpsertArgs} args - Arguments to update or create a PDFTemplate.
+     * @example
+     * // Update or create a PDFTemplate
+     * const pDFTemplate = await prisma.pDFTemplate.upsert({
+     *   create: {
+     *     // ... data to create a PDFTemplate
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the PDFTemplate we want to update
+     *   }
+     * })
+     */
+    upsert<T extends PDFTemplateUpsertArgs>(args: SelectSubset<T, PDFTemplateUpsertArgs<ExtArgs>>): Prisma__PDFTemplateClient<$Result.GetResult<Prisma.$PDFTemplatePayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of PDFTemplates.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PDFTemplateCountArgs} args - Arguments to filter PDFTemplates to count.
+     * @example
+     * // Count the number of PDFTemplates
+     * const count = await prisma.pDFTemplate.count({
+     *   where: {
+     *     // ... the filter for the PDFTemplates we want to count
+     *   }
+     * })
+    **/
+    count<T extends PDFTemplateCountArgs>(
+      args?: Subset<T, PDFTemplateCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], PDFTemplateCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a PDFTemplate.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PDFTemplateAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends PDFTemplateAggregateArgs>(args: Subset<T, PDFTemplateAggregateArgs>): Prisma.PrismaPromise<GetPDFTemplateAggregateType<T>>
+
+    /**
+     * Group by PDFTemplate.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PDFTemplateGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends PDFTemplateGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: PDFTemplateGroupByArgs['orderBy'] }
+        : { orderBy?: PDFTemplateGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, PDFTemplateGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetPDFTemplateGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the PDFTemplate model
+   */
+  readonly fields: PDFTemplateFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for PDFTemplate.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__PDFTemplateClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the PDFTemplate model
+   */
+  interface PDFTemplateFieldRefs {
+    readonly id: FieldRef<"PDFTemplate", 'String'>
+    readonly name: FieldRef<"PDFTemplate", 'String'>
+    readonly description: FieldRef<"PDFTemplate", 'String'>
+    readonly config: FieldRef<"PDFTemplate", 'Json'>
+    readonly createdAt: FieldRef<"PDFTemplate", 'DateTime'>
+    readonly updatedAt: FieldRef<"PDFTemplate", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * PDFTemplate findUnique
+   */
+  export type PDFTemplateFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PDFTemplate
+     */
+    select?: PDFTemplateSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PDFTemplate
+     */
+    omit?: PDFTemplateOmit<ExtArgs> | null
+    /**
+     * Filter, which PDFTemplate to fetch.
+     */
+    where: PDFTemplateWhereUniqueInput
+  }
+
+  /**
+   * PDFTemplate findUniqueOrThrow
+   */
+  export type PDFTemplateFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PDFTemplate
+     */
+    select?: PDFTemplateSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PDFTemplate
+     */
+    omit?: PDFTemplateOmit<ExtArgs> | null
+    /**
+     * Filter, which PDFTemplate to fetch.
+     */
+    where: PDFTemplateWhereUniqueInput
+  }
+
+  /**
+   * PDFTemplate findFirst
+   */
+  export type PDFTemplateFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PDFTemplate
+     */
+    select?: PDFTemplateSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PDFTemplate
+     */
+    omit?: PDFTemplateOmit<ExtArgs> | null
+    /**
+     * Filter, which PDFTemplate to fetch.
+     */
+    where?: PDFTemplateWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PDFTemplates to fetch.
+     */
+    orderBy?: PDFTemplateOrderByWithRelationInput | PDFTemplateOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for PDFTemplates.
+     */
+    cursor?: PDFTemplateWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PDFTemplates from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PDFTemplates.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of PDFTemplates.
+     */
+    distinct?: PDFTemplateScalarFieldEnum | PDFTemplateScalarFieldEnum[]
+  }
+
+  /**
+   * PDFTemplate findFirstOrThrow
+   */
+  export type PDFTemplateFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PDFTemplate
+     */
+    select?: PDFTemplateSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PDFTemplate
+     */
+    omit?: PDFTemplateOmit<ExtArgs> | null
+    /**
+     * Filter, which PDFTemplate to fetch.
+     */
+    where?: PDFTemplateWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PDFTemplates to fetch.
+     */
+    orderBy?: PDFTemplateOrderByWithRelationInput | PDFTemplateOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for PDFTemplates.
+     */
+    cursor?: PDFTemplateWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PDFTemplates from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PDFTemplates.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of PDFTemplates.
+     */
+    distinct?: PDFTemplateScalarFieldEnum | PDFTemplateScalarFieldEnum[]
+  }
+
+  /**
+   * PDFTemplate findMany
+   */
+  export type PDFTemplateFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PDFTemplate
+     */
+    select?: PDFTemplateSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PDFTemplate
+     */
+    omit?: PDFTemplateOmit<ExtArgs> | null
+    /**
+     * Filter, which PDFTemplates to fetch.
+     */
+    where?: PDFTemplateWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PDFTemplates to fetch.
+     */
+    orderBy?: PDFTemplateOrderByWithRelationInput | PDFTemplateOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing PDFTemplates.
+     */
+    cursor?: PDFTemplateWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PDFTemplates from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PDFTemplates.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of PDFTemplates.
+     */
+    distinct?: PDFTemplateScalarFieldEnum | PDFTemplateScalarFieldEnum[]
+  }
+
+  /**
+   * PDFTemplate create
+   */
+  export type PDFTemplateCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PDFTemplate
+     */
+    select?: PDFTemplateSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PDFTemplate
+     */
+    omit?: PDFTemplateOmit<ExtArgs> | null
+    /**
+     * The data needed to create a PDFTemplate.
+     */
+    data: XOR<PDFTemplateCreateInput, PDFTemplateUncheckedCreateInput>
+  }
+
+  /**
+   * PDFTemplate createMany
+   */
+  export type PDFTemplateCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many PDFTemplates.
+     */
+    data: PDFTemplateCreateManyInput | PDFTemplateCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * PDFTemplate createManyAndReturn
+   */
+  export type PDFTemplateCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PDFTemplate
+     */
+    select?: PDFTemplateSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the PDFTemplate
+     */
+    omit?: PDFTemplateOmit<ExtArgs> | null
+    /**
+     * The data used to create many PDFTemplates.
+     */
+    data: PDFTemplateCreateManyInput | PDFTemplateCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * PDFTemplate update
+   */
+  export type PDFTemplateUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PDFTemplate
+     */
+    select?: PDFTemplateSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PDFTemplate
+     */
+    omit?: PDFTemplateOmit<ExtArgs> | null
+    /**
+     * The data needed to update a PDFTemplate.
+     */
+    data: XOR<PDFTemplateUpdateInput, PDFTemplateUncheckedUpdateInput>
+    /**
+     * Choose, which PDFTemplate to update.
+     */
+    where: PDFTemplateWhereUniqueInput
+  }
+
+  /**
+   * PDFTemplate updateMany
+   */
+  export type PDFTemplateUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update PDFTemplates.
+     */
+    data: XOR<PDFTemplateUpdateManyMutationInput, PDFTemplateUncheckedUpdateManyInput>
+    /**
+     * Filter which PDFTemplates to update
+     */
+    where?: PDFTemplateWhereInput
+    /**
+     * Limit how many PDFTemplates to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * PDFTemplate updateManyAndReturn
+   */
+  export type PDFTemplateUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PDFTemplate
+     */
+    select?: PDFTemplateSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the PDFTemplate
+     */
+    omit?: PDFTemplateOmit<ExtArgs> | null
+    /**
+     * The data used to update PDFTemplates.
+     */
+    data: XOR<PDFTemplateUpdateManyMutationInput, PDFTemplateUncheckedUpdateManyInput>
+    /**
+     * Filter which PDFTemplates to update
+     */
+    where?: PDFTemplateWhereInput
+    /**
+     * Limit how many PDFTemplates to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * PDFTemplate upsert
+   */
+  export type PDFTemplateUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PDFTemplate
+     */
+    select?: PDFTemplateSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PDFTemplate
+     */
+    omit?: PDFTemplateOmit<ExtArgs> | null
+    /**
+     * The filter to search for the PDFTemplate to update in case it exists.
+     */
+    where: PDFTemplateWhereUniqueInput
+    /**
+     * In case the PDFTemplate found by the `where` argument doesn't exist, create a new PDFTemplate with this data.
+     */
+    create: XOR<PDFTemplateCreateInput, PDFTemplateUncheckedCreateInput>
+    /**
+     * In case the PDFTemplate was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<PDFTemplateUpdateInput, PDFTemplateUncheckedUpdateInput>
+  }
+
+  /**
+   * PDFTemplate delete
+   */
+  export type PDFTemplateDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PDFTemplate
+     */
+    select?: PDFTemplateSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PDFTemplate
+     */
+    omit?: PDFTemplateOmit<ExtArgs> | null
+    /**
+     * Filter which PDFTemplate to delete.
+     */
+    where: PDFTemplateWhereUniqueInput
+  }
+
+  /**
+   * PDFTemplate deleteMany
+   */
+  export type PDFTemplateDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which PDFTemplates to delete
+     */
+    where?: PDFTemplateWhereInput
+    /**
+     * Limit how many PDFTemplates to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * PDFTemplate without action
+   */
+  export type PDFTemplateDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PDFTemplate
+     */
+    select?: PDFTemplateSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PDFTemplate
+     */
+    omit?: PDFTemplateOmit<ExtArgs> | null
+  }
+
+
+  /**
    * Enums
    */
 
@@ -4548,6 +5648,18 @@ export namespace Prisma {
   };
 
   export type WaitlistScalarFieldEnum = (typeof WaitlistScalarFieldEnum)[keyof typeof WaitlistScalarFieldEnum]
+
+
+  export const PDFTemplateScalarFieldEnum: {
+    id: 'id',
+    name: 'name',
+    description: 'description',
+    config: 'config',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type PDFTemplateScalarFieldEnum = (typeof PDFTemplateScalarFieldEnum)[keyof typeof PDFTemplateScalarFieldEnum]
 
 
   export const SortOrder: {
@@ -4920,6 +6032,63 @@ export namespace Prisma {
     createdAt?: DateTimeNullableWithAggregatesFilter<"Waitlist"> | Date | string | null
   }
 
+  export type PDFTemplateWhereInput = {
+    AND?: PDFTemplateWhereInput | PDFTemplateWhereInput[]
+    OR?: PDFTemplateWhereInput[]
+    NOT?: PDFTemplateWhereInput | PDFTemplateWhereInput[]
+    id?: StringFilter<"PDFTemplate"> | string
+    name?: StringFilter<"PDFTemplate"> | string
+    description?: StringNullableFilter<"PDFTemplate"> | string | null
+    config?: JsonFilter<"PDFTemplate">
+    createdAt?: DateTimeFilter<"PDFTemplate"> | Date | string
+    updatedAt?: DateTimeFilter<"PDFTemplate"> | Date | string
+  }
+
+  export type PDFTemplateOrderByWithRelationInput = {
+    id?: SortOrder
+    name?: SortOrder
+    description?: SortOrderInput | SortOrder
+    config?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type PDFTemplateWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    name?: string
+    AND?: PDFTemplateWhereInput | PDFTemplateWhereInput[]
+    OR?: PDFTemplateWhereInput[]
+    NOT?: PDFTemplateWhereInput | PDFTemplateWhereInput[]
+    description?: StringNullableFilter<"PDFTemplate"> | string | null
+    config?: JsonFilter<"PDFTemplate">
+    createdAt?: DateTimeFilter<"PDFTemplate"> | Date | string
+    updatedAt?: DateTimeFilter<"PDFTemplate"> | Date | string
+  }, "id" | "name">
+
+  export type PDFTemplateOrderByWithAggregationInput = {
+    id?: SortOrder
+    name?: SortOrder
+    description?: SortOrderInput | SortOrder
+    config?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: PDFTemplateCountOrderByAggregateInput
+    _max?: PDFTemplateMaxOrderByAggregateInput
+    _min?: PDFTemplateMinOrderByAggregateInput
+  }
+
+  export type PDFTemplateScalarWhereWithAggregatesInput = {
+    AND?: PDFTemplateScalarWhereWithAggregatesInput | PDFTemplateScalarWhereWithAggregatesInput[]
+    OR?: PDFTemplateScalarWhereWithAggregatesInput[]
+    NOT?: PDFTemplateScalarWhereWithAggregatesInput | PDFTemplateScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"PDFTemplate"> | string
+    name?: StringWithAggregatesFilter<"PDFTemplate"> | string
+    description?: StringNullableWithAggregatesFilter<"PDFTemplate"> | string | null
+    config?: JsonWithAggregatesFilter<"PDFTemplate">
+    createdAt?: DateTimeWithAggregatesFilter<"PDFTemplate"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"PDFTemplate"> | Date | string
+  }
+
   export type UserCreateInput = {
     clerkId: string
     email: string
@@ -5180,6 +6349,69 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     isClaimed?: NullableBoolFieldUpdateOperationsInput | boolean | null
     createdAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type PDFTemplateCreateInput = {
+    id?: string
+    name: string
+    description?: string | null
+    config: JsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type PDFTemplateUncheckedCreateInput = {
+    id?: string
+    name: string
+    description?: string | null
+    config: JsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type PDFTemplateUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    config?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PDFTemplateUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    config?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PDFTemplateCreateManyInput = {
+    id?: string
+    name: string
+    description?: string | null
+    config: JsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type PDFTemplateUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    config?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PDFTemplateUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    config?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type StringFilter<$PrismaModel = never> = {
@@ -5593,6 +6825,56 @@ export namespace Prisma {
     createdAt?: SortOrder
   }
 
+  export type DateTimeFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeFilter<$PrismaModel> | Date | string
+  }
+
+  export type PDFTemplateCountOrderByAggregateInput = {
+    id?: SortOrder
+    name?: SortOrder
+    description?: SortOrder
+    config?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type PDFTemplateMaxOrderByAggregateInput = {
+    id?: SortOrder
+    name?: SortOrder
+    description?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type PDFTemplateMinOrderByAggregateInput = {
+    id?: SortOrder
+    name?: SortOrder
+    description?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type DateTimeWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeWithAggregatesFilter<$PrismaModel> | Date | string
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedDateTimeFilter<$PrismaModel>
+    _max?: NestedDateTimeFilter<$PrismaModel>
+  }
+
   export type GenerationCreateNestedManyWithoutUserInput = {
     create?: XOR<GenerationCreateWithoutUserInput, GenerationUncheckedCreateWithoutUserInput> | GenerationCreateWithoutUserInput[] | GenerationUncheckedCreateWithoutUserInput[]
     connectOrCreate?: GenerationCreateOrConnectWithoutUserInput | GenerationCreateOrConnectWithoutUserInput[]
@@ -5689,6 +6971,10 @@ export namespace Prisma {
     delete?: UserWhereInput | boolean
     connect?: UserWhereUniqueInput
     update?: XOR<XOR<UserUpdateToOneWithWhereWithoutGenerationsInput, UserUpdateWithoutGenerationsInput>, UserUncheckedUpdateWithoutGenerationsInput>
+  }
+
+  export type DateTimeFieldUpdateOperationsInput = {
+    set?: Date | string
   }
 
   export type NestedStringFilter<$PrismaModel = never> = {
@@ -5943,6 +7229,31 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumStatusFilter<$PrismaModel>
     _max?: NestedEnumStatusFilter<$PrismaModel>
+  }
+
+  export type NestedDateTimeFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeFilter<$PrismaModel> | Date | string
+  }
+
+  export type NestedDateTimeWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeWithAggregatesFilter<$PrismaModel> | Date | string
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedDateTimeFilter<$PrismaModel>
+    _max?: NestedDateTimeFilter<$PrismaModel>
   }
 
   export type GenerationCreateWithoutUserInput = {

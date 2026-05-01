@@ -8,8 +8,14 @@ export const ContextProvider =({children}: PropsWithChildren)=> {
     
 const [prompt, setPrompt] = useState("");
 const [intent, setIntent] = useState("");
-const [hFormat, setHFormat] = useState("bold");
-const [shFormat, setSHFormat] = useState("underline");
+const [hFormat, setHFormat] = useState([
+  {id : 1, Format : "Bold", selected : false},
+    {id : 2, Format : "Underline", selected : false}
+  ]);
+const [shFormat, setSHFormat] = useState([
+   {id : 1, Format : "Bold", selected : false},
+    {id : 2, Format : "Underline", selected : false}
+]);
 const [wordCount, setWordCount] = useState(0);
 const [title,setTitle] = useState("");
 const [userDetailsModal, setUserDetailsModal] = useState(false)

@@ -5,5 +5,8 @@ export default defineConfig({
     schema : "prisma/schema.prisma",
     datasource:{
         url : process.env.DIRECT_URL,
+    },
+    migrations : {
+        seed : "npx tsx ./scripts/seed-template.ts"
     }
 })

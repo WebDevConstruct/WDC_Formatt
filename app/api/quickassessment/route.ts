@@ -81,7 +81,7 @@ if(user?.planTier === "free" && user?.generationsUsed >=5){
 }
 
 //5. Get Request Body
-  const {prompt, wordCount, courseType, intent}: requestTypes = await request.json()
+  const {prompt,  wordCount, courseType, intent}: requestTypes = await request.json()
      const systemPrompt = `
     You are the WDC Formatt Finance AI. 
     Strictly follow these layout rules:

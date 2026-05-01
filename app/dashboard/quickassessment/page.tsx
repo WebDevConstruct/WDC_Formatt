@@ -4,15 +4,23 @@ import { Settings2, FileText, Send,   Zap, X,
  ChevronDown, Terminal, Monitor, Layers} from "lucide-react";
   import {motion, AnimatePresence} from "framer-motion";
 import { useGlobalContext } from '@/app/Context';
-
+import Image from "next/image";
+import cancel from "../../Images/cancel_24dp_8C1AF6_FILL0_wght400_GRAD0_opsz24.svg"
 export const dynamic = 'force-dynamic';
-
+export const formData = {
+  "assignment_title": "Speed: The Velocity of Innovation",
+  "subheader": "Course: Finance & Tech Integration (FTI 301)",
+  "student_name": "Oladimeji Balogun",
+  "submission_date": "October 24, 2026",
+  "body_content": "The intersection of speed and creative thinking defines the modern frontier of financial technology. In building scalable financial systems, speed is not merely a performance metric but a strategic requirement. When developing predictive payment models, the ability to process vast arrays of statistical data—including regression analysis and ANOVA—at high velocity determines the utility of the tool for finance professionals. This assignment explores how assistive AI tools, integrated via stacks like React, Next.js, and Prisma, can reduce the latency between a financial hypothesis and its technical execution. By mastering atomic habits in our coding workflow, we ensure that the systems we build are not just fast, but inherently robust and adaptable to the volatile nature of global markets.",
+  "references": "1. Housel, M. (2020). The Psychology of Money. \n2. Clear, J. (2018). Atomic Habits: An Easy & Proven Way to Build Good Habits & Break Bad Ones. \n3. Garcia, H. & Miralles, F. (2016). Ikigai: The Japanese Secret to a Long and Happy Life. \n4. Deisenroth, M. P. (2020). Mathematics for Machine Learning."
+}
 
 
 type FormatDropDownType = {
   label : string,
-  value : string,
-  onChange : (value : string) => void 
+  Format : "HeaderFormat" | "SubHeaderFormat"
+  arrayValue : Array<FormatTypes>
 }
 const SystemSpec = ({ label, value }: {label : string, value : string}) => (
   <div className="flex justify-between items-center p-2 border-b border-[#5C4033]/10 text-[10px] font-black uppercase tracking-widest">
@@ -21,33 +29,88 @@ const SystemSpec = ({ label, value }: {label : string, value : string}) => (
   </div>
 );
 
-const FormatDropdown = ({ label, value, onChange }: FormatDropDownType) => (
-  <div className="space-y-2">
-    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[#5C4033] ml-1">
-      {label}
+
+type FormatTypes = {
+  id : number,
+  Format : string,
+  selected : boolean,
+}
+const FormatDropdown = ({ label,  arrayValue, Format }: FormatDropDownType) => {
+  const {hFormat , setHFormat, shFormat, setSHFormat} = useGlobalContext();
+
+      //This Function is to allow the User to pick between the Bold and Underline format
+//For Headers and SubHeaders. It Updates the Context accordingly.
+  const addFormat = (id : number, Format : string) => {
+      if(Format === "HeaderFormat"){
+    setHFormat((prev : Array<FormatTypes>)=> prev.map((value)=> value?.id === id && value?.selected === false  ?
+  {id : value?.id, Format : value?.Format, selected : true} :value))
+      }else if(Format === "SubHeaderFormat"){
+        setSHFormat((prev:  Array<FormatTypes>)=> prev?.map((value)=> value?.id === id && value?.selected === false ?
+  {id : value?.id, Format : value?.Format, selected : true} :value))
+      }
+  }
+//The Remove Format does the Opposite of the addFormat Function.
+  const removeFormat = (id : number, Format : string) => {
+    if(Format === "HeaderFormat"){
+    setHFormat((prev: Array<FormatTypes>)=> prev?.map((value)=> value?.id === id && value?.selected === true ?
+  {id : value?.id, Format : value?.Format, selected : false} :value))
+    }else if(Format === "SubHeaderFormat"){
+      setSHFormat((prev: Array<FormatTypes>)=> prev?.map((value)=> value?.id === id && value?.selected === true ?
+  {id : value?.id, Format : value?.Format, selected : false} :value))
+    }
+  }
+
+      return(
+        <div className="flex flex-col gap-3">
+    <label className="text-base font-black uppercase tracking-[0.2em] flex items-center">
+    {label}
     </label>
-    <div className="relative">
-      <select 
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className="w-full appearance-none bg-[#F5F5DC] border-2 border-[#5C4033] 
-        p-3 rounded-xl text-sm font-bold text-[#5C4033] focus:ring-2 focus:ring-[#8B0000]
-         outline-none cursor-pointer transition-all hover:bg-[#A52A2A]/5"
-      >
-        <option value="bold">BOLD</option>
-        <option value="underline">UNDERLINE</option>
-      </select>
-      <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#8B0000] pointer-events-none" />
-    </div>
-  </div>
+      
+         <div className={"flex flex-wrap gap-3 p-2  bg-[#F5F5DC] border border-[#5C4033] rounded-xl cursor-pointer"}>
+              {arrayValue.map((item : FormatTypes)=>(
+               <div key ={item.id} onClick ={()=> {
+                if(item.selected === false){
+                     addFormat(item?.id, Format)
+                }else {
+                  return null;
+                }
+                   }}
+    className={`relative w-25 rounded-3xl 
+    h-12.5 ${item?.selected === false ? 
+       "bg-[#5C4033]": "bg-[#8B0000] opacity-100"} flex items-center leading-4
+     gap-1 justify-between  px-2 `}>
+    
+    <p className='text-base text-white font-bold'
+     onClick={()=> {
+                            if(item.selected === true){
+                     addFormat(item?.id, Format)
+                }
+                           }} color="text-white"> {item?.Format}</p>
+                           {item.selected === true && (
+                       <Image
+                       preload={true} onClick={()=> {
+
+                         removeFormat(item?.id, Format)
+                       }}
+                       className=''
+                       src={cancel} 
+                       width ={25} 
+                       height ={25} 
+                       alt="Cancel Icon" />
+                      )}
+                   </div>
+                ))}
+                </div>
+                </div>
 );
+}
 export default function QuickAssessment() {
 
 //const [courseType, setCourseType] = useState("main");
 const { prompt, setPrompt,
       intent, setIntent,
-      hFormat, setHFormat,
-      shFormat, setSHFormat,
+      hFormat, 
+      shFormat, 
       wordCount, setWordCount} = useGlobalContext()
 const [isStreaming, setIsStreaming] = useState(false);
   
@@ -55,41 +118,80 @@ const [isStreaming, setIsStreaming] = useState(false);
 const [courseType, setCourseType] = useState("main");
 
 
-  const handleGenerate = async () => {
-  
-    setIsStreaming(true);
-    
 
-    try {
-   const response = await fetch("/api/quickassessment", {
-      method : "POST",
-      headers : {"Content-Type" : "application/json"},
-      credentials : "include",
-      body : JSON.stringify({
-        prompt, 
-        intent,
-        wordCount
-      })
+const generateAssignment = async( )=> {
+  try {
+  const response = await fetch("/api/quickassessment-template", {
+    method : "POST",
+    headers : {"Content-Type" : "application/json"},
+    body : JSON.stringify({
+      templateName : "ACADEMIC_ASSIGNMENT",
+      userInput : {
       
-     })
-     if(response.ok){
-      const data = await response.json();
-      console.log("Stream data Expected:", data)
-     }else{
-    console.log("Failed")
-     }
+  "assignment_title": "Scalable Predictive Models in Modern Fintech Systems",
+  "student_name": "Oladimeji Balogun",
+  "intro_title": "1. Introduction",
+  "intro_content": "The landscape of financial technology is undergoing a seismic shift driven by the integration of high-performance software engineering and advanced statistical methodologies. As systems move toward real-time processing, the necessity for scalable architectures becomes paramount. This research explores the synergy between React-based frontend interfaces and robust backend engines, specifically focusing on how predictive payment models can be optimized for low-latency environments. By leveraging modern tech stacks, developers can bridge the gap between complex financial theory and practical, user-centric applications.",
+  "method_title": "2. Methodology",
+  "method_content": "Our approach utilizes a quantitative research design, incorporating regression analysis and ANOVA to evaluate the performance of different architectural patterns. The data was gathered via simulated transaction environments using a tech stack comprised of Next.js, TypeScript, and Prisma connected to a Neon PostgreSQL database. We focused on 'Estimation Theory' to predict transaction failure rates, applying Chi-square testing to ensure the statistical significance of our findings. This methodology ensures that the resulting software tools are not only aesthetically functional but mathematically sound.",
+  "body_title": "3. Analysis & Discussion",
+  "body_content": "Analysis of the collected data suggests that the implementation of 'Atomic Habits' in the development lifecycle—such as consistent code reviews and modular component design—leads to a 30% reduction in production bugs. Furthermore, the psychology of money plays a critical role in how users interact with financial dashboards; predictive tools must be intuitive enough to challenge user assumptions without causing cognitive overload. When building these assistive tools, it is vital to balance technical complexity with the user's need for immediate, actionable insights, a concept deeply rooted in the Ikigai of professional development: finding where skill meets market necessity.",
+  "concl_title": "4. Conclusion",
+  "concl_content": "In conclusion, the future of finance lies in the seamless integration of machine learning and frontend engineering. By focusing on high-speed data playback and offline functionality, as demonstrated in our educational platform initiatives, we can ensure that financial literacy and technical proficiency are accessible to all. The key to success in this domain is a commitment to continuous learning and the rigorous application of statistical principles to real-world software problems. As we move forward, the 'Architectural Virtual Space' will continue to be a benchmark for university-level research in this field."
+ }
+    })
+  })
+  const blob = await response.blob();
+  console.log(blob);
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "Assignment.pdf";
+  a.click();
+} catch(error){
+  throw new Error("Could not Create the Assignment")
+}
+}
 
-        }
+
+//To CALL THE MODEL FOR THE ASSIGNMENT / TASK
+
+  // const handleGenerate = async () => {
+  
+  //   setIsStreaming(true);
     
-     catch (error) {
-      console.error("Axios Stream failed:", error);
-    } finally {
-      setIsStreaming(false);
-    }
-  };
 
-const dateNow = new Date()
-console.log(dateNow?.getDay());
+  //   try {
+  //  const response = await fetch("/api/quickassessment", {
+  //     method : "POST",
+  //     headers : {"Content-Type" : "application/json"},
+  //     credentials : "include",
+  //     body : JSON.stringify({
+  //       prompt, 
+  //       intent,
+  //       wordCount
+  //     })
+      
+  //    })
+  //    if(response.ok){
+  //     const data = await response.json();
+  //     console.log("Stream data Expected:", data)
+  //    }else{
+  //   console.log("Failed")
+  //    }
+
+  //       }
+    
+  //    catch (error) {
+  //     console.error("Axios Stream failed:", error);
+  //   } finally {
+  //     setIsStreaming(false);
+  //   }
+  // };
+//Filter the headerFormats to known which of both or both goes to the backend
+
+const getSelectedHeaderFormat = hFormat?.filter((value : FormatTypes)=> value?.selected === true )
+const getSelectedSubHeaderFormat = shFormat?.filter((value  : FormatTypes)=> value?.selected === true );
   return (
  <div className="min-h-screen bg-[#F5F5DC] text-[#5C4033] p-4 md:p-10 font-sans selection:bg-[#8B0000] selection:text-[#F5F5DC]">
       
@@ -98,7 +200,8 @@ console.log(dateNow?.getDay());
         {/* --- LEFT SIDE: THE CONFIGURATION FORM --- */}
         <div className="lg:col-span-7 space-y-8">
           <header className="space-y-2 border-l-4 border-[#8B0000] pl-6">
-            <h1 className="text-4xl font-black text-[#8B0000] uppercase tracking-tighter italic">Document Architect</h1>
+            <h1 className="text-4xl font-black text-[#8B0000] uppercase 
+            tracking-tighter italic">Document Architect</h1>
             <p className="text-xs font-bold opacity-60 uppercase tracking-widest flex items-center gap-2">
               <Layers className="w-3 h-3" /> System Version: 30-Day Beta Cycle
             </p>
@@ -106,30 +209,35 @@ console.log(dateNow?.getDay());
 
           <form onSubmit={(e : React.FormEvent)=> {
             e.preventDefault()
-           handleGenerate()
+            generateAssignment()
+          // handleGenerate()
           }} 
-           className="space-y-6">
+           className="space-y-8">
             {/* 1. Prompt & Intent */}
-            <div className="space-y-4">
+            <div className="space-y-2">
               <div className="space-y-2">
-                <label className="text-[10px] font-black uppercase tracking-[0.2em] flex items-center gap-2">
-                  <FileText className="w-3 h-3 text-[#8B0000]" /> The Prompt (Actual Assessment)
+                <label className="text-base font-black uppercase tracking-[0.2em] flex items-center gap-2">
+                  <FileText className="w-10 h-10 text-[#8B0000]" /> The Prompt (Actual Assessment)
                 </label>
                 <textarea 
                   placeholder="Paste the core assessment content here. Avoid adding instructions..."
-                  className="w-full h-32 bg-[#F5F5DC] border-2 border-[#5C4033] p-4 rounded-2xl text-sm font-medium focus:border-[#8B0000] outline-none transition-all resize-none shadow-[6px_6px_0px_0px_rgba(92,64,51,1)]"
+                  className="w-full h-32 bg-[#F5F5DC] border-2 border-[#5C4033] p-4 rounded-2xl
+                   text-base leading-6.5
+                  font-medium focus:border-[#8B0000] outline-none transition-all resize-none 
+                  shadow-[6px_6px_0px_0px_rgba(92,64,51,1)]"
                   value={prompt}
                   onChange={(e) => setPrompt(e.target.value)}
                 />
               </div>
 
               <div className="space-y-2">
-                <label className="text-[10px] font-black uppercase tracking-[0.2em] flex items-center gap-2">
-                  <Settings2 className="w-3 h-3 text-[#8B0000]" /> Intent / Strategy (Instructions)
+                <label className="text-base font-black uppercase tracking-[0.2em] flex items-center gap-2">
+                  <Settings2 className="w-10 h-10 text-[#8B0000]" /> Intent / Strategy (Instructions)
                 </label>
                 <textarea 
                   placeholder="Define the prompt strategy (e.g., Use Nigerian case studies, keep tone formal)..."
-                  className="w-full h-24 bg-white/40 border-2 border-[#5C4033]/20 p-4 rounded-2xl text-sm font-medium italic focus:border-[#8B0000] outline-none transition-all resize-none"
+                  className="w-full h-32 bg-white/40 border-2 border-[#5C4033]/20 p-4 rounded-2xl
+                   font-medium text-base leading-6.5 focus:border-[#8B0000] outline-none transition-all resize-none"
                   value={intent}
                   onChange={(e) => setIntent(e.target.value)}
                 />
@@ -138,16 +246,17 @@ console.log(dateNow?.getDay());
 
             {/* 2. Format Dropdowns & Word Count */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <FormatDropdown label="Header Style" value={hFormat} onChange={setHFormat} />
-              <FormatDropdown label="SubHeader Style" value={shFormat} onChange={setSHFormat} />
+              <FormatDropdown label="Header Style" Format = "HeaderFormat" arrayValue={hFormat}  />
+              <FormatDropdown label="SubHeader Style" Format = "SubHeaderFormat" arrayValue ={shFormat}  />
               
               <div className="space-y-2">
-                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[#5C4033]">Word Count</label>
+                <label className="text-base font-black uppercase tracking-[0.2em] flex 
+                items-center">Word Count</label>
                 <input 
                   type="number"
                   value={wordCount}
                   onChange={(e) => setWordCount(Number(e.target.value))}
-                  className="w-full bg-[#F5F5DC] border-2 border-[#5C4033] p-3 rounded-xl text-sm font-bold text-[#8B0000] outline-none focus:ring-2 focus:ring-[#8B0000]"
+                  className={"w-full bg-[#F5F5DC] border-2 border-[#5C4033] p-3 text-base rounded-xl  font-bold text-[#8B0000] outline-none focus:ring-2 focus:ring-[#8B0000]"}
                 />
               </div>
             </div>
@@ -156,7 +265,7 @@ console.log(dateNow?.getDay());
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-[#A52A2A]/5 p-6 rounded-[2rem] border border-[#A52A2A]/20">
               <div className="space-y-4">
                 <label className="text-[10px] font-black uppercase tracking-[0.2em]">Course Association</label>
-                <div className="flex gap-2 p-1 bg-[#5C4033]/10 rounded-xl">
+                <div className="flex gap-2 p-1  rounded-xl">
                   <button 
                     type="button"
                     onClick={() => setCourseType("main")}
@@ -214,7 +323,20 @@ console.log(dateNow?.getDay());
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4">
                   <p className="text-[#8B0000] font-black">&gt; INITIALIZING GENERATION ENGINE...</p>
                   <p>&gt; MAPPING STRATEGY: {intent.slice(0, 30)}...</p>
-                  <p>&gt; APPLYING FORMATS: H({hFormat}) SH({shFormat})</p>
+                  {getSelectedHeaderFormat?.map((item : FormatTypes)=> 
+                  <div key={item?.id} className='gap-2 flex flex-col'>
+                     <h1>&gt; APPLYING HEADER FORMATS-</h1>
+                  <p>&gt; APPLYING FORMATS: BOLD FORMAT: {item?.Format=== "Bold" ? "APPLIED" : "NIL"}</p>
+                      <p>&gt; APPLYING FORMATS: UNDERLINE FORMAT: {item?.Format=== "Underline" ? "APPLIED" : "NIL"}</p>
+                  </div>
+                  )}
+                   {getSelectedSubHeaderFormat?.map((item : FormatTypes)=> 
+                  <div key={item?.id} className='gap-2 flex flex-col'>
+                     <h1>&gt; APPLYING SUB HEADER FORMATS-</h1>
+                  <p>&gt; APPLYING FORMATS: BOLD FORMAT: {item?.Format=== "Bold" ? "APPLIED" : "NIL"}</p>
+                      <p>&gt; APPLYING FORMATS: UNDERLINE FORMAT: {item?.Format=== "Underline" ? "APPLIED" : "NIL"}</p>
+                  </div>
+                  )}
                   <p>&gt; MARGIN: 1.0 | SPACING: 1.5</p>
                   <div className="pt-4 border-t border-white/10 text-white italic">
                     &gt; {prompt}

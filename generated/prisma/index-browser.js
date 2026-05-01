@@ -157,6 +157,15 @@ exports.Prisma.WaitlistScalarFieldEnum = {
   createdAt: 'createdAt'
 };
 
+exports.Prisma.PDFTemplateScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  description: 'description',
+  config: 'config',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -190,7 +199,8 @@ exports.Status = exports.$Enums.Status = {
 exports.Prisma.ModelName = {
   User: 'User',
   Generation: 'Generation',
-  Waitlist: 'Waitlist'
+  Waitlist: 'Waitlist',
+  PDFTemplate: 'PDFTemplate'
 };
 
 /**

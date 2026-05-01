@@ -75,6 +75,16 @@ model Waitlist {
 
   @@map("waitlist")
 }
+//5 PDF TEMPLATE
+model PDFTemplate {
+  id          String   @id @default(cuid())
+  name        String   @unique // e.g., "FACULTY_SCIENCE_RECEIPT"
+  description String?
+  // This JSON field stores the x, y coordinates and formatting rules
+  config      Json     
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
 
 
 

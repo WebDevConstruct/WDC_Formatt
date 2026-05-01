@@ -28,7 +28,7 @@ export default function PremiumSignUp() {
  const router = useRouter();
    const [departmentChosen, setDepartmentChosen] = useState("");
    const {user} = useUser()
-    const clerkId = user?.id || ""
+   // const clerkId = user?.id || ""
 
   // 1. THE MODERN GUARD: Replacing the old 'isLoaded'
   if (fetchStatus === "fetching") {

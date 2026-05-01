@@ -171,6 +171,41 @@ const [index, setIndex] = useState(0);
                 </div>
               </Card>
             </Link>
+
+                {/* Slides */}
+            <Link href="/dashboard/Slides" className="block group">
+              <Card className="relative overflow-hidden bg-[#F5F5DC] border-2 border-[#5C4033] p-1 shadow-[8px_8px_0px_0px_rgba(92,64,51,1)] transition-all group-hover:shadow-[12px_12px_0px_0px_rgba(139,0,0,1)] group-hover:border-[#8B0000] group-hover:-translate-x-1 group-hover:-translate-y-1">
+                <div className="bg-[#8B0000]/5 p-8 md:p-12 space-y-8">
+                  <div className="flex justify-between items-start">
+                    <div className="p-4 bg-[#8B0000] text-[#F5F5DC] rounded-2xl shadow-xl shadow-[#8B0000]/20">
+                      <Zap className="w-8 h-8" />
+                    </div>
+                    <div className="flex flex-col items-end gap-2">
+                      <div className="px-4 py-2 bg-[#8B0000] text-[#F5F5DC] rounded-full text-[10px] font-black flex items-center gap-2">
+                        <Clock className="w-3 h-3 animate-pulse" />
+                        TIME-SENSITIVE
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    <h2 className="text-4xl md:text-5xl font-black text-[#5C4033] leading-none uppercase italic">Slides</h2>
+                    <p className="text-[#A52A2A] text-lg max-w-xl font-medium leading-relaxed">
+                      This module is currently the only operational sequence active for the 30-day testing window. Ensure you are in a controlled environment before initializing.
+                    </p>
+                  </div>
+
+                  <div className="pt-8 flex items-center gap-4">
+                    <button className="bg-[#8B0000] text-[#F5F5DC] px-8 
+                    py-4 rounded-xl font-black uppercase
+                     text-sm tracking-widest shadow-lg shadow-[#8B0000]/30 group-hover:bg-[#5C4033] transition-colors">
+                      Get Started
+                    </button>
+                    <span className="text-[#8B0000] font-black hidden sm:inline">PREPARING SERVER...</span>
+                  </div>
+                </div>
+              </Card>
+            </Link>
           </div>
 
           {/* RIGHT: Dynamic PDF History */}
@@ -209,6 +244,8 @@ const [index, setIndex] = useState(0);
                 Access Full Archive →
               </Link>
             </div>
+
+            {/* Slides Page */}
           </div>
         </div>
 
