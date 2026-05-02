@@ -97,12 +97,13 @@ const updateTheme = (key: string, value: string) => {
 
   //TRIGGER BUTTON TO GENERATE THE SLIDE: LET GO
  const GetkeyNoteSlide = async()=> {
-
+   const {headline} = presentation?.sections[0]
     try{
      const response =await fetch("/api/keynote-template", {
         method : "POST",
         headers : {
-            "Content-Type" : "application/json"
+            "Content-Type" : "application/pdf",
+              "Content-Disposition": `attachment; filename=${headline || "Keynote"}.pdf`,
         },
         body : JSON.stringify({
         templateName : "Slides_Template",
@@ -116,8 +117,15 @@ const blob = await response.blob();
   const url = window.URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = "KeyNotePresentation.pdf";
-  a.click();
+  //Ensure the filename is strictly pdf
+  const fileName = `${presentation?.topic?.replace(/s+/g, "_") || "Keynote"}.pdf`
+  a.setAttribute("download",fileName);
+  document?.body?.appendChild(a);
+  a?.parentNode?.removeChild(a);
+  window?.URL?.revokeObjectURL(url)
+  a?.click()
+ // a.download = `${headline || "Keynote"}.pdf`;
+ 
        }
     }catch(error){
         throw new Error("Unable to generate Keynote slide")

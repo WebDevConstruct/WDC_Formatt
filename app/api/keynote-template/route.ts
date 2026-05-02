@@ -9,7 +9,7 @@ export async function POST(req : Request){
             where : {name : templateName}
         })
     ])
-
+const {headline} = userInput?.presentation?.sections[0] || ""
         if(!template){
              return new Response("Error: Missing data", {
             status : 404
@@ -21,8 +21,8 @@ export async function POST(req : Request){
       return new Response(Buffer.from(pdfBytes), {
         status : 200, 
       headers : {
-        "Content-Type" : "application/json",
-        "Content-Disposition": 'attachment; filename="KeyNoteSlide.pdf"',
+        "Content-Type" : "application/pdf",
+        "Content-Disposition": `attachment; filename=${headline || "Keynotes"}.pdf`,
     "Content-Length": pdfBytes.length.toString(),
       }
       })

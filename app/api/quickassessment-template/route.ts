@@ -21,8 +21,8 @@ export async function POST(req : Request){
       return new Response(Buffer.from(pdfBytes), {
         status : 200, 
       headers : {
-        "Content-Type" : "application/json",
-        "Content-Disposition": 'attachment; filename="Assignment.pdf"',
+        "Content-Type" : "application/pdf",
+        "Content-Disposition": `attachment; filename=${userInput?.assignment_title || "ASSIGNMENT"}`,
     "Content-Length": pdfBytes.length.toString(),
       }
       })

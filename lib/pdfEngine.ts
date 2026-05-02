@@ -3,7 +3,6 @@ import {PDFDocument, PDFFont, StandardFonts, rgb} from "pdf-lib"
 import { wrapText } from "./utils/wrapText";
 import { db } from "./prisma";
 import { PDFTemplateConfigType,BasePlaceholder, KeyNoteTheme } from "@/scripts/templatetypes";
-import { KeyNoteTemplateConfigType } from "@/scripts/templatetypes";
 import { KeynotePresentation, } from "@/app/dashboard/Slides/page";
 import { KeyNoteTemplateConfig } from "@/scripts/seed-template";
 

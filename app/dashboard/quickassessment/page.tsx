@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { Settings2, FileText, Send,   Zap, X,
- ChevronDown, Terminal, Monitor, Layers} from "lucide-react";
+ Terminal, Monitor, Layers} from "lucide-react";
   import {motion, AnimatePresence} from "framer-motion";
 import { useGlobalContext } from '@/app/Context';
 import Image from "next/image";
@@ -123,7 +123,10 @@ const generateAssignment = async( )=> {
   try {
   const response = await fetch("/api/quickassessment-template", {
     method : "POST",
-    headers : {"Content-Type" : "application/json"},
+    headers : {
+      "Content-Type" : "application/pdf",
+      "Content-Disposition" : `attachment; filename=${"Scalable Predictive Models in Modern Fintech Systems"}.pdf`
+    },
     body : JSON.stringify({
       templateName : "ACADEMIC_ASSIGNMENT",
       userInput : {
@@ -146,8 +149,12 @@ const generateAssignment = async( )=> {
   const url = window.URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = "Assignment.pdf";
-  a.click();
+  const fileName = `${"Scalable Predictive Models"}.pdf`
+  a.setAttribute("download",fileName);
+  document?.body?.appendChild(a);
+  a?.parentNode?.removeChild(a);
+  window?.URL?.revokeObjectURL(url)
+  a?.click()
 } catch(error){
   throw new Error("Could not Create the Assignment")
 }
