@@ -74,7 +74,7 @@ const assignmentTemplate = {
         type: "subheader",
         x: 60,
         y: 535,
-        fontSize: 11,
+        fontSize: 14,
         isBold: true,
         color: "secondary", // Syncing Red
         fontFamily: "Helvetica-Bold"
@@ -95,7 +95,7 @@ const assignmentTemplate = {
         type: "subheader",
         x: 60,
         y: 410,
-        fontSize: 14,
+        fontSize: 16,
         isBold: true,
         color: "secondary", // Syncing Red
         fontFamily: "Helvetica-Bold"
@@ -105,7 +105,7 @@ const assignmentTemplate = {
         type: "paragraph",
         x: 60,
         y: 380,
-        fontSize: 16,
+        fontSize: 14,
         lineHeight: 24,
         color: "primary", // Majestic Brown
         fontFamily: "Helvetica",

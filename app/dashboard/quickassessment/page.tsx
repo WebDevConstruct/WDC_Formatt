@@ -5,6 +5,7 @@ import { Settings2, FileText, Send,   Zap, X,
   import {motion, AnimatePresence} from "framer-motion";
 import { useGlobalContext } from '@/app/Context';
 import Image from "next/image";
+import { useUser } from '@clerk/nextjs';
 import cancel from "../../Images/cancel_24dp_8C1AF6_FILL0_wght400_GRAD0_opsz24.svg"
 export const dynamic = 'force-dynamic';
 export const formData = {
@@ -117,22 +118,15 @@ const [isStreaming, setIsStreaming] = useState(false);
 
 const [courseType, setCourseType] = useState("main");
 
+const {user} = useUser();
 
+const generateAssignment = async()=> {
 
-const generateAssignment = async( )=> {
-  try {
-  const response = await fetch("/api/quickassessment-template", {
-    method : "POST",
-    headers : {
-      "Content-Type" : "application/pdf",
-      "Content-Disposition" : `attachment; filename=${"Scalable Predictive Models in Modern Fintech Systems"}.pdf`
-    },
-    body : JSON.stringify({
+  const body = {
       templateName : "ACADEMIC_ASSIGNMENT",
       userInput : {
-      
   "assignment_title": "Scalable Predictive Models in Modern Fintech Systems",
-  "student_name": "Oladimeji Balogun",
+  "student_name":(user?.firstName || "")  + " " + (user?.lastName || "")  || "User",
   "intro_title": "1. Introduction",
   "intro_content": "The landscape of financial technology is undergoing a seismic shift driven by the integration of high-performance software engineering and advanced statistical methodologies. As systems move toward real-time processing, the necessity for scalable architectures becomes paramount. This research explores the synergy between React-based frontend interfaces and robust backend engines, specifically focusing on how predictive payment models can be optimized for low-latency environments. By leveraging modern tech stacks, developers can bridge the gap between complex financial theory and practical, user-centric applications.",
   "method_title": "2. Methodology",
@@ -142,21 +136,36 @@ const generateAssignment = async( )=> {
   "concl_title": "4. Conclusion",
   "concl_content": "In conclusion, the future of finance lies in the seamless integration of machine learning and frontend engineering. By focusing on high-speed data playback and offline functionality, as demonstrated in our educational platform initiatives, we can ensure that financial literacy and technical proficiency are accessible to all. The key to success in this domain is a commitment to continuous learning and the rigorous application of statistical principles to real-world software problems. As we move forward, the 'Architectural Virtual Space' will continue to be a benchmark for university-level research in this field."
  }
-    })
+    }
+     const {userInput} = body;
+  try {
+  const response = await fetch("/api/quickassessment-template", {
+    method : "POST",
+    headers : {
+      "Content-Type" : "application/pdf",
+      "Content-Disposition" : `attachment; filename=${userInput?.assignment_title}.pdf`
+    },
+    body : JSON.stringify({body})
   })
+ // console.log(JSON.stringify({body}));
+
+ 
+
+ 
   const blob = await response.blob();
   console.log(blob);
   const url = window.URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  const fileName = `${"Scalable Predictive Models"}.pdf`
+  const fileName = `${userInput?.assignment_title || "ASSIGNMENT"}.pdf`
   a.setAttribute("download",fileName);
   document?.body?.appendChild(a);
-  a?.parentNode?.removeChild(a);
-  window?.URL?.revokeObjectURL(url)
   a?.click()
+  //Clean Up
+  window?.URL?.revokeObjectURL(url)
+    a?.parentNode?.removeChild(a);
 } catch(error){
-  throw new Error("Could not Create the Assignment")
+  throw new Error("Could not Create the Assignment");
 }
 }
 

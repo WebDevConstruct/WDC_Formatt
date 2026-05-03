@@ -244,13 +244,13 @@ export const compileKeynotePDF = async (data: KeynotePresentation, slideTheme: K
   for (const section of data.sections) {
     const page = pdfDoc.addPage([width, height]);
     page.drawRectangle({ x: 0, y: 0, width, height, color: rgb(surfaceColor.r, surfaceColor.g, surfaceColor.b) });
-    page.drawRectangle({ x: 0, y: height - 5, width, height: 5, color: rgb(primaryColor.r, primaryColor.g, primaryColor.b) });
+  //  page.drawRectangle({ x: 0, y: height - 5, width, height: 5, color: rgb(primaryColor.r, primaryColor.g, primaryColor.b) });
 
     let currentY = height - 60;
 
     // A. Subheader (Safe Wrap)
     const subheaderText = section.subheader || "";
-    const subheaderLines = TextWrap(subheaderText.toUpperCase(), TEXT_MAX_WIDTH, boldFont, 11);
+    const subheaderLines = TextWrap(subheaderText.toUpperCase(), TEXT_MAX_WIDTH, boldFont, 16);
     subheaderLines.forEach(line => {
       page.drawText(line, { x: 60, y: currentY, size: 11, font: boldFont, color: rgb(secondaryColor.r, secondaryColor.g, secondaryColor.b) });
       currentY -= 14;
@@ -266,10 +266,10 @@ export const compileKeynotePDF = async (data: KeynotePresentation, slideTheme: K
 
     // C. Body Content (Safe Wrap)
     currentY -= 25;
-    const bodyLines = TextWrap(section.body_content || "", TEXT_MAX_WIDTH, regularFont, 16);
+    const bodyLines = TextWrap(section.body_content || "", TEXT_MAX_WIDTH, regularFont, 14);
     bodyLines.forEach(line => {
       if (currentY > 40) {
-        page.drawText(line, { x: 60, y: currentY, size: 16, font: regularFont, color: rgb(secondaryColor.r, secondaryColor.g, secondaryColor.b) });
+        page.drawText(line, { x: 60, y: currentY, size: 14, font: regularFont, color: rgb(secondaryColor.r, secondaryColor.g, secondaryColor.b) });
         currentY -= 22;
       }
     });

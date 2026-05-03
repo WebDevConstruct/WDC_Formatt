@@ -46,7 +46,7 @@ export default function KeynoteBuilder() {
   const finalizeSetup = () => {
     const generatedSections: KeynoteSection[] = Array.from({ length: presentation.pageCount }).map((_, i) => ({
       id: crypto.randomUUID(),
-      subheader: `0${i + 1} // ANALYTICAL FRAMEWORK`,
+      subheader: `0${i + 1} `,
       headline: '',
       paragraph : "",
       body_content: '',
@@ -97,13 +97,13 @@ const updateTheme = (key: string, value: string) => {
 
   //TRIGGER BUTTON TO GENERATE THE SLIDE: LET GO
  const GetkeyNoteSlide = async()=> {
-   const {headline} = presentation?.sections[0]
+   const headline = (presentation?.topic  || "KeyNotes")?.replace(/[^a-z0-9]/gi, '_') || ""
     try{
      const response =await fetch("/api/keynote-template", {
         method : "POST",
         headers : {
             "Content-Type" : "application/pdf",
-              "Content-Disposition": `attachment; filename=${headline || "Keynote"}.pdf`,
+              "Content-Disposition": `attachment; filename=${headline}.pdf`,
         },
         body : JSON.stringify({
         templateName : "Slides_Template",
@@ -117,13 +117,15 @@ const blob = await response.blob();
   const url = window.URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
+ 
   //Ensure the filename is strictly pdf
-  const fileName = `${presentation?.topic?.replace(/s+/g, "_") || "Keynote"}.pdf`
+  const fileName = `${headline}.pdf`
   a.setAttribute("download",fileName);
   document?.body?.appendChild(a);
+   a?.click()
   a?.parentNode?.removeChild(a);
   window?.URL?.revokeObjectURL(url)
-  a?.click()
+  
  // a.download = `${headline || "Keynote"}.pdf`;
  
        }
@@ -206,7 +208,8 @@ const blob = await response.blob();
             <button 
               key={section.id} 
               onClick={() => setActiveSectionIndex(i)}
-              className={`aspect-video w-14 md:w-full rounded border-2 transition-all shrink-0 ${activeSectionIndex === i ? 'bg-[#F5F5DC]' : 'bg-[#5C4033]/10 border-transparent'}`}
+              className={`aspect-video w-14 md:w-full rounded border-2 transition-all shrink-0
+                 ${activeSectionIndex === i ? 'bg-[#F5F5DC]' : 'bg-[#5C4033]/10 border-transparent'}`}
               style={{ borderColor: activeSectionIndex === i ? THEME.syncRed : 'transparent' }}
             />
           ))}
@@ -345,7 +348,8 @@ const blob = await response.blob();
 )}
           
 
-          <p className="mt-6 md:absolute md:bottom-6 md:left-12 text-[10px] font-bold text-[#5C4033]/40 uppercase tracking-widest">
+          <p className="mt-6 md:absolute md:bottom-6 md:left-12 text-[10px] font-bold
+           text-[#5C4033]/40 uppercase tracking-widest">
             Section {activeSectionIndex+1}  {presentation.pageCount}
           </p>
         
