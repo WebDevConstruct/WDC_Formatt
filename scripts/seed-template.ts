@@ -3,13 +3,9 @@ import pg from "pg";
  import {PrismaPg} from "@prisma/adapter-pg"
 import * as dotenv from "dotenv"
 
-// const prisma = new PrismaClient({
-//     datasources : {
-//       db : {
-//        url : process.env.DATABASE_URL
-//       }
-//     }
-// })//
+
+
+
 //Template for Academic assigment
 const assignmentTemplate = {
         layout : {
@@ -37,6 +33,16 @@ const assignmentTemplate = {
             },
             {
                 varName : "body_content",
+                type : "paragraph",
+                x : 50,
+                y : 730,
+                fontSize : 11,
+                lineHeights : 15,
+                maxWidth : 495,
+                fontFamily : "Helvetica"
+            },
+              {
+                varName : "lists",
                 type : "paragraph",
                 x : 50,
                 y : 730,
@@ -134,10 +140,12 @@ const UpdatedAcademicAssigmentTemplate = {
           // Section 1: Introduction
           { varName: "intro_title", type: "subheader", x: 50, y: 720, fontSize: 13, isBold: true, fontFamily: "Helvetica-Bold" },
           { varName: "intro_content", type: "paragraph", x: 50, y: 705, fontSize: 11, lineHeights: 14, maxWidth: 495, fontFamily: "Helvetica" },
-
-          // Section 2: Methodology
-          { varName: "method_title", type: "subheader", x: 50, y: 580, fontSize: 13, isBold: true, fontFamily: "Helvetica-Bold" },
-          { varName: "method_content", type: "paragraph", x: 50, y: 565, fontSize: 11, lineHeights: 14, maxWidth: 495, fontFamily: "Helvetica" },
+// LISTS
+ { varName: "lists", type: "paragraph", x: 50, y: 705, fontSize: 11, lineHeights: 14, maxWidth: 495, fontFamily: "Helvetica" },
+  { varName: "recipientName", type: "paragraph", x: 50, y: 205, fontSize: 11, lineHeights: 14, maxWidth: 495, fontFamily: "Helvetica" },
+          // // Section 2: Methodology
+          // { varName: "method_title", type: "subheader", x: 50, y: 580, fontSize: 13, isBold: true, fontFamily: "Helvetica-Bold" },
+          // { varName: "method_content", type: "paragraph", x: 50, y: 565, fontSize: 11, lineHeights: 14, maxWidth: 495, fontFamily: "Helvetica" },
 
           // Section 3: Analysis
           { varName: "body_title", type: "subheader", x: 50, y: 420, fontSize: 13, isBold: true, fontFamily: "Helvetica-Bold" },
@@ -145,7 +153,9 @@ const UpdatedAcademicAssigmentTemplate = {
 
           // Section 4: Conclusion
           { varName: "concl_title", type: "subheader", x: 50, y: 220, fontSize: 13, isBold: true, fontFamily: "Helvetica-Bold" },
-          { varName: "concl_content", type: "paragraph", x: 50, y: 205, fontSize: 11, lineHeights: 14, maxWidth: 495, fontFamily: "Helvetica" }
+          { varName: "concl_content", type: "paragraph", x: 50, y: 205, fontSize: 11, lineHeights: 14, maxWidth: 495, fontFamily: "Helvetica" },
+           { varName: "reference", type: "paragraph", x: 50, y: 205, fontSize: 11, lineHeights: 14, maxWidth: 495, fontFamily: "Helvetica" },
+      //   { varName: "", type: "paragraph", x: 50, y: 205, fontSize: 11, lineHeights: 14, maxWidth: 495, fontFamily: "Helvetica" }
         ]
       }
 

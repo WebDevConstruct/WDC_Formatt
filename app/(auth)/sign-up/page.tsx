@@ -195,131 +195,123 @@ const handleSync = async () => {
   //console.log(clerkId);
 
   return (
-    <div className="min-h-screen bg-[#FDFCF0] flex items-center justify-center p-6 selection:bg-[#8B0000] selection:text-white font-sans">
-      <motion.div 
-        layout 
-        className="w-full max-w-lg bg-[#FDFCF0] border border-[#8B0000]/20 p-12 relative shadow-[24px_24px_0px_rgba(139,0,0,0.05)]"
-      >
-        <header className="mb-12">
-          <div className="flex items-center gap-3 mb-4">
-            <span className="h-[1px] w-12 bg-[#8B0000]" />
-            <span className="text-[9px] font-mono uppercase tracking-[0.4em] text-[#8B0000]">Step 0{step}</span>
-          </div>
-          <h1 className="text-4xl font-serif text-[#1A1A1A] italic leading-tight">
-            Scholar <br /><span className="not-italic text-[#8B0000]">Authorization</span>
-          </h1>
-        </header>
+  <div className="min-h-screen bg-[#1A1512] flex items-center justify-center p-6 selection:bg-[#D4AF37] selection:text-[#1A1512] font-sans text-[#F2F0E9]">
+  <motion.div 
+    layout 
+    className="w-full max-w-lg bg-[#2C2520] border border-[#D4AF37]/20 p-12 relative shadow-[24px_24px_0px_rgba(212,175,55,0.05)] rounded-[2rem]"
+  >
+    <header className="mb-12">
+      <div className="flex items-center gap-3 mb-4">
+        <span className="h-[1px] w-12 bg-[#D4AF37]" />
+        <span className="text-[9px] font-mono uppercase tracking-[0.4em] text-[#D4AF37]">Step 0{step}</span>
+      </div>
+      <h1 className="text-4xl font-serif text-[#F2F0E9] italic leading-tight">
+        Scholar <br /><span className="not-italic text-[#D4AF37]">Authorization</span>
+      </h1>
+    </header>
 
-        <AnimatePresence mode="wait">
-          {step === 1 && (
-            <motion.div key="step1" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-8">
-              <input 
-                type="email" 
-                placeholder="YOUR EMAIL"
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full border-b border-[#8B0000]/20 p-4 outline-none font-mono text-sm bg-transparent focus:border-[#8B0000] transition-all placeholder:text-[#8B0000]/30"
-              />
-              <button 
-                onClick={(e : React.FormEvent)=> {
-                  e.preventDefault();
-                  handleInitialVerify()
-                }} 
-                className="w-full bg-[#1A1A1A] text-white p-5 
-                text-[11px] font-black uppercase tracking-widest hover:bg-[#8B0000] transition-colors"
-              >
-                Verify Identity →
-              </button>
-      <div className="flex w-full justify-between">
-              <Link href="/signin" className="text-right mt-3 text-md font-medium text-black">
+    <AnimatePresence mode="wait">
+      {step === 1 && (
+        <motion.div key="step1" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-8">
+          <input 
+            type="email" 
+            placeholder="YOUR INSTITUTIONAL EMAIL"
+            onChange={(e) => setEmail(e.target.value)}
+            className="w-full border-b border-[#D4AF37]/20 p-4 outline-none font-mono text-sm bg-transparent focus:border-[#D4AF37] transition-all placeholder:text-[#D4AF37]/30 text-[#F2F0E9]"
+          />
+          <button 
+            onClick={(e: React.FormEvent) => {
+              e.preventDefault();
+              handleInitialVerify();
+            }} 
+            className="w-full bg-[#D4AF37] text-[#1A1512] p-5 text-[11px] font-black uppercase tracking-widest hover:bg-[#F2F0E9] transition-colors"
+          >
+            Verify Identity →
+          </button>
+          <div className="flex w-full justify-between">
+            <Link href="/signin" className="text-right mt-3 text-xs font-black uppercase tracking-widest text-[#D4AF37]/60 hover:text-[#D4AF37] transition-colors">
               Sign in instead
-              </Link>
-               <Link href="/waitlist" className="text-right mt-3 text-md font-medium text-black">
-                Join Waitlist 
-              </Link>
+            </Link>
+            <Link href="/waitlist" className="text-right mt-3 text-xs font-black uppercase tracking-widest text-[#D4AF37]/60 hover:text-[#D4AF37] transition-colors">
+              Join Waitlist 
+            </Link>
+          </div>
+        </motion.div>
+      )}
 
-              </div>
+      {step === 2 && (
+        <motion.div key="step2" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-8">
+          <div className="border-l-2 border-[#D4AF37] p-4 bg-[#D4AF37]/5 flex justify-between items-center">
+            <span className="font-mono text-xs text-[#D4AF37]">{email}</span>
+            <span className="text-[8px] uppercase font-black text-[#D4AF37] bg-[#D4AF37]/10 px-2 py-1 rounded-full">Matched</span>
+          </div>
+          <div className="flex flex-col gap-5">
+            <input 
+              type="text" 
+              placeholder="LEGAL NAME"
+              onChange={(e) => setUsername(e.target.value)}
+              className="w-full border-b border-[#D4AF37]/20 p-4 outline-none font-mono text-sm bg-transparent focus:border-[#D4AF37] text-[#F2F0E9]"
+            />
+            <input 
+              type="password" 
+              placeholder="ASSIGN PASSCODE"
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full border-b border-[#D4AF37]/20 p-4 outline-none font-mono text-sm bg-transparent focus:border-[#D4AF37] text-[#F2F0E9]"
+            />
 
-            </motion.div>
-          )}
-
-          {step === 2 && (
-            <motion.div key="step2" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-8">
-              <div className="border-l-2 border-[#8B0000] p-4 bg-[#8B0000]/5 flex justify-between items-center">
-                <span className="font-mono text-xs text-[#8B0000]">{email}</span>
-                <span className="text-[8px] uppercase font-black text-green-700">Matched</span>
-              </div>
-              <div className="flex flex-col gap-5">
-               <input 
-                type="username" 
-                placeholder="John"
-                onChange={(e) => setUsername(e.target.value)}
-                className="w-full border-b border-[#8B0000]/20 p-4 outline-none 
-                font-mono text-sm bg-transparent focus:border-[#8B0000]"
-              />
-              <input 
-                type="password" 
-                placeholder="ASSIGN PASSWORD"
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full border-b border-[#8B0000]/20 p-4 outline-none 
-                font-mono text-sm bg-transparent focus:border-[#8B0000]"
-              />
-
-              {/* Department */}
-               <div className="border-b-2 border-[#8B0000]/30 pb-2 focus-within:border-[#8B0000] transition-all relative">
-              <label className="block text-[10px] font-black uppercase tracking-widest text-[#8B0000] mb-3">Select Department</label>
-              <select value={departmentChosen} 
-               onChange={(e)=> {
-                    setDepartmentChosen(e.currentTarget.value)
-              }}
-               required name="department" 
-                className="w-full bg-transparent outline-none font-serif text-xl text-[#8B0000] cursor-pointer appearance-none">
-                <option  disabled selected>Choose your field... </option>
-                {DEPARTMENTS.map(dept =>(
-                  <option key={dept} value={dept} className="bg-[#FDFCF0] text-[#8B0000]">{dept}</option>
+            {/* Department */}
+            <div className="border-b-2 border-[#D4AF37]/30 pb-2 focus-within:border-[#D4AF37] transition-all relative">
+              <label className="block text-[10px] font-black uppercase tracking-widest text-[#D4AF37] mb-3">Department Domain</label>
+              <select 
+                value={departmentChosen} 
+                onChange={(e) => setDepartmentChosen(e.currentTarget.value)}
+                required 
+                className="w-full bg-transparent outline-none font-serif text-xl text-[#F2F0E9] cursor-pointer appearance-none"
+              >
+                <option disabled selected className="bg-[#2C2520]">Choose field...</option>
+                {DEPARTMENTS.map(dept => (
+                  <option key={dept} value={dept} className="bg-[#2C2520] text-[#F2F0E9]">{dept}</option>
                 ))}
               </select>
-              {/* Custom Down Arrow for Dropdown */}
-              <div className="absolute right-0 bottom-4 pointer-events-none text-[#8B0000]">
+              <div className="absolute right-0 bottom-4 pointer-events-none text-[#D4AF37]">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M6 9l6 6 6-6"/></svg>
               </div>
             </div>
-              <button 
-                onClick={handleEstablishSession}
-                className="w-full bg-[#1A1A1A] text-white p-5 text-[11px] font-black uppercase tracking-widest hover:bg-[#8B0000] transition-colors"
-              >
-                Create Credentials →
-              </button>
-              </div>
-            </motion.div>
-          )}
+            <button 
+              onClick={handleEstablishSession}
+              className="w-full bg-[#D4AF37] text-[#1A1512] p-5 text-[11px] font-black uppercase tracking-widest hover:bg-[#F2F0E9] transition-colors"
+            >
+              Establish Credentials →
+            </button>
+          </div>
+        </motion.div>
+      )}
 
-          {step === 3 && (
-            <motion.div key="step3" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-8 text-center">
-              <p className="text-[10px] uppercase font-bold text-[#8B0000]">Security Handshake Required</p>
-              <input 
-                placeholder="000000"
-                onChange={(e) => setCode(e.target.value)}
-                className="w-full text-center text-3xl border-b border-[#8B0000] p-4 outline-none bg-transparent font-mono tracking-[0.5em]"
-              />
-              <button 
-                onClick={handleVerifyOTP}
-                className="w-full bg-[#8B0000] text-white p-5 text-[11px] font-black uppercase tracking-widest"
-              >
-                Authorize & Enter
-              </button>
-            </motion.div>
-          )}
-        
-        </AnimatePresence>
-       
+      {step === 3 && (
+        <motion.div key="step3" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-8 text-center">
+          <p className="text-[10px] uppercase font-bold text-[#D4AF37] tracking-[0.2em]">Security Handshake Required</p>
+          <input 
+            placeholder="000000"
+            maxLength={6}
+            onChange={(e) => setCode(e.target.value)}
+            className="w-full text-center text-4xl border-b border-[#D4AF37] p-4 outline-none bg-transparent font-mono tracking-[0.5em] text-[#D4AF37]"
+          />
+          <button 
+            onClick={handleVerifyOTP}
+            className="w-full bg-[#D4AF37] text-[#1A1512] p-5 text-[11px] font-black uppercase tracking-widest hover:bg-[#F2F0E9] transition-all"
+          >
+            Authorize & Access System
+          </button>
+        </motion.div>
+      )}
+    </AnimatePresence>
 
-        {localError && (
-          <p className="text-red-700 text-[12px] lg:text-[15px] 
-          uppercase mt-6 text-center font-black tracking-tighter animate-pulse">
-            {localError}
-          </p>
-        )}
-      </motion.div>
-    </div>
+    {localError && (
+      <p className="text-[#FF4D4D] text-[10px] uppercase mt-8 text-center font-black tracking-widest animate-pulse border border-[#FF4D4D]/20 py-2 bg-[#FF4D4D]/5">
+        {localError}
+      </p>
+    )}
+  </motion.div>
+</div>
   );
 }

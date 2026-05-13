@@ -1,10 +1,10 @@
 import { db } from "@/lib/prisma";
 import { compilePDF,} from "@/lib/pdfEngine";
-
+import { PDFTemplateConfigType } from "@/scripts/templatetypes";
 export async function POST(req : Request){
     const {body} = await req.json();
     //FETCH THE DEPENDENT VARIABLES (THE TEMPLATE)
-    const {userInput, templateName} = body;
+    const {userInput, templateName, contentBlock} = body;
    // console.log("Received request with body:", body);
     const [template] = await Promise.all([
         db.pDFTemplate.findUnique({
@@ -19,8 +19,8 @@ export async function POST(req : Request){
     }
     const data =(userInput?.assignment_title || "ASSIGNMENT")?.replace(/[^a-z0-9]/gi, '_');
         //Generate the PDF binary
-     //   const typedAssertionConfig = template.config as unknown as PDFTemplateConfigType
-        const pdfBytes = await compilePDF(userInput);
+        const Config = template.config as unknown as PDFTemplateConfigType
+        const pdfBytes = await compilePDF(Config, userInput, contentBlock);
       return new Response(Buffer.from(pdfBytes), {
         status : 200, 
       headers : {

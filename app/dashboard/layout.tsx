@@ -1,6 +1,6 @@
 "use client"
 import '../globals.css'
-
+import { NavBar } from '../components/nav'
 
 export default  function  Layout({
   children,
@@ -17,6 +17,7 @@ export default  function  Layout({
   return (
    
     <div>
+      <NavBar/>
    {children}
      
 </div>

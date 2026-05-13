@@ -1,3 +1,4 @@
+import { DocumentSegment } from "@/app/dashboard/Files/quick_assessment/page";
 export type PlaceholderType = 'header' | 'subheader' | 'paragraph';
 
 
@@ -8,57 +9,70 @@ export interface KeyNoteTheme {
   surface : string
 }
 
+
+
 export type studentDataType = {
   // Main Headers
   assignment_title: string;
   student_name: string;
-  
+   recipientName : string;
   // Section 1
   intro_title: string;
   intro_content: string;
   
   // Section 2
-  method_title: string;
-  method_content: string;
+ 
   
   // Section 3
-  body_title: string;
-  body_content: string;
+  body_title: Array<DocumentSegment>;
+  body_content: Array<DocumentSegment>;
+  lists: Array<DocumentSegment>;
   
   // Section 4
   concl_title: string;
-  concl_content: string;
+  concl_content: Array<DocumentSegment>;
 
   // Optional Footer
   references?: string;
 };
-export interface BasePlaceholder {
+// export interface BasePlaceholder {
+//   varName: keyof  studentDataType;
+//   type: PlaceholderType; // Required for the engine to know how to render
+//   x: number;
+//   y: number;
+//   fontSize: number;
+//   fontFamily: string;
+//   isBold?: boolean;
+//   color?: { r: number; g: number; b: number };
+//   format?: 'currency' | 'date' | 'uppercase' | 'none';
+//   alignment?: 'left' | 'center' | 'right';
+//   maxWidth: number;
+//   lineHeights: number;
+// }
+
+// Specialization for multi-line text
+
+
+// Specialization for single-line text
+// export interface HeaderField extends BasePlaceholder {
+//   type: 'header' | 'subheader';
+// }
+
+// This is the union type that Prisma needs to map to
+//export type PlaceholderField = HeaderField | ParagraphField;
+export type PDFPlaceholder = {
   varName: keyof  studentDataType;
-  type: PlaceholderType; // Required for the engine to know how to render
-  x: number;
-  y: number;
-  fontSize: number;
-  fontFamily: string;
-  isBold?: boolean;
+  type: PlaceholderType;   
+  x: number;             // Horizontal coordinate on A4 (0-595)
+  y: number;             // Vertical coordinate on A4 (0-841)
+  fontSize: number;      // Pt size of the text
+  isBold: boolean;       // Determines if fontBold or fontRegular is used
   color?: { r: number; g: number; b: number };
   format?: 'currency' | 'date' | 'uppercase' | 'none';
   alignment?: 'left' | 'center' | 'right';
-}
-
-// Specialization for multi-line text
-export interface ParagraphField extends BasePlaceholder {
-  type: 'paragraph';
   maxWidth: number;
-  lineHeights: number;
+  lineHeights: number;   // Optional: Boundary for the wrapping engine
 }
-
-// Specialization for single-line text
-export interface HeaderField extends BasePlaceholder {
-  type: 'header' | 'subheader';
-}
-
-// This is the union type that Prisma needs to map to
-export type PlaceholderField = HeaderField | ParagraphField;
 
 export interface PDFTemplateConfigType {
   layout: {
@@ -74,7 +88,7 @@ export interface PDFTemplateConfigType {
     signatureUrl?: string;
     backgroundUrl?: string;
   };
-  placeholders: PlaceholderField[];
+   placeholders: PDFPlaceholder[]
 }
 
 //kEYNOTE TEMPLATE CONFIG TYPES
@@ -88,6 +102,12 @@ export interface PDFTemplateConfigType {
 
 export type PlaceHolderType = 'header' | 'subheader' | 'paragraph' | 'image';
 
+
+export type additionalHeaders = {
+  id : number,
+  subHeader : string,
+  paragraph : string
+}
 export interface KeyNotePlaceholder {
   varName: string;
   type: PlaceHolderType;
