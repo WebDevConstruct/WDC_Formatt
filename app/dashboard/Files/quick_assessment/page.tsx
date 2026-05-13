@@ -21,7 +21,7 @@ interface SectionProps {
   title: string;
   id: Exclude<SectionId, null>;
   activeId: SectionId;
-  setActive: (id: SectionId) => void;
+  setActive: (id: SectionId) => void ;
   icon: React.ReactNode;
   children: React.ReactNode;
 }
@@ -206,7 +206,7 @@ interface MetadataState {
   };
 }
 
-type SectionId = 'cover' 
+type SectionId = 'cover'  | null
 
 export default function QuickAssessment() {
  // 1. Structural State
