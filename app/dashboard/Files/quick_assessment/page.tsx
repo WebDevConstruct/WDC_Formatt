@@ -254,6 +254,13 @@ const [bodyReq, setBodyReq] = useState<studentDataType>()
       setContentBlocks(prev => prev.filter(block => block.id !== id));
     }
   };
+
+  //FILTERING OUT THE DOCUMENT ROLES FOR EASY MODIFICATION
+const paragraphSort = segments.filter((item)=> ( item?.role === "paragraph"));
+const subheaderSort = segments.filter((item)=> ( item?.role === "subheader"));
+//const referenceSort = segments.filter((item)=> ( item?.role === "reference"));
+const conclusionSort = segments.filter((item)=> ( item?.role === "conclusion"));
+const ListsSort = segments.filter((item)=> ( item?.role === "lists"));
 //console.log(contentBlocks);
   //The Chunk Parser
   function parseChunk(rawText: string): studentDataType {
@@ -321,14 +328,14 @@ let useAlphaList = false;
         id: crypto.randomUUID(), // Native unique ID
         role: "subheader",
         content: line.replace('## SUBHEADER:', '').trim(),
-        index: data.body_content.length
+        index: subheaderSort?.length
       });
          const actualContent = line.replace('## SUBHEADER:', '').trim();
           segments?.push({
        id : `seg-${crypto.randomUUID()}`,
        role : "subheader",
        content : actualContent,
-       index : index
+       index : subheaderSort?.length
       })
 
       listCounter = 1; // Reset numbering for new section
@@ -342,7 +349,7 @@ let useAlphaList = false;
         id: crypto.randomUUID(), // Native unique ID
         role: "conclusion",
         content: line.replace('## CONCLUSION:', '').trim(),
-        index: data.concl_content.length
+        index: conclusionSort?.length
       });
          const actualContent = line.replace('## CONCLUSION:', '').trim();
            //    const Content = line.replace('### PARAGRAPH:', '').trim();
@@ -350,7 +357,7 @@ let useAlphaList = false;
        id : `seg-${crypto.randomUUID()}`,
        role : "conclusion",
        content : actualContent,
-       index : index
+       index : conclusionSort?.length
       })
       //   segments?.push({
       //  id : `seg-${crypto.randomUUID()}`,
@@ -375,7 +382,7 @@ let useAlphaList = false;
             id: `list-${crypto.randomUUID()}`,
             role: "lists",
             content: `${marker} ${cleanContent}`,
-            index: data.body_content.length
+            index: ListsSort?.length
           });
           listCounter++;
       //if lists
@@ -385,7 +392,7 @@ let useAlphaList = false;
        id : `list-${crypto?.randomUUID()}`,
        role :line.startsWith('### LIST:') ? "lists" : "paragraph",
        content : cleanContent,
-       index : index
+       index :line.startsWith('### LIST:') ? ListsSort?.length : paragraphSort?.length
       })
 
     } else if (currentSection === 'concl') {
@@ -393,14 +400,14 @@ let useAlphaList = false;
         id: crypto.randomUUID(),
         role: "paragraph",
         content: cleanContent,
-        index: data.concl_content.length
+        index: conclusionSort?.length
       });
         const actualContent = line.replace('## CONCLUSION:', '').replace('### PARAGRAPH:', '').trim();
         segments?.push({
        id : `seg-${crypto.randomUUID()}`,
        role : line?.startsWith("## CONCLUSION") ? "conclusion" : "paragraph",
        content : actualContent,
-       index : index
+    index :  line?.startsWith("## CONCLUSION") ? conclusionSort?.length : paragraphSort?.length
       })
       //THE SUBCONTENT UNDER CONCLUSION
      
@@ -481,6 +488,7 @@ const generateAssignment = async()=> {
 }
 
 
+//const paragraph = segments.filter((item)=> ( item?.role === "paragraph"));
 
 
   // const handleGenerate = async () => {

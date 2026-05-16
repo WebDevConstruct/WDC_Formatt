@@ -117,11 +117,11 @@ const MajesticBrownSelection = () => {
             key={template.id}
             onClick={() => setOnSelect(template.id)}
             className={`group relative ${template.theme.bg}  ${template.theme.border}
-             border-[1.5px] rounded-[2.5rem] md:w-1/2 w-full p-12 transition-all 
+             border-[1.5px] rounded-[2.5rem] md:w-1/2 w-full md:p-12 p-8 transition-all 
             duration-700 cursor-pointer overflow-hidden ${template.theme.shadow} hover:-translate-y-3`}>
             <div className="relative z-10">
               <div className="flex items-center justify-between mb-12">
-                <div className={`p-4 ${template.theme.buttonBg} rounded-2xl shadow-xl`}>
+                <div className={`p-1 ${template.theme.buttonBg} rounded-2xl shadow-xl`}>
                   {template.theme.icon}
                 </div>
                 <span className={`text-[10px] font-black ${template.theme.accent} ${template.theme.tagBg} px-5 py-2 rounded-full uppercase tracking-[0.25em] border ${template.id === 'critical' ? 'border-[#D4AF37]/20' : 'border-[#483C32]/20'}`}>
