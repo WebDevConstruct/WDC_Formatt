@@ -76,7 +76,6 @@ const ImageAssessment = () => {
     const processImages = async()=> {
       setIsProcessing(true);
       const worker = await createWorker("eng");
-//console.log(worker);
       for (const img of images){
         if(img?.status === "completed") continue;
 
@@ -194,10 +193,10 @@ const hasSubheaders = lines.some(line => {
   
   // 1. Nested Numbering Pattern (e.g., 1.1, 2.4.1, Section 2)
   const isNestedNumbering = /^((\d+\.)+\d+|Section\s\w+|Part\s\d+)/i.test(trimmed);
-
+const findHeaders = segments?.find(seg => seg?.role === "header")
   // 2. Structural Heuristic
   const isSubheaderPattern = 
-    detectedElements?.includes("HEADERS") &&
+    findHeaders &&
     trimmed.length > 15 &&               // Longer than a simple title
     trimmed.length < 75 &&               // Shorter than a paragraph
     /^[A-Z]/.test(trimmed) &&            // Starts with a Capital

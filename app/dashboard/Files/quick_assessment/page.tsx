@@ -1,13 +1,16 @@
 'use client';
 import { useState } from 'react';
 import { Settings2, FileText, Send, 
- Terminal, Monitor, Layers, Layout, ChevronDown, Plus, Trash2} from "lucide-react";
+ Terminal, Monitor, Layers, Layout, ChevronDown, Plus, Trash2,
+ RollerCoaster} from "lucide-react";
 import { useGlobalContext } from '@/app/Context';
 import Image from "next/image";
 import { useUser } from '@clerk/nextjs';
 import Link from "next/link";
 import { studentDataType } from '@/scripts/templatetypes';
+import { Modal } from '@/components/Modal';
 export const dynamic = 'force-dynamic';
+
 export const formData = {
   "assignment_title": "Speed: The Velocity of Innovation",
   "subheader": "Course: Finance & Tech Integration (FTI 301)",
@@ -118,70 +121,40 @@ export interface AssessmentState {
 // 2. Add these to your component state
 
 // 3. Dummy Chunk for the Parser
-const DUMMY_CHUNK = `
+const DUMMY_CHUNK = `# TITLE: AUDIT COMPANY ARCHITECTURE AND THE EVOLUTION OF PROFESSIONAL FINANCIAL OVERSIGHT
+# HEADER: CORE FUNCTIONS AND OPERATIONAL FRAMEWORKS
+# TO: INTERNAL COMPLIANCE COMMITTEE | AUDIT DIVISION
 
-# TITLE: SUSTAINABLE FINTECH INFRASTRUCTURE AND THE EVOLUTION OF DIGITAL BANKING SYSTEMS IN NIGERIA
-# HEADER: INTRODUCTION TO FINANCIAL SYSTEMS
-# TO: DR. ADEBAYO OGUNLESI | LEAD TECHNICAL COORDINATOR, FACULTY OF MANAGEMENT SCIENCES
+## INTRODUCTION: An audit company (or audit firm) is a professional services organization that conducts independent examinations of an entity's financial, operational, or compliance records. Their primary role is to provide an objective opinion on the accuracy and fairness of these records, ensuring they comply with applicable laws, regulations, and reporting standards.
 
-## INTRODUCTION: The Nigerian fintech landscape has undergone a radical transformation, evolving from primitive ledger-based systems to sophisticated, cloud-native architectures. This assessment explores the intersection of traditional financial modeling and modern software engineering, focusing on how scalable payment systems can be automated to serve emerging markets. By analyzing the historical context of the Central Bank of Nigeria alongside 19th-century British banking acts, we establish a benchmark for the future of decentralized finance.
+## SUBHEADER: 1. CORE FUNCTIONS OF AUDIT COMPANIES
+### PARAGRAPH: The fundamental purpose of an audit company is to instill confidence in stakeholders—such as investors, lenders, regulators, and the public—by validating that an organization’s financial statements are free from material misstatements.
+### LIST: Financial Audits: The most common service, where auditors examine balance sheets, income statements, and cash flow statements to verify they provide a "true and fair" view of the company’s financial position.
+### LIST: Compliance Audits: Evaluating whether an organization adheres to specific industry regulations, legal standards, or tax laws.
+### LIST: Internal Audits: Assessing a company's internal control systems, risk management frameworks, and operational efficiencies.
+### LIST: IT/System Audits: Examining information technology infrastructure to ensure data integrity, cybersecurity resilience, and the effectiveness of IT governance.
 
-## SUBHEADER: 1.0 HISTORICAL FOUNDATIONS OF BANKING SYSTEMS
-### PARAGRAPH: To understand modern fintech, one must examine the evolution of banking legislation, including the pivotal acts of the 19th-century British banking system that influenced colonial financial structures. These historical frameworks provided the initial blueprints for the Central Bank of Nigeria's institutional structures.
-### PARAGRAPH: The transition from manual verification to digital synchronization represents a shift in risk management protocols. Early systems relied on physical audits, whereas contemporary models utilize automated financial modeling tools to predict market volatility in real-time.
-### LIST: Analysis of the 1844 Bank Charter Act and its impact on currency issuance.
-### LIST: The establishment of the Central Bank of Nigeria and its role in domestic fiscal policy.
-### LIST: The emergence of early electronic funds transfer systems in the late 20th century.
+## SUBHEADER: 2. KEY CHARACTERISTICS OF AUDIT FIRMS
+### PARAGRAPH: To maintain institutional authority, audit firms must operate under a specific set of principles that ensure the integrity of their output.
+### LIST: Independence: To remain objective, external auditors must have no financial or personal interest in the company being audited.
+### LIST: Standardization: Audit firms operate under strict professional standards (such as GAAS) and reporting frameworks (like IFRS or GAAP).
+### LIST: Professional Qualification: Signing partners must be qualified professionals, typically Chartered Accountants or CPAs.
+### LIST: Reporting: The "end product" is an Audit Report, containing the auditor's opinion on the entity's financial status.
 
-## SUBHEADER: 2.0 TECHNICAL STACK AND SCALABLE ARCHITECTURE
-### PARAGRAPH: Building a scalable payment gateway requires a robust and high-performance technical stack. For the purpose of this architectural virtual space initiative, we utilize Next.js, React, and TypeScript to ensure type safety and rapid rendering.
-### PARAGRAPH: The backend infrastructure is powered by Appwrite and the Neon database console, allowing for seamless state management and global data distribution. This stack is particularly effective for student assessment templates that require high concurrency and data integrity.
-### LIST: Implementation of Tailwind CSS and NativeWind for responsive, cross-platform UI/UX.
-### LIST: Utilizing Refine for building data-heavy internal dashboards and fintech administrative tools.
-### LIST: Integration of the Neon Console for managing serverless PostgreSQL instances and complex relational schemas.
+## SUBHEADER: 3. OPERATIONAL PHASES AND RISK MANAGEMENT
+### PARAGRAPH: Audits typically follow a structured, multi-phase process to ensure rigorous verification and documentation of financial health.
+### LIST: Planning & Risk Assessment: Understanding the client’s business, environment, and potential areas of risk.
+### LIST: Fieldwork: Examining evidence, testing internal controls, and verifying financial transactions against supporting documents.
+### LIST: Reporting: Summarizing findings and expressing an opinion, ranging from "unqualified" to "adverse."
+### LIST: Follow-up: Assessing whether management has addressed any deficiencies identified during the audit.
 
-## SUBHEADER: 3.0 STATISTICAL ANALYSIS AND ECONOMIC FORECASTING
-### PARAGRAPH: Financial accuracy is predicated on rigorous statistical theory. In this section, we apply Karl Pearson correlation and regression models to forecast economic trends within the Nigerian tech sector.
-### PARAGRAPH: Analysis of Variance (ANOVA) is employed to test the significance of market variables across different banking sectors. By integrating these mathematical models into the frontend assessment engine, we provide students with real-time feedback on their financial modeling accuracy.
-### LIST: Application of the Karl Pearson correlation coefficient to measure the relationship between fintech adoption and GDP growth.
-### LIST: Utilizing multiple regression analysis to identify key drivers of user retention in digital payment apps.
-### LIST: Implementing ANOVA to compare the performance of different automated financial tools across varied data sets.
+## SUBHEADER: 4. IMPORTANT DISTINCTIONS AND LIMITATIONS
+### LIST: Distinguishing between internal and external audit roles is crucial for operational transparency and governance.
+### LIST: Internal auditors are employees focused on internal improvements and controls, while external auditors are independent third parties (like the "Big Four") hired to provide unbiased verification for external stakeholders.
+### LIST: Auditors do not manage daily finances, prepare original statements, or establish controls; they act as a verification layer, not a creator of the data.
 
-## SUBHEADER: 4.0 CASE STUDY: ACCESS BANK RETENTION AND USER ENGAGEMENT
-### PARAGRAPH: As the Lead Research Strategist for the Access Bank retention study, I analyzed the factors contributing to long-term user engagement in the digital banking space. The study revealed that automated UI updates and personalized financial insights significantly reduced churn rates among younger demographics.
-### PARAGRAPH: The research also highlighted the importance of PDF generation engines for providing users with downloadable, professional-grade financial statements instantly. This feature, developed using Next.js, became a benchmark for user satisfaction during the study.
-### LIST: Identification of user pain points in cross-border transaction flows.
-### LIST: Deployment of personalized notifications based on historical spending patterns.
-### LIST: The role of fast, reliable PDF generation in building trust with digital banking users.
-
-## SUBHEADER: 5.0 THE ROLE OF THE NIGERIA HIGHER EDUCATION FOUNDATION (NHEF)
-### PARAGRAPH: Professional mentorship is a cornerstone of career development in fintech. Through the NHEF network, aspiring software engineers and finance professionals gain exposure to global best practices.
-### PARAGRAPH: This internship program bridges the gap between academic theory at the University of Lagos and experiential guidance in the tech industry. It encourages students to set high professional benchmarks and contribute to the scalable payment infrastructure of Nigeria.
-### LIST: Mentorship opportunities within the NHEF network for finance and tech majors.
-### LIST: Collaboration on international projects to enhance technical and soft skill sets.
-### LIST: Setting academic benchmarks for the Class of 2027 in the Faculty of Management Sciences.
-
-## SUBHEADER: 6.0 RISK MANAGEMENT AND DECENTRALIZED FINANCE (DEFI)
-### PARAGRAPH: Decentralized finance introduces new risks that require innovative mitigation strategies. Traditional banking acts are often insufficient to address the complexities of smart contract vulnerabilities and liquidity pool fluctuations.
-### PARAGRAPH: The integration of "Mathematics of Machine Learning" principles into DeFi protocols allows for more accurate risk assessment and automated liquidation triggers. This ensures that decentralized systems remain solvent even during periods of extreme market volatility.
-### LIST: Analysis of smart contract security audits and common vulnerability patterns.
-### LIST: The impact of decentralized autonomous organizations (DAOs) on corporate governance.
-### LIST: Utilizing machine learning algorithms to detect fraudulent patterns in peer-to-peer lending.
-
-## SUBHEADER: 7.0 FUTURE PROJECTIONS FOR THE NIGERIAN FINTECH SECTOR
-### PARAGRAPH: By 2027, the Nigerian fintech sector is expected to reach a level of maturity characterized by high interoperability between traditional banks and emerging tech startups. This will be driven by continued investment in scalable payment systems and automated financial modeling.
-### PARAGRAPH: Personal development literature, such as "Atomic Habits" and "The Psychology of Money," underscores the human element of these technological shifts. Success in this field requires not only technical proficiency in Next.js or TypeScript but also a deep understanding of human behavior and financial discipline.
-
-## CONCLUSION:
-### PARAGRAPH: The synergy between software engineering and finance is the key to unlocking sustainable growth in emerging markets. By adhering to the standards of the University of Lagos and leveraging modern tech stacks, the next generation of professionals can build a more inclusive financial future.
-
-# REFERENCES:
-### PARAGRAPH: Balogun, O. (2026). Fintech Infrastructure and Scalability in Emerging Markets. UNILAG Press.
-### PARAGRAPH: WEBDEVCONSTRUCT. (2026). Technical Documentation for Frontend Engineering and API Integration.
-### PARAGRAPH: Clear, J. (2018). Atomic Habits: An Easy & Proven Way to Build Good Habits & Break Bad Ones.
-### PARAGRAPH: Housel, M. (2020). The Psychology of Money: Timeless lessons on wealth, greed, and happiness.
-### PARAGRAPH: Deisenroth, M. P., et al. (2020). Mathematics for Machine Learning. Cambridge University Press.
-`;
+## CONCLUSION:  Internal auditors
+### PARAGRAPH: Audit companies act as a cornerstone of the global economy. By verifying the integrity of financial data, they reduce the risk of fraud, ensure accountability, and provide the transparency necessary for capital markets to function efficiently.`
 
 
 
@@ -206,10 +179,38 @@ interface MetadataState {
   };
 }
 
-type SectionId = 'cover'  | null
+
+const getStyleOptions = (role: string) => {
+  const options = {
+    header: ['Bold', 'Uppercase', 'Letter-Spacing'],
+    paragraph: ['FontSize', 'LineHeight', 'Underline'],
+    subheader: ['Bold', 'Italic', 'Underline']
+  };
+  return options[role as keyof typeof options] || [];
+};
+type SectionId = 'cover'  | null;
+
+const StyleToolbar = ({ role, onAction }: { role: string, onAction: (action: string) => void }) => (
+  <div className="flex gap-2 p-2 bg-[#1A1512] rounded border border-[#D4AF37]/30 absolute -top-10 right-0 z-10">
+    {getStyleOptions(role).map(opt => (
+      <button 
+        key={opt} 
+        onClick={() => onAction(opt)}
+        className="text-[8px] uppercase text-[#D4AF37] hover:text-white"
+      >
+        {opt}
+      </button>
+    ))}
+  </div>
+);
 
 export default function QuickAssessment() {
+
+
+
  // 1. Structural State
+ const [isMasterEditMode, setIsMasterEditMode] = useState(false);
+const [activeStyleMenu, setActiveStyleMenu] = useState<string | null>(null);
   const [openSection, setOpenSection] = useState<SectionId>('cover');
   const [contentBlocks, setContentBlocks] = useState<ContentBlock[]>([
     { id: 0, subHeader: '', paragraph: '' }
@@ -223,6 +224,7 @@ export default function QuickAssessment() {
 
 
 
+
 //const [courseType, setCourseType] = useState("main");
 const { prompt, setPrompt,
       intent, setIntent,
@@ -231,12 +233,26 @@ const { prompt, setPrompt,
 //const [isStreaming, setIsStreaming] = useState(false);
 //const [isProcessingRoles, setIsProcessingRoles] = useState(false);
 const [courseType, setCourseType] = useState("main");
+const [editMode, setEditMode] = useState(false)
 const {user} = useUser();
 
 const [segments, setSegments] = useState<DocumentSegment[]>([]);
   const [displayedText, setDisplayedText] = useState<string>("");
   const [isParsing, setIsParsing] = useState<boolean>(false);
-const [bodyReq, setBodyReq] = useState<studentDataType>()
+const [bodyReq, setBodyReq] = useState<studentDataType>( {
+    assignment_title: meta?.cover?.topic ? meta?.cover?.topic : "",
+    student_name: meta?.cover?.author ? meta?.cover?.author: user ?
+     `${user?.firstName ? user?.firstName + " " + user?.lastName : user?.username }` : "",
+     recipientName : meta?.cover?.recipient ? meta?.cover?.recipient : "" ,
+    intro_title: "",
+    intro_content: "",
+    body_title: [],
+    lists : [],
+    body_content: [],
+    concl_title : "",
+    concl_content: [],
+    references: ""
+  })
 
  const addContentBlock = (): void => {
    // const newBlock: ContentBlock = { id : prev.length, subHeader: '', paragraph: '' };
@@ -256,15 +272,11 @@ const [bodyReq, setBodyReq] = useState<studentDataType>()
   };
 
   //FILTERING OUT THE DOCUMENT ROLES FOR EASY MODIFICATION
-const paragraphSort = segments.filter((item)=> ( item?.role === "paragraph"));
-const subheaderSort = segments.filter((item)=> ( item?.role === "subheader"));
-//const referenceSort = segments.filter((item)=> ( item?.role === "reference"));
-const conclusionSort = segments.filter((item)=> ( item?.role === "conclusion"));
-const ListsSort = segments.filter((item)=> ( item?.role === "lists"));
 //console.log(contentBlocks);
   //The Chunk Parser
   function parseChunk(rawText: string): studentDataType {
   const lines = rawText.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+  console.log(lines);
  let listCounter = 1;
   const data: studentDataType = {
     assignment_title: meta?.cover?.topic ? meta?.cover?.topic : "",
@@ -328,14 +340,14 @@ let useAlphaList = false;
         id: crypto.randomUUID(), // Native unique ID
         role: "subheader",
         content: line.replace('## SUBHEADER:', '').trim(),
-        index: subheaderSort?.length
+        index: index
       });
          const actualContent = line.replace('## SUBHEADER:', '').trim();
           segments?.push({
        id : `seg-${crypto.randomUUID()}`,
        role : "subheader",
        content : actualContent,
-       index : subheaderSort?.length
+       index : index
       })
 
       listCounter = 1; // Reset numbering for new section
@@ -349,7 +361,7 @@ let useAlphaList = false;
         id: crypto.randomUUID(), // Native unique ID
         role: "conclusion",
         content: line.replace('## CONCLUSION:', '').trim(),
-        index: conclusionSort?.length
+        index:index
       });
          const actualContent = line.replace('## CONCLUSION:', '').trim();
            //    const Content = line.replace('### PARAGRAPH:', '').trim();
@@ -357,7 +369,7 @@ let useAlphaList = false;
        id : `seg-${crypto.randomUUID()}`,
        role : "conclusion",
        content : actualContent,
-       index : conclusionSort?.length
+       index :index
       })
       //   segments?.push({
       //  id : `seg-${crypto.randomUUID()}`,
@@ -377,37 +389,41 @@ let useAlphaList = false;
     const cleanContent = line.replace('### PARAGRAPH:', '').replace('### LIST:', '').trim();
 
     if (currentSection === 'body') {
+
     const marker = useAlphaList ? `${String.fromCharCode(96 + listCounter)}.` : `${listCounter}.`;
           data.body_content.push({
-            id: `list-${crypto.randomUUID()}`,
-            role: "lists",
-            content: `${marker} ${cleanContent}`,
-            index: ListsSort?.length
+            id: `seg-${crypto.randomUUID()}`,
+            role: line.startsWith('### LIST:') ? "lists" : "paragraph",
+            content: line.startsWith('### LIST:') ?   `${marker} ${cleanContent}` : cleanContent,
+            index: index
           });
+          if(line?.startsWith("### LIST:")){
           listCounter++;
+          }
       //if lists
      
       //if paragraphs
          segments?.push({
-       id : `list-${crypto?.randomUUID()}`,
+       id : `seg-${crypto?.randomUUID()}`,
        role :line.startsWith('### LIST:') ? "lists" : "paragraph",
        content : cleanContent,
-       index :line.startsWith('### LIST:') ? ListsSort?.length : paragraphSort?.length
+       index :index
       })
 
     } else if (currentSection === 'concl') {
+      
       data.concl_content.push({
-        id: crypto.randomUUID(),
+        id: `seg-${crypto?.randomUUID()}`,
         role: "paragraph",
         content: cleanContent,
-        index: conclusionSort?.length
+        index: index
       });
         const actualContent = line.replace('## CONCLUSION:', '').replace('### PARAGRAPH:', '').trim();
         segments?.push({
-       id : `seg-${crypto.randomUUID()}`,
+       id : `seg-${crypto?.randomUUID()}`,
        role : line?.startsWith("## CONCLUSION") ? "conclusion" : "paragraph",
        content : actualContent,
-    index :  line?.startsWith("## CONCLUSION") ? conclusionSort?.length : paragraphSort?.length
+    index : index
       })
       //THE SUBCONTENT UNDER CONCLUSION
      
@@ -446,7 +462,7 @@ let useAlphaList = false;
     }, 1000);
   };
 
-
+//console.log(subheaderSort);
 const generateAssignment = async()=> {
 
   const body = {
@@ -486,72 +502,91 @@ const generateAssignment = async()=> {
   throw new Error("Could not Create the Assignment");
 }
 }
-
+//console.log("SEGMENTS", segments)
 
 //const paragraph = segments.filter((item)=> ( item?.role === "paragraph"));
 
 
-  // const handleGenerate = async () => {
+
+//GETTING THE CHUNK OF TEXT FROM AI SDK
+  const handleGenerate = async () => {
   
-  //   setIsParsing(true);
+    setIsParsing(true);
     
 
-  //   try {
-  //  const response = await fetch("/api/quickassessment", {
-  //     method : "POST",
-  //     headers : {"Content-Type" : "application/json"},
-  //     credentials : "include",
-  //     body : JSON.stringify({
-  //       prompt, 
-  //       intent,
-  //       wordCount
-  //     })
+    try {
+   const response = await fetch("/api/quickassessment", {
+      method : "POST",
+      headers : {"Content-Type" : "application/json"},
+      credentials : "include",
+      body : JSON.stringify({
+        prompt, 
+        intent,
+        wordCount
+      })
       
-  //    })
-  //    if(response.ok){
-  //     const data = await response.json();
-  //     console.log("Stream data Expected:", data)
-  //    }else{
-  //   console.log("Failed")
-  //    }
+     })
+     if(response.ok){
+      const data = await response.json();
+      console.log("Stream data Expected:", data)
+     }else{
+    console.log("Failed")
+     }
 
-  //       }
+        }
     
-  //    catch (error) {
-  //     console.error("Axios Stream failed:", error);
-  //   } finally {
-  //     setIsParsing(false);
-  //   }
-  // };
+     catch (error) {
+      console.error("Axios Stream failed:", error);
+    } finally {
+      setIsParsing(false);
+    }
+  };
 //Filter the headerFormats to known which of both or both goes to the backend
 const [editingId, setEditingId] = useState<string | null>(null);
+const [livePreviewDefault, setLivePreviewDefault] = useState("review")
+const [editProp, setEditProp] = useState({
+  titleState : false, introTitleState : false,
+   introContentState : false, concl_ContentState : false, referenceState : false ,
+   concl_TitleState : false
+})
 // Update a specific segment's content in the state
-const handleSegmentChange = (id: string, newContent: string) => {
+const handleSegmentChange = (id: string, newContent: string, role : string) => {
   setSegments(prev => prev.map(seg => 
     seg.id === id ? { ...seg, content: newContent } : seg
   ));
-};
+//   if(role === "header"){
+// setBodyReq((prev)=> ({...prev, assignment_title : newContent}))
+//   }else if(role === "conclusion"){
+//      setBodyReq((prev)=> ({...prev, conclusion_title : newContent}))
+//   }
+//   const findRole = bodyReq?.body_content?.find(item => item?.id === id)
+//   console.log(findRole);
 
+
+// console.log("segemntOnChange", findRole);
+// console.log()
+};
   return (
 //NEW DESIGN
-<div className="min-h-screen bg-[#F2F0E9] text-[#483C32] p-4 md:p-10 font-sans selection:bg-[#483C32] selection:text-[#D4AF37]">
+<div className="min-h-screen bg-[#F2F0E9] text-[#483C32] p-4 md:p-10 font-sans selection:bg-[#483C32]
+ selection:text-[#D4AF37] w-full">
        <Link href="/dashboard/Files" 
       className ="flex gap-2 items-center my-4">
         <Image src="/ArrowBack.svg" alt="Back to Dashboard" width={24} height={24}/>
         <p className="text-lg font-bold text-[#483C32]/80 hover:opacity-90 hover:text-[17px]">
         Files Engine Room</p>  
       </Link>
-      <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <div className="w-full flex justify-center  mx-auto  gap-8 ">
         
         {/* --- LEFT SIDE: THE CONFIGURATION FORM --- */}
-        <div className="lg:col-span-7 space-y-8">
-          <header className="space-y-2 border-l-4 border-[#D4AF37] pl-6">
+        <div className="space-y-8 justify-center flex flex-col items-center w-full md:w-3/4">
+          <header className="space-y-2 border-l-4 border-[#D4AF37] pl-6 flex flex-col items-start w-full">
             <h1 className="text-4xl font-serif font-black text-[#483C32] uppercase tracking-tighter italic">Document Architect</h1>
-            <p className="text-[#483C32]/60 text-xs font-bold uppercase tracking-widest flex items-center gap-2">
+            <p className="text-[#483C32]/60 text-xs font-bold uppercase tracking-widest flex text-start items-start gap-2">
               <Layers className="w-3 h-3" /> System Version: 30-Day Beta Cycle
             </p>
           </header>
-    <div>
+    <div className="w-full">
            <SectionWrapper 
           title="Cover Section" 
           id="cover" 
@@ -621,7 +656,7 @@ const handleSegmentChange = (id: string, newContent: string) => {
             e.preventDefault()
             startAssessment()
           }} 
-            className="space-y-8">
+            className="space-y-8 w-full">
             
             {/* 1. Prompt & Intent */}
             <div className="space-y-6">
@@ -691,161 +726,341 @@ const handleSegmentChange = (id: string, newContent: string) => {
             </div>
 
             {/* 4. Generate Button */}
-            <button 
+            <button  onClick={()=> {
+              //  setEditMode(true);
+              handleGenerate();
+              }}
               type="submit"
               className="w-full bg-[#483C32] text-[#F2F0E9] py-5 rounded-2xl
                font-black uppercase tracking-[0.4em] shadow-xl 
                shadow-[#483C32]/20 hover:shadow-none hover:translate-y-1 hover:bg-[#2C2520] transition-all 
                flex items-center justify-center gap-4 group"
             >
-              <Send className="w-5 h-5 group-hover:translate-x-1 transition-transform text-[#D4AF37]" />
-              Generate Institutional PDF
+              <Send className="w-5 h-5 group-hover:translate-x-1 transition-transform
+               text-[#D4AF37]" />
+              Generate PDF
             </button>
           </form>
         </div>
 
         {/* --- RIGHT SIDE: LIVE STREAM (Obsidian Style) --- */}
-<div className={`lg:col-span-5 lg:relative ${segments?.length > 0 ? "absolute top-1/2 lg:top-0" : "lg:block hidden"}`}>
-  <div className="sticky top-10 h-[calc(100vh-80px)] bg-[#2C2520] rounded-[3rem] border-4 border-[#483C32]/20 overflow-hidden shadow-2xl flex flex-col">
+        {editMode && (
+          <Modal onClose={()=> {
+            setEditMode(false)
+            setLivePreviewDefault("review")
+          }} isOpen={editMode} >
+<div className={`w-full lg:relative ${segments?.length > 0 ? "absolute top-1/2 lg:top-0" : "lg:block hidden"}`}>
+  
+  <div className="sticky top-10 h-[calc(100vh-80px)] w-full
+   bg-white rounded-[3rem] border-4 border-black/10 overflow-hidden
+    shadow-2xl flex flex-col">
     
     {/* Header */}
-    <div className="p-6 bg-[#483C32] flex justify-between items-center text-[#F2F0E9] border-b border-white/5">
+    <div className="p-6 bg-black flex justify-between items-center text-white border-b border-white/20">
       <div className="flex items-center gap-2">
-        <Monitor className="w-4 h-4 text-[#D4AF37]" />
+        <Monitor className="w-4 h-4 text-white" />
         <span className="text-xs font-black tracking-widest uppercase italic">Architectural Preview</span>
       </div>
       <div className="flex items-center gap-4">
         <div className="flex gap-1">
-          <div className="w-1.5 h-1.5 rounded-full bg-[#D4AF37]/40" />
-          <div className="w-1.5 h-1.5 rounded-full bg-[#D4AF37] animate-pulse" />
+          <button onClick={()=> {
+            setLivePreviewDefault("edit")
+
+          }}
+           className="text-md rounded-lg font-semibold leading-4 text-black py-3 px-3 bg-white">
+            Edit Mode
+          </button>
         </div>
       </div>
     </div>
 
     {/* The Interactive Stream */}
-    <div className="flex-1 p-8 overflow-y-auto custom-scrollbar bg-[#2C2520] space-y-4">
-      {segments.length > 0 ? (
+    <div className="flex-1 p-8 overflow-y-auto custom-scrollbar bg-white space-y-4">
+      
+      {bodyReq?.body_content.length && bodyReq ? (
         <div className="space-y-6">
-          {segments.map((seg) => (
-            <div 
-              key={seg.id}
-              onClick={() => setEditingId(seg.id)}
-              className={`relative group pl-6 border-l-2 transition-all cursor-pointer py-2 ${
-                editingId === seg.id 
-                ? 'border-[#D4AF37] bg-white/5 rounded-r-2xl' 
-                : 'border-white/10 hover:border-white/30'
-              }`}
-            >
-              {/* Role Tag - Floating High-Contrast Label */}
-              <div className={`absolute -left-2 top-0 px-1.5 py-0.5 text-[8px] font-black uppercase tracking-widest rounded-sm transition-all ${
-                editingId === seg.id ? 'bg-[#D4AF37] text-[#2C2520]' : 'bg-[#483C32] text-white/40'
+          
+          {/* Handling Title State */}
+          <div className="relative">
+            <div className={`absolute -left-2 top-0 px-1.5 py-0.5 text-[8px] font-black uppercase tracking-widest 
+            rounded-sm transition  ${
+                editProp?.titleState  ? 'bg-black text-white' : 'bg-gray-200 text-black/40'
               }`}>
-                {seg.role} {seg.role === 'subheader' || seg.role === 'paragraph' ? seg.index : ''}
-              </div>
+            {livePreviewDefault === "edit" && (
+                <p className={``}>TITLE
+              </p>
 
-              {editingId === seg.id ? (
-                /* --- EDIT MODE --- */
+            )}
+            </div>
+            {editProp?.titleState === true && livePreviewDefault === "edit" ? (
+              <textarea
+                autoFocus
+                className="w-full bg-transparent border-none focus:ring-0 p-0 text-sm font-medium text-black resize-none overflow-hidden leading-relaxed"
+                value={bodyReq?.assignment_title}
+                onChange={(e) => setBodyReq((prev)=> ({...prev, assignment_title : e.target.value}))}
+                onBlur={() => setEditingId(null)}
+                rows={7}
+              />
+            ) : (bodyReq?.assignment_title && (
+              <p onClick={()=> {setEditProp((prev)=> ({...prev, titleState : true}))}}
+                 className="text-2xl font-serif font-black text-black italic uppercase mb-6 leading-tight">
+                {bodyReq?.assignment_title}
+              </p>
+            ))}
+          </div>
+
+          {/* Intro Title */}
+          <div className="relative">
+          
+             <div className={`absolute -left-2 top-0 px-1.5 py-0.5 text-[8px] font-black uppercase 
+             tracking-widest rounded-sm transition-all `}>
+                {livePreviewDefault === "edit" && (
+                <p className={` ${
+                editProp?.introTitleState   ? 'bg-black text-white' : 'bg-gray-200 text-black/40'
+              }`}> introduction Title
+              </p>
+
+                 )}
+              </div>
+            {editProp?.introTitleState === true &&  livePreviewDefault === "edit" ? (
+              <textarea
+                autoFocus
+                className="w-full bg-transparent border-none focus:ring-0 p-0 text-sm font-medium text-black resize-none overflow-hidden leading-relaxed"
+                value={bodyReq?.intro_title}
+                onChange={(e) => setBodyReq((prev)=> ({...prev, intro_title : e.target.value}))}
+                onBlur={() => setEditingId(null)}
+                rows={7}
+              />
+            ) : (bodyReq?.intro_title && (
+              <p onClick={()=> {setEditProp((prev)=> ({...prev, introTitleState : true}))}}
+                 className="text-lg font-serif font-black text-black italic uppercase mb-6 leading-tight">
+                {bodyReq?.intro_title}
+              </p>
+            ))}
+          </div>
+
+          {/* Intro Content */}
+          <div className="relative">
+            <div className={`absolute -left-2 top-0 px-1.5 py-0.5 text-[8px] 
+              font-black uppercase tracking-widest rounded-sm transition-all ${
+                editProp?.introContentState   ? 'bg-black text-white' : 'bg-gray-200 text-black/40'
+              }`}>
+                {livePreviewDefault === "edit" && (
+                <p className={` `}> introduction Title
+              </p>
+
+                 )}
+            </div>
+            {editProp?.introContentState === true && livePreviewDefault === "edit" ? (
+              <textarea
+                autoFocus
+                className="w-full bg-transparent border-none focus:ring-0 p-0 text-sm font-medium text-black resize-none overflow-hidden leading-relaxed"
+                value={bodyReq?.intro_content}
+                onChange={(e) => setBodyReq((prev)=> ({...prev, intro_content : e.target.value}))}
+                onBlur={() => setEditingId(null)}
+                rows={7}
+              />
+            ) : (bodyReq?.intro_content && (
+              <p onClick={()=> {setEditProp((prev)=> ({...prev, introContentState : true}))}}
+                 className="text-base font-serif font-black text-black/70 italic uppercase mb-6 leading-tight">
+                {bodyReq?.intro_content}
+              </p>
+            ))}
+          </div>
+
+          {/* Body Segments */}
+          {bodyReq?.body_content.map((seg) => (
+            <div key={seg.id}
+                 onClick={() => {
+                   setEditingId(seg.id);
+                   setEditProp({ titleState: false, introTitleState: false, introContentState: false, concl_ContentState: false, referenceState: false, concl_TitleState: false });
+                 }}
+                 className={`relative group pl-6 border-l-2 
+                 transition-all cursor-pointer py-2 `}>
+                <div className={`absolute -left-2 top-0 px-1.5 py-0.5 text-[8px] 
+              font-black uppercase tracking-widest rounded-sm transition-all  ${
+ editingId !== seg.id ? 'border-black bg-gray-50 rounded-r-2xl' : 'border-black/10 hover:border-black/30 bg-black text-white'
+                 
+              }`}>
+                {livePreviewDefault === "edit" && (
+                <p className={` `}> {seg?.role}
+              </p>
+          
+
+                 )}
+                 </div>
+
+              {editingId === seg.id && livePreviewDefault === "edit" ? (
                 <textarea
                   autoFocus
-                  className="w-full bg-transparent border-none focus:ring-0 p-0 text-sm font-medium text-[#F2F0E9] resize-none overflow-hidden leading-relaxed"
+                  className="w-full bg-transparent border-none focus:ring-0 p-0 text-sm font-medium text-black resize-none overflow-hidden leading-relaxed"
                   value={seg.content}
-                  onChange={(e) => handleSegmentChange(seg.id, e.target.value)}
+                  onChange={(e) => handleSegmentChange(seg.id, e.target.value, seg?.role)}
                   onBlur={() => setEditingId(null)}
                   rows={seg.content.length / 45 + 1}
                 />
               ) : (
-                /* --- DISPLAY MODE (App Theme Typography) --- */
                 <div className="space-y-2">
-              
-                  {seg.role === 'subheader' && (
-                    <h2 className="text-sm font-bold text-[#F2F0E9] uppercase tracking-wide opacity-90">
-                      {seg.content}
-                    </h2>
-                  )}
-
-                   {seg.role === 'lists' && (
-                    <ol className="list-disc list-inside text-[#F2F0E9]">
-                      <li>{seg.content}</li>
-                  </ol>
-                  )}
-
-                  {seg.role === 'paragraph' && (
-                    <p className="text-xs text-[#F2F0E9]/70 leading-relaxed font-medium">
-                      {seg.content}
-                    </p>
-                  )}
-                  {seg.role === 'conclusion' && (
-                    <p className="text-xs italic font-bold text-[#D4AF37] pt-4 border-t border-white/5">
-                      {seg.content}
-                    </p>
-                  )}
-                  {(seg.role === 'header' ) && (
-      <p className="text-[13.5px] font-semibold text-[#D4AF37] tracking-[0.3em] uppercase mb-4 ">
-        { seg.content}
-      </p>
-    )}
-    
-    {seg.role === 'title' && (
-      <h1 className="text-2xl font-serif font-black text-[#D4AF37] italic uppercase mb-6 leading-tight">
-        {seg.content}
-      </h1>
-    )}
-
-                  {seg.role === 'reference' && (
-                    <h2 className="text-lg text-[#F2F0E9]/70 italic leading-relaxed font-medium">
-                      {seg.content}
-                    </h2>
-                  )}
-
-    {seg.role === 'introduction' && (
-      <div className="bg-white/5 p-4 rounded-xl border border-white/10 mb-6">
-
-        <p className="text-xs text-[#F2F0E9] leading-relaxed italic">{seg.content}</p>
-      </div>
-    )}
+                  {seg.role === 'subheader' && <h2 className="text-sm font-bold text-black uppercase tracking-wide opacity-90">{seg.content}</h2>}
+                  {seg.role === 'lists' && <ol className="list-disc list-inside text-black">{<li>{seg.content}</li>}</ol>}
+                  {seg.role === 'paragraph' && <p className="text-xs text-black/70 leading-relaxed font-medium">{seg.content}</p>}
                 </div>
               )}
             </div>
           ))}
+
+         {/* CONCLUSION TITLE */}
+<div className="relative">
+  <div className={`absolute -left-2 top-0 px-1.5 py-0.5 text-[8px] font-black uppercase tracking-widest rounded-sm transition-all `}>
+       {livePreviewDefault === "edit" && (
+                <p className={` ${
+                editProp?.concl_TitleState   ? 'bg-black text-white' : 'bg-gray-200 text-black/40'
+              }`}> conclusion title
+              </p>
+
+            )}
+            </div>
+  {editProp?.concl_TitleState === true && livePreviewDefault === "edit" ? (
+    <textarea
+      autoFocus
+      className="w-full bg-transparent border-none focus:ring-0 p-0 text-sm font-medium text-black resize-none overflow-hidden leading-relaxed"
+      value={bodyReq?.concl_title}
+      onChange={(e) => setBodyReq((prev) => ({...prev, concl_title: e.target.value}))}
+      onBlur={() => setEditingId(null)}
+      rows={7}
+    />
+  ) : (bodyReq?.concl_title && (
+    <p onClick={() => setEditProp((prev) => ({...prev, concl_TitleState: true}))}
+       className="text-base font-serif font-black text-black/70 italic uppercase mb-6 leading-tight cursor-pointer">
+      {bodyReq?.concl_title}
+    </p>
+  ))}
+</div>
+
+{/* CONCLUSION PARAGRAPHS */}
+<div className="relative">
+  <div className={`absolute -left-2 top-0 px-1.5 py-0.5 text-[8px] font-black uppercase tracking-widest rounded-sm
+   transition-all ${
+                editProp?.concl_ContentState   ? 'bg-black text-white' : 'bg-gray-200 text-black/40'
+              }`}>
+     {livePreviewDefault === "edit" && (
+                <p className={` `}> conclusion paragraphs
+              </p>
+
+            )}
+  </div>
+  {bodyReq?.concl_content?.map((item, index) => (
+    editProp?.concl_ContentState && livePreviewDefault === "edit" ? (
+      <textarea
+        key={index}
+        autoFocus
+        className="w-full bg-transparent border-none focus:ring-0 p-0 text-sm font-medium text-black resize-none overflow-hidden leading-relaxed"
+        value={item?.content}
+        onChange={(e) => setBodyReq((prev) => ({...prev, concl_content: [{
+          id: item?.id,
+          role: item?.role,
+          content: item?.id ? e.target.value : item?.content,
+          index: item?.index
+        }]}))}
+        onBlur={() => setEditingId(null)}
+        rows={item.content.length / 45 + 1}
+      />
+    ) : (
+      <p key={index}
+         onClick={() => setEditProp((prev) => ({...prev, concl_ContentState: true}))}
+         className="text-base font-serif font-black text-black/70 cursor-pointer">
+        {item?.content}
+      </p>
+    )
+  ))}
+</div>
+
+{/* REFERENCE SECTION */}
+<div className="relative">
+  <div className={`absolute -left-2 top-0 px-1.5 py-0.5 text-[8px] font-black uppercase tracking-widest
+   rounded-sm transition-all`}>
+   {livePreviewDefault === "edit" && (
+                <p className={` ${
+                editProp?.referenceState   ? 'bg-black text-white' : 'bg-gray-200 text-black/40'
+              }`}> reference
+              </p>
+
+            )}
+  </div>
+  {editProp?.referenceState === true && livePreviewDefault === "edit" ? (
+    <textarea
+      autoFocus
+      className="w-full bg-transparent border-none focus:ring-0 p-0 text-sm font-medium text-black resize-none overflow-hidden leading-relaxed"
+      value={bodyReq?.references}
+      onChange={(e) => setBodyReq((prev) => ({...prev, references: e.target.value}))}
+      onBlur={() => setEditingId(null)}
+      rows={7}
+    />
+  ) : (bodyReq?.references && (
+    <p onClick={() => setEditProp((prev) => ({...prev, referenceState: true}))}
+       className="text-base font-serif font-black text-black/70 italic uppercase mb-6 leading-tight cursor-pointer">
+      {bodyReq?.references}
+    </p>
+  ))}
+</div>
+          
         </div>
       ) : (
-        /* Empty State */
-        <div className="h-full flex flex-col items-center justify-center opacity-10 text-center text-[#F2F0E9]">
+        <div className="h-full flex flex-col items-center justify-center opacity-10 text-center text-black">
           <Terminal className="w-12 h-12 mb-4" />
           <p className="uppercase font-black text-[10px] tracking-[0.3em]">System Idling: Awaiting Input</p>
         </div>
       )}
-
     </div>
 
-    {/* Status Footer */}
-    <div className="flex flex-col gap-5 p-10">
-    <div className="p-4 bg-[#1A1512] border-t border-white/5 flex justify-between items-center px-8">
-      <span className="text-[9px] font-black uppercase text-white/20 tracking-widest">
-        Active Segments: {segments.length}
-      </span>
-      <div className="flex gap-4">
-         <span className="text-[9px] font-black uppercase text-[#D4AF37] animate-pulse">
-           Live Sync Active
-         </span>
+    {/* Footer */}
+    <div className="flex flex-col gap-5 p-10 border-t border-black/5">
+      <div className="p-4 bg-gray-100 flex justify-between items-center px-8">
+        <span className="text-[9px] font-black uppercase text-black/20 tracking-widest">Active Segments: {segments.length}</span>
+        <span className="text-[9px] font-black uppercase text-black animate-pulse">Live Sync Active</span>
       </div>
-   
-      </div>
-      {segments?.length && (
-   <button onClick={()=> generateAssignment()}
-   className='bg-[#D4AF37] py-4 text-[#2C2520] 
-      px-4 rounded-lg text-[12px] font-bold uppercase font-bold
-       tracking-widest shadow-md hover:shadow-none transition-all'>
-    Done
-      </button>
+      {segments?.length > 0 && (
+        <button onClick={() => generateAssignment()}
+                className='bg-black py-4 text-white px-4 rounded-lg text-[12px] uppercase font-bold tracking-widest shadow-md hover:bg-black/80 transition-all'>
+          Done
+        </button>
       )}
     </div>
   </div>
 </div>
+</Modal>
+        )}
 
       </div>
     </div>
 
+
+//  <div className="relative">
+//   <div className={`absolute -left-2 top-0 px-1.5 py-0.5 text-[8px] font-black uppercase tracking-widest rounded-sm transition-all ${
+//                 editProp?.referenceState ? 'bg-[#D4AF37] text-[#2C2520]' : 'bg-[#483C32] text-white/40'
+//               }`}>
+//                 {"Reference"} 
+//               </div>
+//             {editProp?.referenceState === true ?  (
+              
+//                 <textarea
+//                   autoFocus
+//                   className="w-full bg-transparent border-none focus:ring-0 p-0 text-sm font-medium text-[#F2F0E9] resize-none overflow-hidden leading-relaxed"
+//                   value={bodyReq?.references}
+//                   onChange={(e) => setBodyReq((prev)=> ({...prev, references : e.target.value}))}
+//                   onBlur={() => setEditingId(null)}
+//                   rows={7}
+//                 />
+//       ) :( bodyReq?.references && (
+
+        
+//       <p  onClick={()=> {setEditProp((prev)=>  ({...prev, referenceState : true}))}}
+//        className="text-base font-serif font-black text-[#F2F0E9]/70 italic uppercase mb-6 leading-tight">
+//        {bodyReq?.references}
+//       </p>
+      
+//     ))}
+//     </div>
 
     // OLD DESIGN
 //  <div className="min-h-screen bg-[#F5F5DC] text-[#5C4033] p-4 md:p-10 font-sans selection:bg-[#8B0000] selection:text-[#F5F5DC]">
