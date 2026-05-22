@@ -134,10 +134,10 @@ export async function compilePDF(template: PDFTemplateConfigType, studentData: s
     return curY - 45;
   };
 
-  coverY = renderCover("TOPIC:", studentData.assignment_title, coverY);
+  coverY = renderCover(`${studentData.assignment_title, coverY ? "TOPIC:" : ""}`, studentData.assignment_title, coverY);
   coverY = renderCover("NAME:", studentData.student_name, coverY);
-  coverY = renderCover("TO:", studentData.recipientName, coverY);
-  headers?.forEach((item)=>  coverY = renderCover(`${item?.subHeader}:`, item?.paragraph, coverY))
+  coverY = renderCover(`${studentData.recipientName, coverY ? "TO:" : ""}`, studentData.recipientName, coverY);
+  headers?.forEach((item)=>  coverY = renderCover(`${item?.subHeader ? `${item?.subHeader}:` : ""}`, item?.paragraph, coverY))
  
   // --- PAGE 2+: DYNAMIC CONTENT ---
   let contentPage = pdfDoc.addPage([595, 841]);
@@ -148,7 +148,7 @@ export async function compilePDF(template: PDFTemplateConfigType, studentData: s
   const titleResult = await renderStaticField(
     pdfDoc, 
     contentPage, 
-    studentData.intro_title.toUpperCase(), 
+    studentData.intro_title?.toUpperCase(), 
     cursorY, 
     marginX, 
     13, // Slightly larger than body text

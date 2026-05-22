@@ -9,6 +9,19 @@ export interface KeyNoteTheme {
   surface : string
 }
 
+// export type ListStyle = {
+//   type : "number" | "bullet",
+//   startAt : number
+// }
+
+// export type FormattedText = {
+//   content: string;
+//   fontSize: 'text-xs' | 'text-sm' | 'text-base' | 'text-lg' | 'text-xl' | 'text-2xl';
+//   fontFamily: 'font-sans' | 'font-serif' | 'font-mono';
+//   isBold: boolean;
+//   isUnderline: boolean;
+//   listSymbol ?:ListStyle;
+// };
 
 
 export type studentDataType = {

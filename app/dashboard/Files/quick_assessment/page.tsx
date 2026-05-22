@@ -9,6 +9,7 @@ import { useUser } from '@clerk/nextjs';
 import Link from "next/link";
 import { studentDataType } from '@/scripts/templatetypes';
 import { Modal } from '@/components/Modal';
+import { EditToolbar } from '@/components/EditToolBar';
 export const dynamic = 'force-dynamic';
 
 export const formData = {
@@ -20,6 +21,26 @@ export const formData = {
   "references": "1. Housel, M. (2020). The Psychology of Money. \n2. Clear, J. (2018). Atomic Habits: An Easy & Proven Way to Build Good Habits & Break Bad Ones. \n3. Garcia, H. & Miralles, F. (2016). Ikigai: The Japanese Secret to a Long and Happy Life. \n4. Deisenroth, M. P. (2020). Mathematics for Machine Learning."
 }
 
+
+const chunkData = `# TITLE: SUSTAINABLE ARCHITECTURAL FRAMEWORKS
+
+## HEADER: CORE DESIGN PRINCIPLES
+
+## SUBHEADER: Environmental Integration
+### PARAGRAPH: Modern architecture must prioritize environmental harmony...
+### LIST: Passive solar orientation
+### LIST: High-thermal mass insulation
+### LIST: Rainwater harvesting systems
+
+## SUBHEADER: Structural Integrity
+### PARAGRAPH: The foundation of any enduring system...
+### LIST: Reinforced concrete foundations
+### LIST: Modular steel framing
+### LIST: Seismic dampening technologies
+
+## CONCLUSION: Sustainable design is not merely a trend...
+
+# REFERENCES: Journal of Sustainable Urbanism, 2025...`
 interface SectionProps {
   title: string;
   id: Exclude<SectionId, null>;
@@ -110,8 +131,9 @@ type TextRole = 'title' | 'subheader' | 'paragraph' | "lists" | 'conclusion' |"i
 export interface DocumentSegment {
   id: string;
   role: TextRole;
-  content: string;
-  index: number; 
+  content : string;
+  index: number;
+ // FormattedText : FormattedText 
 }
 
 export interface AssessmentState {
@@ -120,41 +142,7 @@ export interface AssessmentState {
 }
 // 2. Add these to your component state
 
-// 3. Dummy Chunk for the Parser
-const DUMMY_CHUNK = `# TITLE: AUDIT COMPANY ARCHITECTURE AND THE EVOLUTION OF PROFESSIONAL FINANCIAL OVERSIGHT
-# HEADER: CORE FUNCTIONS AND OPERATIONAL FRAMEWORKS
-# TO: INTERNAL COMPLIANCE COMMITTEE | AUDIT DIVISION
-
-## INTRODUCTION: An audit company (or audit firm) is a professional services organization that conducts independent examinations of an entity's financial, operational, or compliance records. Their primary role is to provide an objective opinion on the accuracy and fairness of these records, ensuring they comply with applicable laws, regulations, and reporting standards.
-
-## SUBHEADER: 1. CORE FUNCTIONS OF AUDIT COMPANIES
-### PARAGRAPH: The fundamental purpose of an audit company is to instill confidence in stakeholders—such as investors, lenders, regulators, and the public—by validating that an organization’s financial statements are free from material misstatements.
-### LIST: Financial Audits: The most common service, where auditors examine balance sheets, income statements, and cash flow statements to verify they provide a "true and fair" view of the company’s financial position.
-### LIST: Compliance Audits: Evaluating whether an organization adheres to specific industry regulations, legal standards, or tax laws.
-### LIST: Internal Audits: Assessing a company's internal control systems, risk management frameworks, and operational efficiencies.
-### LIST: IT/System Audits: Examining information technology infrastructure to ensure data integrity, cybersecurity resilience, and the effectiveness of IT governance.
-
-## SUBHEADER: 2. KEY CHARACTERISTICS OF AUDIT FIRMS
-### PARAGRAPH: To maintain institutional authority, audit firms must operate under a specific set of principles that ensure the integrity of their output.
-### LIST: Independence: To remain objective, external auditors must have no financial or personal interest in the company being audited.
-### LIST: Standardization: Audit firms operate under strict professional standards (such as GAAS) and reporting frameworks (like IFRS or GAAP).
-### LIST: Professional Qualification: Signing partners must be qualified professionals, typically Chartered Accountants or CPAs.
-### LIST: Reporting: The "end product" is an Audit Report, containing the auditor's opinion on the entity's financial status.
-
-## SUBHEADER: 3. OPERATIONAL PHASES AND RISK MANAGEMENT
-### PARAGRAPH: Audits typically follow a structured, multi-phase process to ensure rigorous verification and documentation of financial health.
-### LIST: Planning & Risk Assessment: Understanding the client’s business, environment, and potential areas of risk.
-### LIST: Fieldwork: Examining evidence, testing internal controls, and verifying financial transactions against supporting documents.
-### LIST: Reporting: Summarizing findings and expressing an opinion, ranging from "unqualified" to "adverse."
-### LIST: Follow-up: Assessing whether management has addressed any deficiencies identified during the audit.
-
-## SUBHEADER: 4. IMPORTANT DISTINCTIONS AND LIMITATIONS
-### LIST: Distinguishing between internal and external audit roles is crucial for operational transparency and governance.
-### LIST: Internal auditors are employees focused on internal improvements and controls, while external auditors are independent third parties (like the "Big Four") hired to provide unbiased verification for external stakeholders.
-### LIST: Auditors do not manage daily finances, prepare original statements, or establish controls; they act as a verification layer, not a creator of the data.
-
-## CONCLUSION:  Internal auditors
-### PARAGRAPH: Audit companies act as a cornerstone of the global economy. By verifying the integrity of financial data, they reduce the risk of fraud, ensure accountability, and provide the transparency necessary for capital markets to function efficiently.`
+// FORMATTED TEXT TYPES
 
 
 
@@ -190,19 +178,7 @@ const getStyleOptions = (role: string) => {
 };
 type SectionId = 'cover'  | null;
 
-const StyleToolbar = ({ role, onAction }: { role: string, onAction: (action: string) => void }) => (
-  <div className="flex gap-2 p-2 bg-[#1A1512] rounded border border-[#D4AF37]/30 absolute -top-10 right-0 z-10">
-    {getStyleOptions(role).map(opt => (
-      <button 
-        key={opt} 
-        onClick={() => onAction(opt)}
-        className="text-[8px] uppercase text-[#D4AF37] hover:text-white"
-      >
-        {opt}
-      </button>
-    ))}
-  </div>
-);
+
 
 export default function QuickAssessment() {
 
@@ -240,12 +216,14 @@ const [segments, setSegments] = useState<DocumentSegment[]>([]);
   const [displayedText, setDisplayedText] = useState<string>("");
   const [isParsing, setIsParsing] = useState<boolean>(false);
 const [bodyReq, setBodyReq] = useState<studentDataType>( {
-    assignment_title: meta?.cover?.topic ? meta?.cover?.topic : "",
-    student_name: meta?.cover?.author ? meta?.cover?.author: user ?
+    assignment_title:  meta?.cover?.topic ? meta?.cover?.topic : "",
+    student_name:   meta?.cover?.author ? meta?.cover?.author: user ?
      `${user?.firstName ? user?.firstName + " " + user?.lastName : user?.username }` : "",
-     recipientName : meta?.cover?.recipient ? meta?.cover?.recipient : "" ,
-    intro_title: "",
-    intro_content: "",
+
+     recipientName :  meta?.cover?.recipient ? meta?.cover?.recipient : "" , 
+     
+    intro_title:'',
+    intro_content:'',
     body_title: [],
     lists : [],
     body_content: [],
@@ -278,19 +256,20 @@ const [bodyReq, setBodyReq] = useState<studentDataType>( {
   const lines = rawText.split('\n').map(l => l.trim()).filter(l => l.length > 0);
   console.log(lines);
  let listCounter = 1;
-  const data: studentDataType = {
-    assignment_title: meta?.cover?.topic ? meta?.cover?.topic : "",
-    student_name: meta?.cover?.author ? meta?.cover?.author: user ?
+  const data: studentDataType =  {
+    assignment_title:  meta?.cover?.topic ? meta?.cover?.topic : "", 
+    student_name:   meta?.cover?.author ? meta?.cover?.author: user ?
      `${user?.firstName ? user?.firstName + " " + user?.lastName : user?.username }` : "",
-     recipientName : meta?.cover?.recipient ? meta?.cover?.recipient : "" ,
-    intro_title: "",
+     recipientName :  meta?.cover?.recipient ? meta?.cover?.recipient : "" , 
+    intro_title : "" , 
+
     intro_content: "",
-    body_title: [],
+    body_title:  [],
     lists : [],
     body_content: [],
     concl_title : "",
     concl_content: [],
-    references: ""
+    references:  ""
   };
 
   let currentSection: 'intro' | 'body' | 'concl' | 'refs' = 'intro';
@@ -298,14 +277,15 @@ let useAlphaList = false;
   lines.forEach((line, index) => {
     // 1. Detect Tags and Metadata
     if (line.startsWith('# TITLE:') ) {
-      data.assignment_title = meta?.cover?.topic ? meta?.cover?.topic :  line.replace('# TITLE:', '').trim();
+      data.assignment_title =  meta?.cover?.topic ? meta?.cover?.topic :  line.replace('# TITLE:', '').trim()
       const actualContent = meta?.cover?.topic ? meta?.cover?.topic : 
       line.replace('# TITLE:', '').trim();
       segments?.push({
        id : `seg-${crypto.randomUUID()}`,
        role : "title",
-       content : actualContent,
-       index : index
+      content : actualContent,
+       index : index,
+      
       })
       return;
     }
@@ -316,7 +296,8 @@ let useAlphaList = false;
        id : `seg-${crypto.randomUUID()}`,
        role : "header",
        content : actualContent,
-       index : index
+       index : index,
+
       })
       return;
     }
@@ -328,26 +309,28 @@ let useAlphaList = false;
           segments?.push({
        id : `seg-${crypto.randomUUID()}`,
        role : "introduction",
-       content : actualContent,
-       index : index
+    content : actualContent,
+       index : index,
+     
       })
       currentSection = 'intro';
       return;
     }
     if (line.startsWith('## SUBHEADER:')) {
+ const actualContent = line.replace('## SUBHEADER:', '').trim()
       currentSection = 'body'; 
       data.body_content.push({
         id: crypto.randomUUID(), // Native unique ID
         role: "subheader",
-        content: line.replace('## SUBHEADER:', '').trim(),
+    content: line.replace('## SUBHEADER:', '').trim(),
         index: index
       });
-         const actualContent = line.replace('## SUBHEADER:', '').trim();
+       //  const actualContent = line.replace('## SUBHEADER:', '').trim();
           segments?.push({
        id : `seg-${crypto.randomUUID()}`,
        role : "subheader",
-       content : actualContent,
-       index : index
+    content : actualContent,
+       index : index,
       })
 
       listCounter = 1; // Reset numbering for new section
@@ -356,20 +339,21 @@ let useAlphaList = false;
       return;
     }
     if (line.startsWith('## CONCLUSION:')) {
+      const concContent =  line.replace('## CONCLUSION:', '').trim();
       currentSection = 'concl';
       data.concl_content.push({
         id: crypto.randomUUID(), // Native unique ID
         role: "conclusion",
         content: line.replace('## CONCLUSION:', '').trim(),
-        index:index
+        index : index
       });
-         const actualContent = line.replace('## CONCLUSION:', '').trim();
-           //    const Content = line.replace('### PARAGRAPH:', '').trim();
+       
           segments?.push({
        id : `seg-${crypto.randomUUID()}`,
        role : "conclusion",
-       content : actualContent,
-       index :index
+      content : concContent,
+       index : index,
+    
       })
       //   segments?.push({
       //  id : `seg-${crypto.randomUUID()}`,
@@ -394,8 +378,9 @@ let useAlphaList = false;
           data.body_content.push({
             id: `seg-${crypto.randomUUID()}`,
             role: line.startsWith('### LIST:') ? "lists" : "paragraph",
-            content: line.startsWith('### LIST:') ?   `${marker} ${cleanContent}` : cleanContent,
-            index: index
+           content: line.startsWith('### LIST:') ?   `${marker} ${cleanContent}` : cleanContent,
+            index: index,
+  
           });
           if(line?.startsWith("### LIST:")){
           listCounter++;
@@ -406,24 +391,28 @@ let useAlphaList = false;
          segments?.push({
        id : `seg-${crypto?.randomUUID()}`,
        role :line.startsWith('### LIST:') ? "lists" : "paragraph",
-       content : cleanContent,
-       index :index
+     content : cleanContent,
+       index :index,
+
       })
 
     } else if (currentSection === 'concl') {
-      
+        const actualContent = line.replace('## CONCLUSION:', '').replace('### PARAGRAPH:', '').trim();
       data.concl_content.push({
         id: `seg-${crypto?.randomUUID()}`,
         role: "paragraph",
-        content: cleanContent,
-        index: index
+       content: cleanContent,
+        index: index,
+  
+      
       });
-        const actualContent = line.replace('## CONCLUSION:', '').replace('### PARAGRAPH:', '').trim();
+      
         segments?.push({
        id : `seg-${crypto?.randomUUID()}`,
        role : line?.startsWith("## CONCLUSION") ? "conclusion" : "paragraph",
-       content : actualContent,
-    index : index
+      content : actualContent,
+    index : index,
+
       })
       //THE SUBCONTENT UNDER CONCLUSION
      
@@ -434,7 +423,7 @@ let useAlphaList = false;
        id : `seg-${crypto.randomUUID()}`,
        role : "reference",
        content : actualContent,
-       index : index
+       index : index,
       })
     }
   });
@@ -445,17 +434,19 @@ let useAlphaList = false;
   return data;
 }
   // Simulate streaming effect
-  const startAssessment = () => {
+  const startAssessment = (chunkValue : string) => {
     setIsParsing(true);
+    setEditMode(true)
+    console.log(chunkValue)
    // setSegments([]);
-    parseChunk(DUMMY_CHUNK);
+    parseChunk(chunkValue);
     
     // Simulate gradual UI appearance
     let i = 0;
     const interval = setInterval(() => {
-      setDisplayedText(DUMMY_CHUNK.slice(0, i));
+      setDisplayedText(chunkValue.slice(0, i));
       i += 5;
-      if (i > DUMMY_CHUNK.length) {
+      if (i > chunkValue.length) {
         clearInterval(interval);
         setIsParsing(false);
       }
@@ -464,7 +455,7 @@ let useAlphaList = false;
 
 //console.log(subheaderSort);
 const generateAssignment = async()=> {
-
+  setEditMode(false)
   const body = {
       templateName : "ACADEMIC_ASSIGNMENT",
       userInput : bodyReq,
@@ -499,6 +490,7 @@ const generateAssignment = async()=> {
   window?.URL?.revokeObjectURL(url)
     a?.parentNode?.removeChild(a);
 } catch(error){
+  alert("Request failed why trying to generate your pdf")
   throw new Error("Could not Create the Assignment");
 }
 }
@@ -509,6 +501,7 @@ const generateAssignment = async()=> {
 
 
 //GETTING THE CHUNK OF TEXT FROM AI SDK
+const [chunkdata, setChunkData] = useState("")
   const handleGenerate = async () => {
   
     setIsParsing(true);
@@ -527,16 +520,23 @@ const generateAssignment = async()=> {
       
      })
      if(response.ok){
-      const data = await response.json();
+      const data = await response.text();
+      setChunkData(data?.toString());
+     //  if(typeof chunkData === "string"){
+        startAssessment(data?.toString())
+     //  }
+      
       console.log("Stream data Expected:", data)
      }else{
-    console.log("Failed")
+alert("WDC_FORMATT AI is currently down.")
+    return;
      }
 
         }
     
      catch (error) {
       console.error("Axios Stream failed:", error);
+      alert("WDC_FORMATT AI is currently down.")
     } finally {
       setIsParsing(false);
     }
@@ -565,6 +565,24 @@ const handleSegmentChange = (id: string, newContent: string, role : string) => {
 
 // console.log("segemntOnChange", findRole);
 // console.log()
+};
+
+//PROPOGATION FOR LISTS;
+
+
+const updateListStyle = (newType: 'bullet' | 'number') => {
+  setBodyReq((prev) => ({
+    ...prev,
+    body_content: prev.body_content.map((seg, index) => {
+      if (seg.role === 'lists') {
+        return { 
+          ...seg, 
+          listStyle: { type: newType, startAt: newType === 'number' ? index + 1 : 1 } 
+        };
+      }
+      return seg;
+    })
+  }));
 };
   return (
 //NEW DESIGN
@@ -654,7 +672,7 @@ const handleSegmentChange = (id: string, newContent: string, role : string) => {
     </div>
           <form onSubmit={(e : React.FormEvent)=> {
             e.preventDefault()
-            startAssessment()
+           // startAssessment()
           }} 
             className="space-y-8 w-full">
             
@@ -728,7 +746,8 @@ const handleSegmentChange = (id: string, newContent: string, role : string) => {
             {/* 4. Generate Button */}
             <button  onClick={()=> {
               //  setEditMode(true);
-              handleGenerate();
+             
+             handleGenerate();
               }}
               type="submit"
               className="w-full bg-[#483C32] text-[#F2F0E9] py-5 rounded-2xl
@@ -797,7 +816,7 @@ const handleSegmentChange = (id: string, newContent: string, role : string) => {
                 autoFocus
                 className="w-full bg-transparent border-none focus:ring-0 p-0 text-sm font-medium text-black resize-none overflow-hidden leading-relaxed"
                 value={bodyReq?.assignment_title}
-                onChange={(e) => setBodyReq((prev)=> ({...prev, assignment_title : e.target.value}))}
+                onChange={(e) => setBodyReq((prev)=> ({...prev, assignment_title :  e.target.value }))}
                 onBlur={() => setEditingId(null)}
                 rows={7}
               />
@@ -827,7 +846,7 @@ const handleSegmentChange = (id: string, newContent: string, role : string) => {
                 autoFocus
                 className="w-full bg-transparent border-none focus:ring-0 p-0 text-sm font-medium text-black resize-none overflow-hidden leading-relaxed"
                 value={bodyReq?.intro_title}
-                onChange={(e) => setBodyReq((prev)=> ({...prev, intro_title : e.target.value}))}
+                onChange={(e) => setBodyReq((prev)=> ({...prev, intro_title :  e.target.value }))}
                 onBlur={() => setEditingId(null)}
                 rows={7}
               />
@@ -856,7 +875,7 @@ const handleSegmentChange = (id: string, newContent: string, role : string) => {
                 autoFocus
                 className="w-full bg-transparent border-none focus:ring-0 p-0 text-sm font-medium text-black resize-none overflow-hidden leading-relaxed"
                 value={bodyReq?.intro_content}
-                onChange={(e) => setBodyReq((prev)=> ({...prev, intro_content : e.target.value}))}
+                onChange={(e) => setBodyReq((prev)=> ({...prev, intro_content :  e.target.value }))}
                 onBlur={() => setEditingId(null)}
                 rows={7}
               />
@@ -891,6 +910,7 @@ const handleSegmentChange = (id: string, newContent: string, role : string) => {
                  </div>
 
               {editingId === seg.id && livePreviewDefault === "edit" ? (
+                <div key={seg?.id}>
                 <textarea
                   autoFocus
                   className="w-full bg-transparent border-none focus:ring-0 p-0 text-sm font-medium text-black resize-none overflow-hidden leading-relaxed"
@@ -898,7 +918,9 @@ const handleSegmentChange = (id: string, newContent: string, role : string) => {
                   onChange={(e) => handleSegmentChange(seg.id, e.target.value, seg?.role)}
                   onBlur={() => setEditingId(null)}
                   rows={seg.content.length / 45 + 1}
+                  
                 />
+                </div>
               ) : (
                 <div className="space-y-2">
                   {seg.role === 'subheader' && <h2 className="text-sm font-bold text-black uppercase tracking-wide opacity-90">{seg.content}</h2>}
@@ -951,6 +973,13 @@ const handleSegmentChange = (id: string, newContent: string, role : string) => {
   </div>
   {bodyReq?.concl_content?.map((item, index) => (
     editProp?.concl_ContentState && livePreviewDefault === "edit" ? (
+      <div key ={index}>
+      
+  <div className="absolute -top-12 left-0 z-50">
+    
+
+  </div>
+
       <textarea
         key={index}
         autoFocus
@@ -960,11 +989,12 @@ const handleSegmentChange = (id: string, newContent: string, role : string) => {
           id: item?.id,
           role: item?.role,
           content: item?.id ? e.target.value : item?.content,
-          index: item?.index
+          index: item?.index,
         }]}))}
         onBlur={() => setEditingId(null)}
         rows={item.content.length / 45 + 1}
       />
+      </div>
     ) : (
       <p key={index}
          onClick={() => setEditProp((prev) => ({...prev, concl_ContentState: true}))}
@@ -1020,7 +1050,10 @@ const handleSegmentChange = (id: string, newContent: string, role : string) => {
         <span className="text-[9px] font-black uppercase text-black animate-pulse">Live Sync Active</span>
       </div>
       {segments?.length > 0 && (
-        <button onClick={() => generateAssignment()}
+        <button onClick={() => {
+         
+        generateAssignment()
+        }}
                 className='bg-black py-4 text-white px-4 rounded-lg text-[12px] uppercase font-bold tracking-widest shadow-md hover:bg-black/80 transition-all'>
           Done
         </button>
