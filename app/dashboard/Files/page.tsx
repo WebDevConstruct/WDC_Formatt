@@ -100,10 +100,10 @@ const MajesticBrownSelection = () => {
             <div className="h-[1px] w-16 bg-[#483C32]/30"></div>
         </div>
         <h2 className="text-xs font-bold tracking-[0.4em] text-[#483C32] uppercase mb-4">
-          WDC — Architectural Document Suite
+          WDC — Engine Room
         </h2>
         <h1 className="text-5xl md:text-6xl font-serif text-[#2C2520] mb-8 tracking-tight">
-          Select Your <span className="italic">Majestic</span> Path
+          Choose your  <span className="italic">Path</span> based on your taste.
         </h1>
         <p className="max-w-2xl mx-auto text-[#483C32]/80 text-lg leading-relaxed font-light">
           Your vision deserves an engine of equivalent stature. 
@@ -137,7 +137,7 @@ const MajesticBrownSelection = () => {
               </p>
               
               {/* SERVICE PERKS ARRAY */}
-              <div className={`mb-10 p-8 rounded-[2rem] ${template.id === 'quick' ? 'bg-white/60 border border-[#483C32]/5' : 'bg-white/[0.03] border border-white/5'}`}>
+              <div className={`hidden lg:block mb-10 p-8 rounded-[2rem] ${template.id === 'quick' ? 'bg-white/60 border border-[#483C32]/5' : 'bg-white/[0.03] border border-white/5'}`}>
                 <h4 className={`text-[10px] font-black uppercase tracking-[0.2em] mb-6 ${template.id === 'quick' ? 'text-[#483C32]/40' : 'text-[#D4AF37]/50'}`}>
                   Quality Standards
                 </h4>
@@ -173,9 +173,11 @@ const MajesticBrownSelection = () => {
               </div>
 
               {/* FINAL ACTION */}
-              <Link href={template?.navigateTo} className={`flex items-center ${template.theme.accent} font-black text-xs
+              <Link href={template?.navigateTo} 
+               className={`flex items-center py-3 w-full text-white ${template.theme.buttonBg} justify-center rounded-full
+               md:w-[200px] ${template.theme.accent} font-black text-xs
                uppercase tracking-[0.3em] group-hover:gap-6 transition-all duration-500`}>
-                Initialize Build <ArrowRight size={20} className="ml-3" />
+               Get Started<ArrowRight size={20} className="ml-3" />
               </Link>
             </div>
 

@@ -110,7 +110,7 @@ const [index, setIndex] = useState(0);
           {/* LEFT: Modules */}
           <div className="lg:col-span-8 space-y-6">
             <div className="flex items-center justify-between px-2">
-               <h3 className="text-xs font-black uppercase tracking-[0.3em] text-[#483C32]/60">Available Architecture</h3>
+               <h3 className="text-xs font-black uppercase tracking-[0.3em] text-[#483C32]/60">Available Document Engine</h3>
             </div>
             
             {/* Files Card */}
@@ -131,8 +131,8 @@ const [index, setIndex] = useState(0);
                   <div className="space-y-4">
                     <h2 className="text-4xl md:text-5xl font-serif font-black text-[#483C32] leading-none uppercase italic">Files</h2>
                     <p className="text-[#483C32]/80 text-lg max-w-xl font-medium leading-relaxed">
-                      This module is currently operational. Transform your core data into 
-                      <span className="text-[#483C32] font-bold"> Majestic PDF Assessments</span> within the beta window.
+                      This module is currently operational. Get your ideas in a 
+                      <span className="text-[#483C32] font-bold"> well formatted</span> in seconds.
                     </p>
                   </div>
 

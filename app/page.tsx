@@ -23,15 +23,12 @@ export default function LandingPage() {
       <section className="flex-1 flex pt-10 flex-col items-center justify-center px-6 text-center lg:px-20">
         <div className="max-w-6xl w-full space-y-8 md:space-y-12">
           
-          {/* Badge */}
-          <div className="inline-block px-4 py-1.5 rounded-full border border-[#D4AF37] text-[#483C32] text-xs md:text-sm font-bold tracking-[0.3em] uppercase bg-white/50 backdrop-blur-sm">
-            30-Day Academic Beta
-          </div>
+          
 
           {/* Headline */}
           <h1 className="text-4xl sm:text-6xl lg:text-8xl xl:text-9xl font-serif text-[#483C32] leading-[1.05] tracking-tight">
-            The Professional <br className="hidden lg:block" /> 
-            Standard for <span className="italic text-[#D4AF37]">Mgt Science</span>
+           <br className="hidden lg:block" /> 
+            Standard For <span className="italic text-[#D4AF37]">Quality-Formatted</span>  Document Generation
           </h1>
           
           {/* Subtext - Updated to the new paragraph standard */}

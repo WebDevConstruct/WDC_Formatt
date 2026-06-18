@@ -111,90 +111,274 @@ const hexToRgb = (hex: string) => {
 
 //   return await pdfDoc.save();
 // }
-export async function compilePDF(template: PDFTemplateConfigType, studentData: studentDataType, headers : Array<additionalHeaders>) {
+
+
+//Engine Test
+//import { PDFDocument, StandardFonts } from 'pdf-lib';
+
+// Assuming these types are defined elsewhere in your project
+// type PDFTemplateConfigType = ...
+// type studentDataType = ...
+// type additionalHeaders = ...
+
+//Engine Test
+
+
+export async function compilePDF(
+  template: PDFTemplateConfigType, 
+  studentData: studentDataType, 
+  headers: Array<additionalHeaders>
+) {
   const pdfDoc = await PDFDocument.create();
+  
+  // Embed high-contrast typography
   const fonts = {
-    regular: await pdfDoc.embedFont(StandardFonts.TimesRoman),
-    bold: await pdfDoc.embedFont(StandardFonts.TimesRomanBold)
+    serifBold: await pdfDoc.embedFont(StandardFonts.TimesRomanBold),
+    sansRegular: await pdfDoc.embedFont(StandardFonts.Helvetica),
+    sansBold: await pdfDoc.embedFont(StandardFonts.HelveticaBold),
   };
 
-  // --- PAGE 1: THE FRONT PAGE (Automatic Upper-Middle Centering) ---
-  const coverPage = pdfDoc.addPage([595, 841]);
+  const PAGE_WIDTH = 595;
+  const PAGE_HEIGHT = 841;
+  const marginX = 50;
+
+  // =================================================================
+  // --- PAGE 1: THE FRONT PAGE ---
+  // =================================================================
+  const coverPage = pdfDoc.addPage([PAGE_WIDTH, PAGE_HEIGHT]);
   let coverY = 600;
   
   const renderCover = (label: string, val: string, y: number) => {
+    if (!val) return y;
     const text = `${label.toUpperCase()} ${val.toUpperCase()}`;
-    const lines = wrapText(text, 450, fonts.bold, 22);
+    const lines = wrapText(text, 450, fonts.serifBold, 22); 
     let curY = y;
     lines.forEach(l => {
-      const w = fonts.bold.widthOfTextAtSize(l, 22);
-      coverPage.drawText(l, { x: 297.5 - (w/2), y: curY, size: 22, font: fonts.bold });
+      const w = fonts.serifBold.widthOfTextAtSize(l, 22);
+      coverPage.drawText(l, { x: 297.5 - (w/2), y: curY, size: 22, font: fonts.serifBold });
       curY -= 28;
     });
     return curY - 45;
   };
 
-  coverY = renderCover(`${studentData.assignment_title, coverY ? "TOPIC:" : ""}`, studentData.assignment_title, coverY);
+  coverY = renderCover(studentData.assignment_title ? "TOPIC:" : "", studentData.assignment_title, coverY);
   coverY = renderCover("NAME:", studentData.student_name, coverY);
-  coverY = renderCover(`${studentData.recipientName, coverY ? "TO:" : ""}`, studentData.recipientName, coverY);
-  headers?.forEach((item)=>  coverY = renderCover(`${item?.subHeader ? `${item?.subHeader}:` : ""}`, item?.paragraph, coverY))
- 
-  // --- PAGE 2+: DYNAMIC CONTENT ---
-  let contentPage = pdfDoc.addPage([595, 841]);
-  let cursorY = 780; // Top Margin
-  const marginX = 50;
-
-  // 1. Render INTRO_TITLE (Bold & Uppercase)
-  const titleResult = await renderStaticField(
-    pdfDoc, 
-    contentPage, 
-    studentData.intro_title?.toUpperCase(), 
-    cursorY, 
-    marginX, 
-    13, // Slightly larger than body text
-    fonts.bold
-  );
+  coverY = renderCover(studentData.recipientName ? "TO:" : "", studentData.recipientName, coverY);
   
-  contentPage = titleResult.page;
-  cursorY = titleResult.y - 10; // Tight gap after the title
+  headers?.forEach((item) => {
+    coverY = renderCover(item?.subHeader ? `${item.subHeader}:` : "", item?.paragraph, coverY);
+  });
+ 
+  // =================================================================
+  // --- PAGE 2+: DYNAMIC CONTENT ---
+  // =================================================================
+  let contentPage = pdfDoc.addPage([PAGE_WIDTH, PAGE_HEIGHT]);
+  let cursorY = 780; // Top Margin
 
-  // 2. Render INTRO_CONTENT (Flowing text)
-  const introResult = await renderStaticField(
-    pdfDoc, 
-    contentPage, 
-    studentData.intro_content, 
-    cursorY, 
-    marginX, 
-    11, 
-    fonts.regular
-  );
+  // --- 1. MAIN SECTION HEADER ---
+  if (studentData.intro_title) {
+    const mainTitleText = studentData.intro_title.toUpperCase();
+    const titleFontSize = 24; 
+    const mainTitleLines = wrapText(mainTitleText, PAGE_WIDTH - (marginX * 2), fonts.serifBold, titleFontSize);
+    
+    mainTitleLines.forEach(line => {
+      const lineWidth = fonts.serifBold.widthOfTextAtSize(line, titleFontSize);
+      contentPage.drawText(line, {
+        x: (PAGE_WIDTH / 2) - (lineWidth / 2),
+        y: cursorY,
+        size: titleFontSize,
+        font: fonts.serifBold
+      });
+      cursorY -= 30;
+    });
 
-  // 3. Render BODY_CONTENT (Automatic Pagination Relay)
-  const bodyResult = await renderSequentialFlow(
-    pdfDoc, 
-    introResult.page, 
-    studentData.body_content, 
-    introResult.y - 25, 
-    marginX, 
-    11, 
-    fonts
-  );
-  // Conclusion
-  const conclResult = await renderSequentialFlow(
-    pdfDoc, bodyResult.page, studentData.concl_content, bodyResult.y - 25, 50, 11, fonts
-  );
+    cursorY -= 5;
 
-  // References
+    // 1.5px solid black decorative rule line
+    contentPage.drawLine({
+      start: { x: marginX, y: cursorY },
+      end: { x: PAGE_WIDTH - marginX, y: cursorY },
+      thickness: 1.5,
+    });
+    
+    cursorY -= 24; 
+  }
+
+  // --- 2. INTRODUCTION TEXT ---
+  if (studentData.intro_content) {
+    // Calling your unmodified renderStaticField
+    const introResult = await renderStaticField(
+      pdfDoc, 
+      contentPage, 
+      studentData.intro_content, 
+      cursorY, 
+      marginX, 
+      12, 
+      fonts.sansRegular
+    );
+    contentPage = introResult.page;
+    cursorY = introResult.y - 24; // Added generous block spacing
+  }
+
+  // --- 3. BODY CONTENT SECTIONS ---
+  if (studentData.body_content) {
+    // Calling your unmodified renderSequentialFlow
+    const bodyResult = await renderSequentialFlow(
+      pdfDoc, 
+      contentPage, 
+      studentData.body_content, 
+      cursorY, 
+      marginX, 
+      12, 
+      { regular: fonts.sansRegular, bold: fonts.sansBold }
+    );
+    contentPage = bodyResult.page;
+    cursorY = bodyResult.y - 24;
+  }
+
+  // --- 4. THE CONCLUSION SECTION ---
+  if (studentData.concl_content) {
+    contentPage.drawText("CONCLUSION", {
+      x: marginX,
+      y: cursorY,
+      size: 12,
+      font: fonts.sansBold,
+    });
+    
+    cursorY -= 16;
+
+    // Passing the conclusion array to your unmodified renderSequentialFlow
+    const conclResult = await renderSequentialFlow(
+      pdfDoc, 
+      contentPage, 
+      studentData.concl_content, 
+      cursorY, 
+      marginX, 
+      12, 
+      { regular: fonts.sansRegular, bold: fonts.sansBold }
+    );
+    contentPage = conclResult.page;
+    cursorY = conclResult.y - 35;
+  }
+
+  // --- 5. REFERENCES ---
   if (studentData.references) {
-    const refY = conclResult.y - 35;
-    conclResult.page.drawText("REFERENCES", { x: 50, y: refY, size: 10, font: fonts.bold });
+    contentPage.drawLine({
+      start: { x: marginX, y: cursorY },
+      end: { x: PAGE_WIDTH - marginX, y: cursorY },
+      thickness: 1.0,
+    });
+    
+    cursorY -= 20;
+
+    contentPage.drawText("REFERENCES", { 
+      x: marginX, 
+      y: cursorY, 
+      size: 14, 
+      font: fonts.serifBold 
+    });
+    
+    cursorY -= 16;
+
+    // Calling your unmodified renderStaticField for the bibliography
     await renderStaticField(
-      pdfDoc, conclResult.page, studentData.references, refY - 15, 50, 9, fonts.regular
+      pdfDoc, 
+      contentPage, 
+      studentData.references, 
+      cursorY, 
+      marginX, 
+      10, // Smaller reference font size
+      fonts.sansRegular
     );
   }
 
   return await pdfDoc.save();
 }
+//Original Engine Code
+// export async function compilePDF(template: PDFTemplateConfigType, studentData: studentDataType, headers : Array<additionalHeaders>) {
+//   const pdfDoc = await PDFDocument.create();
+//   const fonts = {
+//     regular: await pdfDoc.embedFont(StandardFonts.TimesRoman),
+//     bold: await pdfDoc.embedFont(StandardFonts.TimesRomanBold)
+//   };
+
+//   // --- PAGE 1: THE FRONT PAGE (Automatic Upper-Middle Centering) ---
+//   const coverPage = pdfDoc.addPage([595, 841]);
+//   let coverY = 600;
+  
+//   const renderCover = (label: string, val: string, y: number) => {
+//     const text = `${label.toUpperCase()} ${val.toUpperCase()}`;
+//     const lines = wrapText(text, 450, fonts.bold, 22);
+//     let curY = y;
+//     lines.forEach(l => {
+//       const w = fonts.bold.widthOfTextAtSize(l, 22);
+//       coverPage.drawText(l, { x: 297.5 - (w/2), y: curY, size: 22, font: fonts.bold });
+//       curY -= 28;
+//     });
+//     return curY - 45;
+//   };
+
+//   coverY = renderCover(`${studentData.assignment_title, coverY ? "TOPIC:" : ""}`, studentData.assignment_title, coverY);
+//   coverY = renderCover("NAME:", studentData.student_name, coverY);
+//   coverY = renderCover(`${studentData.recipientName, coverY ? "TO:" : ""}`, studentData.recipientName, coverY);
+//   headers?.forEach((item)=>  coverY = renderCover(`${item?.subHeader ? `${item?.subHeader}:` : ""}`, item?.paragraph, coverY))
+ 
+//   // --- PAGE 2+: DYNAMIC CONTENT ---
+//   let contentPage = pdfDoc.addPage([595, 841]);
+//   let cursorY = 780; // Top Margin
+//   const marginX = 50;
+
+//   // 1. Render INTRO_TITLE (Bold & Uppercase)
+//   const titleResult = await renderStaticField(
+//     pdfDoc, 
+//     contentPage, 
+//     studentData.intro_title?.toUpperCase(), 
+//     cursorY, 
+//     marginX, 
+//     13, // Slightly larger than body text
+//     fonts.bold
+//   );
+  
+//   contentPage = titleResult.page;
+//   cursorY = titleResult.y - 10; // Tight gap after the title
+
+//   // 2. Render INTRO_CONTENT (Flowing text)
+//   const introResult = await renderStaticField(
+//     pdfDoc, 
+//     contentPage, 
+//     studentData.intro_content, 
+//     cursorY, 
+//     marginX, 
+//     11, 
+//     fonts.regular
+//   );
+
+//   // 3. Render BODY_CONTENT (Automatic Pagination Relay)
+//   const bodyResult = await renderSequentialFlow(
+//     pdfDoc, 
+//     introResult.page, 
+//     studentData.body_content, 
+//     introResult.y - 25, 
+//     marginX, 
+//     11, 
+//     fonts
+//   );
+//   // Conclusion
+//   const conclResult = await renderSequentialFlow(
+//     pdfDoc, bodyResult.page, studentData.concl_content, bodyResult.y - 25, 50, 11, fonts
+//   );
+
+//   // References
+//   if (studentData.references) {
+//     const refY = conclResult.y - 35;
+//     conclResult.page.drawText("REFERENCES", { x: 50, y: refY, size: 10, font: fonts.bold });
+//     await renderStaticField(
+//       pdfDoc, conclResult.page, studentData.references, refY - 15, 50, 9, fonts.regular
+//     );
+//   }
+
+//   return await pdfDoc.save();
+// }
 
 //NEW ENGINE CODE
 // export async function compilePDF(template : PDFTemplateConfigType, studentData: studentDataType) {
