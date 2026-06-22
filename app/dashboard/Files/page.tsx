@@ -11,13 +11,13 @@ const TEMPLATES = [
     tagline: 'Velocity Through Clarity',
     navigateTo :"/dashboard/Files/quick_assessment",
     serviceVibe: 'Flex', 
-    description: 'A high-velocity framework for the precise student. Refined, rapid, and inherently professional.',
+    description: 'A PDF engine designed and ready exactly when you are ready, SPEED, CLARTITY AND PROFESSIONALISM.',
     perks: [
-      { label: 'Academic Velocity', detail: 'Instant PDF rendering optimized for immediate review.' },
-      { label: 'Majestic Presets', detail: 'Hard-coded Bold Headers for immediate visual authority.' },
-      { label: 'Sync-Red Logic', detail: 'Subtle error-checking ensuring your memo meets WDC standards.' }
+      { label: 'Quick Project', detail: 'Have an idea lets get get it done.' },
+      { label: 'Enhanced Formatting', detail: 'Professional-looking documents with minimal effort or no editing.' },
+      { label: 'Smart File Engine', detail: 'Intelligent File Handling for best document editing practice' }
     ],
-    features: ['1-Page Official Memo', '2-Page Structural Report'],
+    features: ["Unlimited Pages", 'Collects Intent to give best output'],
     theme: {
       bg: 'bg-[#F9F7F2]', // Warm Parchment
       border: 'border-[#483C32]/20',

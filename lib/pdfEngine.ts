@@ -1,12 +1,9 @@
 
 import {PDFDocument, PDFFont, StandardFonts, rgb} from "pdf-lib";
 import { wrapText } from "./utils/wrapText";
-import { db } from "./prisma";
 import { PDFTemplateConfigType, KeyNoteTheme} from "@/scripts/templatetypes";
 import { KeynotePresentation, } from "@/app/dashboard/Slides/page";
 import { KeyNoteTemplateConfig } from "@/scripts/seed-template";
-import { PDFPlaceholder } from "@/scripts/templatetypes";
-import { DocumentSegment } from "@/app/dashboard/Files/quick_assessment/page";
 import { studentDataType } from "@/scripts/templatetypes";
 import { renderStaticField, renderSequentialFlow } from "./utils/renderingChunkText";
 import { additionalHeaders } from "@/scripts/templatetypes";
@@ -123,18 +120,18 @@ const hexToRgb = (hex: string) => {
 
 //Engine Test
 
-
 export async function compilePDF(
   template: PDFTemplateConfigType, 
   studentData: studentDataType, 
-  headers: Array<additionalHeaders>
+  headers: Array<additionalHeaders>,
+
 ) {
   const pdfDoc = await PDFDocument.create();
   
   // Embed high-contrast typography
   const fonts = {
     serifBold: await pdfDoc.embedFont(StandardFonts.TimesRomanBold),
-    sansRegular: await pdfDoc.embedFont(StandardFonts.Helvetica),
+    sansRegular: await pdfDoc.embedFont(StandardFonts.TimesRoman),
     sansBold: await pdfDoc.embedFont(StandardFonts.HelveticaBold),
   };
 

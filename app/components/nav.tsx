@@ -1,5 +1,4 @@
 "use client"
-import React from 'react'
 import {Crown} from "lucide-react";
 import { useUser } from '@clerk/nextjs';
 import { UserButton } from '@clerk/nextjs';

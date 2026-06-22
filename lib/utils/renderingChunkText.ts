@@ -93,7 +93,6 @@ export async function renderStaticField(
 //     cursorY -= 6;
 //   });
 // }
-
 //NEW CODE
 export async function renderSequentialFlow(
   pdfDoc: any,
@@ -107,28 +106,86 @@ export async function renderSequentialFlow(
   let cursorY = startY;
   let page = currentPage;
   const maxWidth = 500;
+  
+  // Explicit Layout Indentations & Spacing for Lists
+  const listLeftIndent = 25;  // Indentation pushing the numbers in from the left hand side
+  const numberWidth = 18;     // Allocated horizontal space for the number characters
+  const horizontalGap = 10;   // The explicit space separating the number dot from the first word
+  const totalTextShift = listLeftIndent + numberWidth + horizontalGap;
 
-  for (const item of content) {
-    const isSubheader = item.role === "subheader";
+  // Running tracking index to dynamically sequence the lists starting at 1
+  let listCounter = 1;
+
+  for (let i = 0; i < content.length; i++) {
+    const item = content[i];
+    const isSubheader = item.role === "subheader" || item.role === "header" || item.role === "title";
     const isList = item.role === "lists";
-    const font = isSubheader ? fonts.bold : fonts.regular;
-    const currentSize = isSubheader ? size + 1 : size;
-    const indent = isList ? 20 : 0;
 
-    const lines = wrapText(item.content, maxWidth - indent, font, currentSize);
+    // If we transition out of a list block, reset the counter state for the next group
+    if (!isList) {
+      listCounter = 1;
+    }
+
+    // --- 1. DETECT AND RENDER LISTS ---
+    if (isList) {
+      // It must be a list, it must start on its own line, and it must have a dot after it
+      const numberToken = `${listCounter}.`; 
+      
+      // Calculate wrapped text boundaries, constrained to avoid bleeding back under the numbers
+      const availableTextWidth = maxWidth - totalTextShift;
+      const textLines = wrapText(item.content, availableTextWidth, fonts.regular, size);
+      
+      // Calculate layout block bounding boxes for pagination safety checks
+      const blockHeight = textLines.length * (size * 1.3) + 15;
+      if (cursorY - blockHeight < 50) {
+        page = pdfDoc.addPage([595, 841]);
+        cursorY = 780;
+      }
+
+      // Draw the Number prefix (Indented from left edge, Forced Bold)
+      page.drawText(numberToken, {
+        x: x + listLeftIndent, 
+        y: cursorY,
+        size: size,
+        font: fonts.bold, 
+      });
+
+      // Draw the descriptive Text lines (Shifted further right to clear numbers, Forced Regular)
+      let textCursorY = cursorY;
+      textLines.forEach((line) => {
+        page.drawText(line, {
+          x: x + totalTextShift, 
+          y: textCursorY,
+          size: size,
+          font: fonts.regular, 
+        });
+        textCursorY -= (size * 1.3); // Consistent line height spacing within a paragraph row block
+      });
+
+      // Spacing layout rule: Give the bottom of list items an explicit, uniform vertical gap
+      cursorY = textCursorY - 12; 
+      
+      listCounter++; // Increment sequentially for the next sibling list element line
+      continue;
+    }
+
+    // --- 2. RENDER PARAGRAPHS & HEADINGS ---
+    const font = isSubheader ? fonts.bold : fonts.regular;
+    const currentSize = item.role === "title" ? size + 4 : item.role === "header" ? size + 2 : isSubheader ? size + 1 : size;
     
-    // PRE-CALCULATE BLOCK HEIGHT: If the whole block won't fit, move to new page
-    const blockHeight = lines.length * (currentSize * 1.3) + 20;
+    const lines = wrapText(item.content, maxWidth, font, currentSize);
+    const blockHeight = lines.length * (currentSize * 1.3) + 15;
+
     if (cursorY - blockHeight < 50) {
       page = pdfDoc.addPage([595, 841]);
       cursorY = 780;
     }
 
-    if (isSubheader) cursorY -= 15;
+    if (isSubheader) cursorY -= 12;
 
     lines.forEach((line) => {
       page.drawText(line, {
-        x: x + indent,
+        x: x, // Standard text blocks match original flush left-hand margin bounds
         y: cursorY,
         size: currentSize,
         font: font,
@@ -136,8 +193,55 @@ export async function renderSequentialFlow(
       cursorY -= (currentSize * 1.3);
     });
 
-    cursorY -= 8; // Item gap
+    cursorY -= 14; // Default vertical padding spacing between distinct body paragraphs
   }
 
   return { page, y: cursorY };
 }
+//ORIGINAL CODE
+// export async function renderSequentialFlow(
+//   pdfDoc: any,
+//   currentPage: any,
+//   content: DocumentSegment[],
+//   startY: number,
+//   x: number,
+//   size: number,
+//   fonts: { regular: any; bold: any }
+// ): Promise<{ page: any; y: number }> {
+//   let cursorY = startY;
+//   let page = currentPage;
+//   const maxWidth = 500;
+
+//   for (const item of content) {
+//     const isSubheader = item.role === "subheader";
+//     const isList = item.role === "lists";
+//     const font = isSubheader ? fonts.bold : fonts.regular;
+//     const currentSize = isSubheader ? size + 1 : size;
+//     const indent = isList ? 20 : 0;
+
+//     const lines = wrapText(item.content, maxWidth - indent, font, currentSize);
+    
+//     // PRE-CALCULATE BLOCK HEIGHT: If the whole block won't fit, move to new page
+//     const blockHeight = lines.length * (currentSize * 1.3) + 20;
+//     if (cursorY - blockHeight < 50) {
+//       page = pdfDoc.addPage([595, 841]);
+//       cursorY = 780;
+//     }
+
+//     if (isSubheader) cursorY -= 15;
+
+//     lines.forEach((line) => {
+//       page.drawText(line, {
+//         x: x + indent,
+//         y: cursorY,
+//         size: currentSize,
+//         font: font,
+//       });
+//       cursorY -= (currentSize * 1.3);
+//     });
+
+//     cursorY -= 8; // Item gap
+//   }
+
+//   return { page, y: cursorY };
+// }

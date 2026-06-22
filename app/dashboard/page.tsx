@@ -23,7 +23,7 @@ const [index, setIndex] = useState(0);
 
   const ADMIN_PROMPTS = [
     "Get me a list of insurance companies in Nigeria",
-    "What are the big 5 auditing Companies",
+    "WhO are the big 4 auditing Companies",
     "A proposal to a potential sponsorship company",
     "Why does Fischer believe the Nigeria financial environment is not developed enough..."
   ];
@@ -68,7 +68,7 @@ const [index, setIndex] = useState(0);
             </h1>
             <p className="text-[#483C32]/80 text-sm font-bold uppercase tracking-widest flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-[#D4AF37] animate-ping" />
-              30-Day Beta Testing Phase
+              Research Faster, get information into a formatted document in seconds.
             </p>
           </header>
 

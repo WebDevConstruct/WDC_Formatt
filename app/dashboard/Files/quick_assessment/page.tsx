@@ -10,6 +10,8 @@ import Link from "next/link";
 import { studentDataType } from '@/scripts/templatetypes';
 import { Modal } from '@/components/Modal';
 import { EditToolbar } from '@/components/EditToolBar';
+import PDFGeneratingLoader from "@/app/components/PDFGenerationLoader";
+import {FileIcon, SpatulaIcon} from "@/app/components/PDFGenerationLoader";
 export const dynamic = 'force-dynamic';
 
 export const formData = {
@@ -81,7 +83,7 @@ const SectionWrapper: React.FC<SectionProps> = ({ title, id, activeId, setActive
 };
 const TextArea: React.FC<InputProps> = ({ label, value, onChange, placeholder }) => (
   <div className="space-y-1">
-    <label className="text-[9px] font-black uppercase tracking-[0.2em] text-[#483C32]/40 ml-1">{label}</label>
+    <label className="text-[12px] leading-[16px] font-black uppercase tracking-[0.2em] text-[#483C32]/40 ml-1">{label}</label>
     <textarea 
       rows={4}
       value={value}
@@ -101,7 +103,7 @@ interface InputProps {
 
 const InputField: React.FC<InputProps> = ({ label, value, onChange, placeholder }) => (
   <div className="space-y-1">
-    <label className="text-[9px] font-black uppercase tracking-[0.2em] text-[#483C32]/40 ml-1">{label}</label>
+    <label className="text-[12px] leading-[16px] font-black uppercase tracking-[0.2em] text-[#483C32]/40 ml-1">{label}</label>
     <input 
       type="text" 
       value={value}
@@ -181,12 +183,8 @@ type SectionId = 'cover'  | null;
 
 
 export default function QuickAssessment() {
-
-
-
- // 1. Structural State
- const [isMasterEditMode, setIsMasterEditMode] = useState(false);
-const [activeStyleMenu, setActiveStyleMenu] = useState<string | null>(null);
+  const [loadingState, setLoadingState] = useState<boolean>(false);
+   const [creatingPDFState, setCreatingPDFState] = useState<boolean>(false)
   const [openSection, setOpenSection] = useState<SectionId>('cover');
   const [contentBlocks, setContentBlocks] = useState<ContentBlock[]>([
     { id: 0, subHeader: '', paragraph: '' }
@@ -273,7 +271,7 @@ const [bodyReq, setBodyReq] = useState<studentDataType>( {
   };
 
   let currentSection: 'intro' | 'body' | 'concl' | 'refs' = 'intro';
-let useAlphaList = false;
+//let useAlphaList = false;
   lines.forEach((line, index) => {
     // 1. Detect Tags and Metadata
     if (line.startsWith('# TITLE:') ) {
@@ -334,8 +332,8 @@ let useAlphaList = false;
       })
 
       listCounter = 1; // Reset numbering for new section
-      const content = line.replace('## SUBHEADER:', '').trim();
-      useAlphaList= /^\d/.test(content); // N
+     // const content = line.replace('## SUBHEADER:', '').trim();
+      //let useAlphaList= /^\d/.test(content); // N
       return;
     }
     if (line.startsWith('## CONCLUSION:')) {
@@ -374,11 +372,11 @@ let useAlphaList = false;
 
     if (currentSection === 'body') {
 
-    const marker = useAlphaList ? `${String.fromCharCode(96 + listCounter)}.` : `${listCounter}.`;
+   // const marker = useAlphaList ? `${String.fromCharCode(96 + listCounter)}.` : `${listCounter}.`;
           data.body_content.push({
             id: `seg-${crypto.randomUUID()}`,
             role: line.startsWith('### LIST:') ? "lists" : "paragraph",
-           content: line.startsWith('### LIST:') ?   `${marker} ${cleanContent}` : cleanContent,
+           content: line.startsWith('### LIST:') ?   ` ${cleanContent}` : cleanContent,
             index: index,
   
           });
@@ -427,10 +425,7 @@ let useAlphaList = false;
       })
     }
   });
-  
-
   setBodyReq(data);
-  console.log("THE BODY REQUEST: ",data)
   return data;
 }
   // Simulate streaming effect
@@ -464,6 +459,7 @@ const generateAssignment = async()=> {
     console.log(body);
      const {userInput} = body;
   try {
+    setCreatingPDFState(true)
   const response = await fetch("/api/quickassessment-template", {
     method : "POST",
     headers : {
@@ -492,6 +488,8 @@ const generateAssignment = async()=> {
 } catch(error){
   alert("Request failed why trying to generate your pdf")
   throw new Error("Could not Create the Assignment");
+}finally{
+  setCreatingPDFState(false)
 }
 }
 //console.log("SEGMENTS", segments)
@@ -504,10 +502,11 @@ const generateAssignment = async()=> {
 const [chunkdata, setChunkData] = useState("")
   const handleGenerate = async () => {
   
-    setIsParsing(true);
-    
+  
+    setEditMode(false)
 
     try {
+      setLoadingState(true)
    const response = await fetch("/api/quickassessment", {
       method : "POST",
       headers : {"Content-Type" : "application/json"},
@@ -520,13 +519,16 @@ const [chunkdata, setChunkData] = useState("")
       
      })
      if(response.ok){
+         setIsParsing(true);
       const data = await response.text();
+     
+
       setChunkData(data?.toString());
      //  if(typeof chunkData === "string"){
         startAssessment(data?.toString())
      //  }
       
-      console.log("Stream data Expected:", data)
+     console.log("Stream data Expected:", data)
      }else{
 alert("WDC_FORMATT AI is currently down.")
     return;
@@ -538,6 +540,7 @@ alert("WDC_FORMATT AI is currently down.")
       console.error("Axios Stream failed:", error);
       alert("WDC_FORMATT AI is currently down.")
     } finally {
+      setLoadingState(false)
       setIsParsing(false);
     }
   };
@@ -600,8 +603,9 @@ const updateListStyle = (newType: 'bullet' | 'number') => {
         <div className="space-y-8 justify-center flex flex-col items-center w-full md:w-3/4">
           <header className="space-y-2 border-l-4 border-[#D4AF37] pl-6 flex flex-col items-start w-full">
             <h1 className="text-4xl font-serif font-black text-[#483C32] uppercase tracking-tighter italic">Document Architect</h1>
-            <p className="text-[#483C32]/60 text-xs font-bold uppercase tracking-widest flex text-start items-start gap-2">
-              <Layers className="w-3 h-3" /> System Version: 30-Day Beta Cycle
+            <p className="text-[#483C32]/60 text-xs font-bold uppercase flex gap-1 tracking-widest text-start items-start">
+              <Layers className="w-3 h-3" /> What Can I do for you today
+               <span className="text-[#D4AF37] italic">{" "}{user?.username ? user?.username : ""}</span>?
             </p>
           </header>
     <div className="w-full">
@@ -623,7 +627,7 @@ const updateListStyle = (newType: 'bullet' | 'number') => {
               }}
             />
             <InputField 
-              label="Official Title" 
+              label="Topic" 
               value={meta.cover.topic}
               onChange={(val) => setMeta({...meta, cover: {...meta.cover, topic: val}})}
             />
@@ -636,9 +640,9 @@ const updateListStyle = (newType: 'bullet' | 'number') => {
            <div className="space-y-6 pt-4">
             {contentBlocks.map((block, index) => (
               <div key={block.id} className="p-6 bg-white/40 border border-[#483C32]/10 rounded-2xl relative group">
-                <div className="absolute -left-3 top-6 bg-[#483C32] text-[#F2F0E9] text-[9px] px-2 py-1 rounded font-black tracking-widest">
+                {/* <div className="absolute -left-3 top-6 bg-[#483C32] text-[#F2F0E9] text-[9px] px-2 py-1 rounded font-black tracking-widest">
                   BLOCK 0{index + 1}
-                </div>
+                </div> */}
                 {contentBlocks.length > 1 && (
                   <button 
                     onClick={() => removeContentBlock(block.id)}
@@ -768,7 +772,7 @@ const updateListStyle = (newType: 'bullet' | 'number') => {
             setEditMode(false)
             setLivePreviewDefault("review")
           }} isOpen={editMode} >
-<div className={`w-full lg:relative ${segments?.length > 0 ? "absolute top-1/2 lg:top-0" : "lg:block hidden"}`}>
+<div className={`w-full relative   top-1/2 lg:top-0 lg:block`}>
   
   <div className="sticky top-10 h-[calc(100vh-80px)] w-full
    bg-white rounded-[3rem] border-4 border-black/10 overflow-hidden
@@ -1049,21 +1053,32 @@ const updateListStyle = (newType: 'bullet' | 'number') => {
         <span className="text-[9px] font-black uppercase text-black/20 tracking-widest">Active Segments: {segments.length}</span>
         <span className="text-[9px] font-black uppercase text-black animate-pulse">Live Sync Active</span>
       </div>
+
+      <div className="w-full justify-center items-center flex gap-4">
       {segments?.length > 0 && (
         <button onClick={() => {
-         
-        generateAssignment()
+          generateAssignment()
         }}
                 className='bg-black py-4 text-white px-4 rounded-lg text-[12px] uppercase font-bold tracking-widest shadow-md hover:bg-black/80 transition-all'>
           Done
         </button>
+        
       )}
+       <button onClick={() => {
+         handleGenerate()
+        }}
+                className='bg-white py-4 text-black px-4 rounded-lg text-[12px] border-black
+                uppercase font-bold tracking-widest shadow-md hover:bg-black/80 transition-all'>
+          Retry
+        </button>
+      </div>
     </div>
   </div>
 </div>
 </Modal>
         )}
-
+        {loadingState && <PDFGeneratingLoader mainText="Preparing your Content" description="Formatt is formatting the AI output" component={<SpatulaIcon />} />}
+        {creatingPDFState && <PDFGeneratingLoader mainText="Creating your PDF" description="Formatt is generating the PDF file" component={<FileIcon />} />}
       </div>
     </div>
 
