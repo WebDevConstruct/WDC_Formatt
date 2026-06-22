@@ -865,7 +865,7 @@ const updateListStyle = (newType: 'bullet' | 'number') => {
                 editProp?.introContentState   ? 'bg-black text-white' : 'bg-gray-200 text-black/40'
               }`}>
                 {livePreviewDefault === "edit" && (
-                <p className={` `}> introduction Title
+                <p className={` `}> introduction Content
               </p>
 
                  )}

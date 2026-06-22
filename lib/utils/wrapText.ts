@@ -16,7 +16,7 @@ export function wrapText(
   // 1. Handle edge cases for empty or short content
   if (!text) return [];
   
-  const words = text.split(/\s+/); // Split by any whitespace
+  const words = text?.replace(/₦/g, "NGN")?.split(/\s+/); // Split by any whitespace
   const lines: string[] = [];
   let currentLine = "";
 

@@ -1,5 +1,5 @@
 
-import {PDFDocument, PDFFont, StandardFonts, rgb} from "pdf-lib"
+import {PDFDocument, PDFFont, StandardFonts, rgb} from "pdf-lib";
 import { wrapText } from "./utils/wrapText";
 import { db } from "./prisma";
 import { PDFTemplateConfigType, KeyNoteTheme} from "@/scripts/templatetypes";
@@ -195,11 +195,7 @@ export async function compilePDF(
     cursorY -= 5;
 
     // 1.5px solid black decorative rule line
-    contentPage.drawLine({
-      start: { x: marginX, y: cursorY },
-      end: { x: PAGE_WIDTH - marginX, y: cursorY },
-      thickness: 1.5,
-    });
+  
     
     cursorY -= 24; 
   }
