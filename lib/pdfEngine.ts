@@ -7,12 +7,27 @@ import { KeyNoteTemplateConfig } from "@/scripts/seed-template";
 import { studentDataType } from "@/scripts/templatetypes";
 import { renderStaticField, renderSequentialFlow } from "./utils/renderingChunkText";
 import { additionalHeaders } from "@/scripts/templatetypes";
+import {DocumentSegment } from "@/app/dashboard/Files/quick_assessment/assignment/page";
 // Helper to convert Hex to RGB for pdf-lib
+
 const hexToRgb = (hex: string) => {
   const r = hex ?  parseInt(hex.slice(1, 3), 16) / 255 : 0;
   const g = hex ? parseInt(hex.slice(3, 5), 16) / 255 : 0 ;
   const b = hex ?  parseInt(hex.slice(5, 7), 16) / 255 : 0 ;
   return {r, g, b};
+}
+export interface LetterDataConfigType {
+  sender_name: string;
+  recipient_name: string;
+  letter_title ? : string;
+   content : DocumentSegment[];
+   salutation : string;
+   templateName : string;
+      phone : string;
+      email : string;
+      address : string;
+      conclusion : string
+    
 }
 
 
@@ -287,91 +302,168 @@ export async function compilePDF(
 
   return await pdfDoc.save();
 }
-//Original Engine Code
-// export async function compilePDF(template: PDFTemplateConfigType, studentData: studentDataType, headers : Array<additionalHeaders>) {
-//   const pdfDoc = await PDFDocument.create();
-//   const fonts = {
-//     regular: await pdfDoc.embedFont(StandardFonts.TimesRoman),
-//     bold: await pdfDoc.embedFont(StandardFonts.TimesRomanBold)
-//   };
 
-//   // --- PAGE 1: THE FRONT PAGE (Automatic Upper-Middle Centering) ---
-//   const coverPage = pdfDoc.addPage([595, 841]);
-//   let coverY = 600;
+//LETTER ENGINE
+
+
+// Define the precise structure sent from your frontend Track 1 Form
+
+
+export async function compileLetterPDF(letterData: LetterDataConfigType) {
+  const pdfDoc = await PDFDocument.create();
   
-//   const renderCover = (label: string, val: string, y: number) => {
-//     const text = `${label.toUpperCase()} ${val.toUpperCase()}`;
-//     const lines = wrapText(text, 450, fonts.bold, 22);
-//     let curY = y;
-//     lines.forEach(l => {
-//       const w = fonts.bold.widthOfTextAtSize(l, 22);
-//       coverPage.drawText(l, { x: 297.5 - (w/2), y: curY, size: 22, font: fonts.bold });
-//       curY -= 28;
-//     });
-//     return curY - 45;
-//   };
+  const fonts = {
+    regular: await pdfDoc.embedFont(StandardFonts.TimesRoman),
+    bold: await pdfDoc.embedFont(StandardFonts.TimesRomanBold),
+    italic: await pdfDoc.embedFont(StandardFonts.TimesRomanItalic),
+  };
 
-//   coverY = renderCover(`${studentData.assignment_title, coverY ? "TOPIC:" : ""}`, studentData.assignment_title, coverY);
-//   coverY = renderCover("NAME:", studentData.student_name, coverY);
-//   coverY = renderCover(`${studentData.recipientName, coverY ? "TO:" : ""}`, studentData.recipientName, coverY);
-//   headers?.forEach((item)=>  coverY = renderCover(`${item?.subHeader ? `${item?.subHeader}:` : ""}`, item?.paragraph, coverY))
- 
-//   // --- PAGE 2+: DYNAMIC CONTENT ---
-//   let contentPage = pdfDoc.addPage([595, 841]);
-//   let cursorY = 780; // Top Margin
-//   const marginX = 50;
+  const PAGE_WIDTH = 595;  // A4 Standard Dimensions
+  const PAGE_HEIGHT = 841;
+  const marginX = 54;      // Professional 0.75-inch margins
+  const maxTextWidth = PAGE_WIDTH - (marginX * 2);
 
-//   // 1. Render INTRO_TITLE (Bold & Uppercase)
-//   const titleResult = await renderStaticField(
-//     pdfDoc, 
-//     contentPage, 
-//     studentData.intro_title?.toUpperCase(), 
-//     cursorY, 
-//     marginX, 
-//     13, // Slightly larger than body text
-//     fonts.bold
-//   );
+  let currentPage = pdfDoc.addPage([PAGE_WIDTH, PAGE_HEIGHT]);
+  let cursorY = 750; 
+
+  // --- Core Text Wrapping and Overflow Handler ---
+  const renderTextBlock = (text: string, size: number, font: any, lineSpacing: number) => {
+    if (!text) return; 
+    
+    // Split incoming string segments on hard returns to honor explicit paragraph breaks
+    const paragraphs = text.split('\n');
+
+    paragraphs.forEach((paragraph) => {
+      if (paragraph.trim() === '') {
+        cursorY -= (lineSpacing * 0.5);
+        return;
+      }
+
+      const words = paragraph.split(' ');
+      let currentLine = '';
+
+      words.forEach((word) => {
+        const testLine = currentLine ? `${currentLine} ${word}` : word;
+        const width = font.widthOfTextAtSize(testLine, size);
+
+        if (width > maxTextWidth) {
+          if (cursorY < marginX) { 
+            currentPage = pdfDoc.addPage([PAGE_WIDTH, PAGE_HEIGHT]);
+            cursorY = 780;
+          }
+          currentPage.drawText(currentLine, { x: marginX, y: cursorY, size, font });
+          cursorY -= lineSpacing;
+          currentLine = word;
+        } else {
+          currentLine = testLine;
+        }
+      });
+
+      if (currentLine) {
+        if (cursorY < marginX) {
+          currentPage = pdfDoc.addPage([PAGE_WIDTH, PAGE_HEIGHT]);
+          cursorY = 780;
+        }
+        currentPage.drawText(currentLine, { x: marginX, y: cursorY, size, font });
+        cursorY -= lineSpacing;
+      }
+      cursorY -= 6; // Compact block padding for sleek corporate letter layouts
+    });
+  };
+
+  // =================================================================
+  // --- SECTION 1: SENDER METADATA BLOCK (Right-Aligned) ---
+  // =================================================================
+  const renderRightAligned = (text: string, font: any, size: number) => {
+    if (!text) return;
+    const textWidth = font.widthOfTextAtSize(text, size);
+    currentPage.drawText(text, {
+      x: PAGE_WIDTH - marginX - textWidth,
+      y: cursorY,
+      size,
+      font,
+    });
+    cursorY -= (size + 4);
+  };
+
+  renderRightAligned(letterData.sender_name.toUpperCase(), fonts.bold, 11);
+  renderRightAligned(letterData.address, fonts.regular, 10);
+  renderRightAligned(`Phone: ${letterData.phone}`, fonts.regular, 10);
+  renderRightAligned(`Email: ${letterData.email}`, fonts.regular, 10);
+
+  cursorY -= 20; 
+
+  // =================================================================
+  // --- SECTION 2: TIMESTAMP & RECIPIENT BLOCK (Left-Aligned) ---
+  // =================================================================
+  const currentDate = new Date().toLocaleDateString('en-US', {
+    year: 'numeric', month: 'long', day: 'numeric'
+  });
   
-//   contentPage = titleResult.page;
-//   cursorY = titleResult.y - 10; // Tight gap after the title
+  currentPage.drawText(currentDate, { x: marginX, y: cursorY, size: 11, font: fonts.regular });
+  cursorY -= 24;
 
-//   // 2. Render INTRO_CONTENT (Flowing text)
-//   const introResult = await renderStaticField(
-//     pdfDoc, 
-//     contentPage, 
-//     studentData.intro_content, 
-//     cursorY, 
-//     marginX, 
-//     11, 
-//     fonts.regular
-//   );
+  currentPage.drawText(letterData.recipient_name.toUpperCase(), { 
+    x: marginX, y: cursorY, size: 11, font: fonts.bold 
+  });
+  cursorY -= 30;
 
-//   // 3. Render BODY_CONTENT (Automatic Pagination Relay)
-//   const bodyResult = await renderSequentialFlow(
-//     pdfDoc, 
-//     introResult.page, 
-//     studentData.body_content, 
-//     introResult.y - 25, 
-//     marginX, 
-//     11, 
-//     fonts
-//   );
-//   // Conclusion
-//   const conclResult = await renderSequentialFlow(
-//     pdfDoc, bodyResult.page, studentData.concl_content, bodyResult.y - 25, 50, 11, fonts
-//   );
+  // =================================================================
+  // --- SECTION 3: SALUTATION ---
+  // =================================================================
+  currentPage.drawText(letterData.salutation, { 
+    x: marginX, y: cursorY, size: 11, font: fonts.regular 
+  });
+  cursorY -= 24;
 
-//   // References
-//   if (studentData.references) {
-//     const refY = conclResult.y - 35;
-//     conclResult.page.drawText("REFERENCES", { x: 50, y: refY, size: 10, font: fonts.bold });
-//     await renderStaticField(
-//       pdfDoc, conclResult.page, studentData.references, refY - 15, 50, 9, fonts.regular
-//     );
-//   }
+  // =================================================================
+  // --- SECTION 4: SEQUENTIAL CONTENT STREAM PARSING ---
+  // =================================================================
+  // Sorting items dynamically by their structural parsing index to guarantee precise delivery order
+  console.log("I am Alive", letterData?.content);
+  const sortedContent = [...letterData.content].sort((a, b) => a.index - b.index) || [{ id: 'default', role: 'paragraph', content: '', index: 0 }];
 
-//   return await pdfDoc.save();
-// }
+  sortedContent.forEach((segment) => {
+    switch (segment.role) {
+      case 'header':
+        // Renders the single formal letter subject line (# HEADER:)
+        cursorY -= 4;
+        const subjectText = `RE: ${segment.content.toUpperCase()}`;
+        renderTextBlock(subjectText, 11, fonts.bold, 16);
+        
+        // Append crisp horizontal accent line strictly under the subject line text
+        cursorY -= 2;
+        const textWidth = fonts.bold.widthOfTextAtSize(subjectText, 11);
+        currentPage.drawLine({
+          start: { x: marginX, y: cursorY },
+          end: { x: marginX + textWidth, y: cursorY },
+          thickness: 1,
+        });
+        cursorY -= 20;
+        break;
+
+      case 'introduction':
+      case 'paragraph':
+      case 'conclusion':
+        // Continuous block processing for narrative components
+        renderTextBlock(segment.content, 11, fonts.regular, 16);
+        cursorY -= 8;
+        break;
+
+      case 'sign-off':
+        // Adds generous separation spacing layout prior to executing final signature rows
+        cursorY -= 24; 
+        renderTextBlock(segment.content, 11, fonts.regular, 16);
+        break;
+
+      default:
+        renderTextBlock(segment.content, 11, fonts.regular, 16);
+        cursorY -= 8;
+    }
+  });
+
+  return await pdfDoc.save();
+}
 
 //NEW ENGINE CODE
 // export async function compilePDF(template : PDFTemplateConfigType, studentData: studentDataType) {

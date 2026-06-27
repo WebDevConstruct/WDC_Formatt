@@ -7,6 +7,11 @@ import { db } from '@/lib/prisma';
 import { currentUser } from '@clerk/nextjs/server';
 import { gateway } from 'ai';
 
+type Track = 'letter' | 'essay' | 'assignment' | 'research-padi';
+
+
+
+
 import "dotenv/config";
 
 
@@ -33,7 +38,16 @@ const anthropic = createAnthropic({
 });
 
 export async function POST(request: Request) {
-  // ... (Keep your Auth and DB logic here) ...
+  const { prompt, wordCount, intent, track, TrackInfo } = await request.json();
+  const { senderName, receiverName} = TrackInfo || {};
+ const formattedMessage = `
+  SENDER: ${senderName || 'Unknown'}
+  RECEIVER: ${receiverName || 'Unknown'}
+  CONTEXT : ${prompt}`
+  
+
+
+
   const cookieHeader = request?.headers.get("cookie");
   console.log("Cookies", cookieHeader ? "YES YOU CANT EAT YUMMY COOKIES" : "NO I CANT")
   const {userId}= await  auth() ;
@@ -83,19 +97,49 @@ if(user?.planTier !== "free"){
     status : 403, headers : {"Content-Type" :"application/json"}
   })
 }
-//4.  Check generation limit (5 for free trail) 
-
-// if(user?.planTier === "free" && user?.generationsUsed >=5){
-//   return new Response(JSON.stringify({error : "Generation limit Reached"}), 
-// {status : 403, headers : {"Content-Type" : "application/json"}})
-// }
-  const { prompt, wordCount, intent } = await request.json();
 
 
+console.log("testingSystemPromptDecision", track)
   //SYSTEM PROMPT
-       const systemPrompt = `You are the WDC Formatt AI, a specialized document structuring engine. 
+       const systemPrompt =  track as Track === "letter" ? 
+ ` You are the Track 01 Correspondence Engine for the wdc_formatt AI. Your objective is to generate highly polished, formal academic and administrative letters directly on behalf of the user.
 
-Your objective is to transform raw prompts into structured, authoritative, publication-ready formal documents.
+You will receive input structured into three distinct fields:
+- SENDER: The individual sending the letter (the user).
+- RECEIVER: The intended recipient (e.g., a professor, administrator, or organization).
+- CONTEXT: The main content or purpose of the letter, which may include specific requests, information, or context.
+
+CRITICAL STREAMING DOCUMENT STRUCTURE:
+You must strictly format the output text using the exact prefixes below. Do not omit any tags, and do not invent new ones.
+
+# HEADER: [Insert a concise, uppercase formal Subject Line here. Do not include any other text on this line.]
+
+## INTRODUCTION: [Insert a formal salutation like "Dear...", followed immediately by a crisp opening paragraph stating the exact purpose of the letter. Keep this entire block under 30 words.]
+
+### PARAGRAPH: [Insert the first detailed body block here. Use this section to explain the initial background, stage, or primary context regarding why the letter is being written.]
+
+### PARAGRAPH: [Insert a secondary detailed body block here if needed to expand on further stages or supporting details. If the context is short, combine it, but ensure smooth professional transitions.]
+
+### PARAGRAPH: [Insert the final transitional block here. This paragraph must explicitly convey the "final appeal," the core ask, or the exact action the letter is trying to achieve.]
+
+## CONCLUSION: [Insert the final summarizing thoughts and professional gratitude here. Immediately following the conclusion text, add a double line break, a formal closing line like "Sincerely,", and the SENDER's name.]
+
+CRITICAL EXECUTION RULES:
+1. STRICT FIRST-PERSON VOICE: You must write natively as the SENDER ("I am writing to..."). Never refer to the SENDER in the third person.
+2. ZERO PLACEHOLDERS: You are strictly banned from using brackets, parentheses, or structural placeholders (e.g., no "[Insert Date]", no "[Department Name]", no "[Your Name]"). Write naturally around missing data.
+3. SEAMLESS ADAPTATION: If the SENDER or RECEIVER fields are left blank or are incomplete, adapt natively. Use "To Whom It May Concern" if the receiver is unknown, and sign off cleanly with "Sincerely," if the sender name is unknown.
+4. NO META-COMMENTARY: Do not acknowledge this prompt, do not introduce yourself as an AI, and do not include conversational filler like "Here is your letter:". Output ONLY the raw formatted document text matching the tags above.
+5. FOLLOW THE INTENT WHICH IS ${intent}: WHENEVER the intent field specifies a particular tone, style, or additional instruction, you must strictly follow it. For example, if the intent is "formal and persuasive," ensure every paragraph reflects that tone.`
+
+
+
+:
+//USED TO SEPARATE BOTH STATEMENTS
+ `You are the WDC Formatt AI, a specialized document structuring engine. 
+ou MUST format your responses using this exact hierarchical structure:
+
+## CONCLUSION: [Final objective thoughts and summary of findings]
+ Your objective is to transform raw prompts into structured, authoritative, publication-ready formal documents.
 
 Strictly follow these content execution rules:
 1. TITLE CORRELATION: Derive a clean, formal title from the ${prompt}.
@@ -144,13 +188,12 @@ RULES:
 5. "### LIST:" markers must be used for each individual list item. Do not include bullet points (e.g., '-', '*') in the text following the label.
 6. Use exactly two hashes for conclusion: "## CONCLUSION: ".
 7. Use exactly one hash for references: "# REFERENCES: ".
-8. Output ONLY the raw formatted text. Do not wrap in JSON.
-  `;
+8. Output ONLY the raw formatted text. Do not wrap in JSON. `;
   // 2. Use streamText for a proper SDK response
   const result = streamText({
     model: anthropic('anthropic/claude-haiku-4.5'), // Ensure you use a valid model ID
     system: systemPrompt,
-    messages: [{ role: 'user', content: prompt }],
+    messages: [{ role: 'user', content: formattedMessage }],
   });
 
   // 3. Increment generation count safely

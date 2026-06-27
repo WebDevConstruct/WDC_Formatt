@@ -5,7 +5,7 @@ import { useState, useMemo} from "react";
 const ContextHolder  = createContext<any>({});
 export const useGlobalContext = ()=> useContext(ContextHolder);
 export const ContextProvider =({children}: PropsWithChildren)=> {
-    
+    const [trackChange, setTrackChange] = useState<"letter" | "essay" | "assignment" | "research-padi">("assignment");
 const [prompt, setPrompt] = useState("");
 const [intent, setIntent] = useState("");
 const [hFormat, setHFormat] = useState([
@@ -18,7 +18,8 @@ const [shFormat, setSHFormat] = useState([
 ]);
 const [wordCount, setWordCount] = useState(0);
 const [title,setTitle] = useState("");
-const [userDetailsModal, setUserDetailsModal] = useState(false)
+const [userDetailsModal, setUserDetailsModal] = useState(false);
+const [letterPreviewModal, setLetterPreviewModal] = useState(false)
    const holdValues = useMemo(() => ({
     prompt, setPrompt,
     intent, setIntent,
@@ -26,8 +27,9 @@ const [userDetailsModal, setUserDetailsModal] = useState(false)
     shFormat, setSHFormat,
     wordCount, setWordCount,
     title, setTitle,
-    userDetailsModal, setUserDetailsModal
-  }), [prompt, intent, hFormat, shFormat, wordCount, title, userDetailsModal]);
+    userDetailsModal, setUserDetailsModal, trackChange, setTrackChange,
+    letterPreviewModal,  setLetterPreviewModal
+  }), [prompt, intent, hFormat, shFormat, wordCount, title, userDetailsModal, trackChange, letterPreviewModal]);
     return (
         <ContextHolder.Provider value ={holdValues}>
         {children}

@@ -18,7 +18,7 @@ import { Settings2,
   import { useGlobalContext } from '@/app/Context';
   import { KeynoteSection } from '../../Slides/page';
   import {createWorker} from "tesseract.js";
-  import { DocumentSegment } from '../quick_assessment/page';
+  import { DocumentSegment } from '../quick_assessment/assignment/page';
   import { studentDataType } from '@/scripts/templatetypes';
 // --- TYPES & INTERFACES ---
 

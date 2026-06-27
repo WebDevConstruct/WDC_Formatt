@@ -1,7 +1,7 @@
 import { PDFPlaceholder } from "@/scripts/templatetypes";
 import { PDFFont } from "pdf-lib";
 import { wrapText } from "./wrapText";
-import { DocumentSegment } from "@/app/dashboard/Files/quick_assessment/page";
+import { DocumentSegment } from "@/app/dashboard/Files/quick_assessment/assignment/page";
 // export function renderSingleField(page: any, text: string, config: PDFPlaceholder, fonts: any) {
 //   const activeFont = config.isBold ? fonts.bold : fonts.regular;
   

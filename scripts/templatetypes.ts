@@ -1,4 +1,4 @@
-import { DocumentSegment } from "@/app/dashboard/Files/quick_assessment/page";
+import { DocumentSegment } from "@/app/dashboard/Files/quick_assessment/assignment/page";
 export type PlaceholderType = 'header' | 'subheader' | 'paragraph';
 
 

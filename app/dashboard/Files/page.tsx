@@ -3,7 +3,6 @@ import React, {useState} from 'react';
 import { CheckCircle2, ArrowRight, Gem, Compass, Shield,BookOpenCheck } from 'lucide-react';
 import Link from "next/link";
 import Image from "next/image";
-
 const TEMPLATES = [
   {
     id: 'quick',
