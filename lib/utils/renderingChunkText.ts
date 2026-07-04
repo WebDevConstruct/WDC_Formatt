@@ -1,7 +1,8 @@
 import { PDFPlaceholder } from "@/scripts/templatetypes";
 import { PDFFont } from "pdf-lib";
 import { wrapText } from "./wrapText";
-import { DocumentSegment } from "@/app/dashboard/Files/quick_assessment/assignment/page";
+import {PDFDocument, rgb} from "pdf-lib"
+
 // export function renderSingleField(page: any, text: string, config: PDFPlaceholder, fonts: any) {
 //   const activeFont = config.isBold ? fonts.bold : fonts.regular;
   
@@ -20,46 +21,53 @@ import { DocumentSegment } from "@/app/dashboard/Files/quick_assessment/assignme
 //   });
 // }
 
-/**
- * Renders an array of ContentRoles (Body or Conclusion) with relative vertical tracking.
- * 
- * @param page - The pdf-lib page object.
- * @param content - Array of objects (subheaders, paragraphs, lists).
- * @param startY - The vertical anchor point to begin drawing.
- * @param x - The horizontal margin (X-coordinate).
- * @param size - The base font size for paragraphs.
- * @param fonts - Object containing { regular, bold } PDFFonts.
- * @returns The final cursorY position for the next section.
- */
+// /**
+//  * Renders an array of ContentRoles (Body or Conclusion) with relative vertical tracking.
+//  * 
+//  * @param page - The pdf-lib page object.
+//  * @param content - Array of objects (subheaders, paragraphs, lists).
+//  * @param startY - The vertical anchor point to begin drawing.
+//  * @param x - The horizontal margin (X-coordinate).
+//  * @param size - The base font size for paragraphs.
+//  * @param fonts - Object containing { regular, bold } PDFFonts.
+//  * @returns The final cursorY position for the next section.
+//  */
 
-export async function renderStaticField(
-  pdfDoc: any,
-  currentPage: any,
-  text: string,
-  y: number,
-  x: number,
-  size: number,
-  font: any,
-  maxWidth: number = 500
-): Promise<{ page: any; y: number }> {
-  const lines = wrapText(text, maxWidth, font, size);
-  let currentY = y;
-  let page = currentPage;
+// export async function renderStaticField(
+//   pdfDoc: PDFDocument,
+//   page: any,
+//   content: string,
+//   y: number,
+//   margin: number,
+//   fontSize: number,
+//   font: any
+// ): Promise<{ page: any; y: number }> {
+//   let currentPage = page;
+//   let currentY = y;
+//   const { width, height } = currentPage.getSize();
+//   const maxWidth = width - (margin * 2);
+//   const lineSpacing = fontSize + 4;
 
-  for (const line of lines) {
-    // THRESHOLD CHECK: If we are 50pt from the bottom, swap pages
-    if (currentY < 50) {
-      page = pdfDoc.addPage([595, 841]);
-      currentY = 780; // Reset to top margin
-    }
+//   if (!content) return { page: currentPage, y: currentY };
 
-    page.drawText(line, { x, y: currentY, size, font });
-    currentY -= (size * 1.3);
-  }
-
-  return { page, y: currentY };
-}
-
+//   const lines = wrapText(content, maxWidth, font, fontSize);
+//   for (const line of lines) {
+//     // Dynamic Pagination Check
+//     if (currentY - lineSpacing < margin) {
+//       currentPage = pdfDoc.addPage([width, height]);
+//       currentY = height - margin;
+//     }
+//     currentPage.drawText(line, {
+//       x: margin,
+//       y: currentY - fontSize,
+//       size: fontSize,
+//       font,
+//       color: rgb(0.15, 0.15, 0.15),
+//     });
+//     currentY -= lineSpacing;
+//   }
+//   return { page: currentPage, y: currentY };
+// }
 //This is for Arrayed item?.varName
 
 //OLD CODE
@@ -93,111 +101,133 @@ export async function renderStaticField(
 //     cursorY -= 6;
 //   });
 // }
-//NEW CODE
-export async function renderSequentialFlow(
-  pdfDoc: any,
-  currentPage: any,
-  content: DocumentSegment[],
-  startY: number,
-  x: number,
-  size: number,
-  fonts: { regular: any; bold: any }
-): Promise<{ page: any; y: number }> {
-  let cursorY = startY;
-  let page = currentPage;
-  const maxWidth = 500;
-  
-  // Explicit Layout Indentations & Spacing for Lists
-  const listLeftIndent = 25;  // Indentation pushing the numbers in from the left hand side
-  const numberWidth = 18;     // Allocated horizontal space for the number characters
-  const horizontalGap = 10;   // The explicit space separating the number dot from the first word
-  const totalTextShift = listLeftIndent + numberWidth + horizontalGap;
+// Parses sequential item arrays, capturing subheaders to apply measured underlining
+ 
+const BASELINE = 12; // Base font size
+const LINE_HEIGHT = BASELINE * 1.4;
+// type PDF_LAYOUT_TYPE = {
+//    MARGIN_TOP: number,
+//   MARGIN_BOTTOM: number,
+//   // Spacing applied before/after components
+//   SPACING: {
+//     HEADER: number,    // Major section break
+//     SUBHEADER: number,  // Subsection break
+//     PARAGRAPH: number,// Standard text gap
+//     LIST_ITEM: number,// Tight grouping for lists
+//   }
+// // }
+// export const PDF_LAYOUT = {
+//   MARGIN_TOP: 50,
+//   MARGIN_BOTTOM: 50,
+//   // Spacing applied before/after components
+//   SPACING : {
+//     HEADER: BASELINE * 3,    // Major section break
+//     SUBHEADER: BASELINE * 2,  // Subsection break
+//     PARAGRAPH: BASELINE * 1.5,// Standard text gap
+//     LIST_ITEM: BASELINE * 1.2,// Tight grouping for lists
+//   }
+// };
 
-  // Running tracking index to dynamically sequence the lists starting at 1
-  let listCounter = 1;
+//SPACING FRAMEWORK
+// Add this as the core manager in compilePDF
+// export async function renderPageBlock(
+//   role: string,
+//   content: string,
+//   context: { page: any, y: number, doc: any }
+// ) {
+//   const spacing = PDF_LAYOUT.SPACING[role.toUpperCase()] || PDF_LAYOUT.SPACING.PARAGRAPH;
 
-  for (let i = 0; i < content.length; i++) {
-    const item = content[i];
-    const isSubheader = item.role === "subheader" || item.role === "header" || item.role === "title";
-    const isList = item.role === "lists";
+//   // 1. Mandatory Top Buffer
+//   const targetY = context.y - spacing;
 
-    // If we transition out of a list block, reset the counter state for the next group
-    if (!isList) {
-      listCounter = 1;
-    }
-
-    // --- 1. DETECT AND RENDER LISTS ---
-    if (isList) {
-      // It must be a list, it must start on its own line, and it must have a dot after it
-      const numberToken = `${listCounter}.`; 
-      
-      // Calculate wrapped text boundaries, constrained to avoid bleeding back under the numbers
-      const availableTextWidth = maxWidth - totalTextShift;
-      const textLines = wrapText(item.content, availableTextWidth, fonts.regular, size);
-      
-      // Calculate layout block bounding boxes for pagination safety checks
-      const blockHeight = textLines.length * (size * 1.3) + 15;
-      if (cursorY - blockHeight < 50) {
-        page = pdfDoc.addPage([595, 841]);
-        cursorY = 780;
-      }
-
-      // Draw the Number prefix (Indented from left edge, Forced Bold)
-      page.drawText(numberToken, {
-        x: x + listLeftIndent, 
-        y: cursorY,
-        size: size,
-        font: fonts.bold, 
-      });
-
-      // Draw the descriptive Text lines (Shifted further right to clear numbers, Forced Regular)
-      let textCursorY = cursorY;
-      textLines.forEach((line) => {
-        page.drawText(line, {
-          x: x + totalTextShift, 
-          y: textCursorY,
-          size: size,
-          font: fonts.regular, 
-        });
-        textCursorY -= (size * 1.3); // Consistent line height spacing within a paragraph row block
-      });
-
-      // Spacing layout rule: Give the bottom of list items an explicit, uniform vertical gap
-      cursorY = textCursorY - 12; 
-      
-      listCounter++; // Increment sequentially for the next sibling list element line
-      continue;
-    }
-
-    // --- 2. RENDER PARAGRAPHS & HEADINGS ---
-    const font = isSubheader ? fonts.bold : fonts.regular;
-    const currentSize = item.role === "title" ? size + 4 : item.role === "header" ? size + 2 : isSubheader ? size + 1 : size;
+//   // 2. Proactive Page Break check
+//   if (targetY < PDF_LAYOUT.MARGIN_BOTTOM) {
+//     // Add a new page and capture it
+//     const newPage = context.doc.addPage([595, 841]); // Using your standard letter/A4 dimensions
+//     context.page = newPage;
     
-    const lines = wrapText(item.content, maxWidth, font, currentSize);
-    const blockHeight = lines.length * (currentSize * 1.3) + 15;
+//     // Reset Y to the top margin of the new page
+//     // (Assuming PAGE_HEIGHT is 841 and MARGIN_TOP is 50)
+//     context.y = 841 - PDF_LAYOUT.MARGIN_TOP;
+//   } else {
+//     context.y = targetY;
+//   }
+// }
+// export async function renderSequentialFlow(
+//   pdfDoc: PDFDocument,
+//   page: any,
+//   segments: any[],
+//   y: number,
+//   margin: number,
+//   fontSize: number,
+//   fonts: { regular: any; bold: any },
+//   state: any
+// ): Promise<{ page: any; y: number }> {
+//   let currentPage = page;
+//   let currentY = y;
+//   const { height } = currentPage.getSize();
+//   const maxWidth = 595 - (margin * 2);
+//   const MARGIN_BOTTOM = 80; // Fixed footer buffer
+//   const MARGIN_TOP = 80;    // Fixed header buffer
+  
+//   // Tighter, academic leading
+//   const LINE_HEIGHT = fontSize * 1;
 
-    if (cursorY - blockHeight < 50) {
-      page = pdfDoc.addPage([595, 841]);
-      cursorY = 780;
-    }
+//   for (const segment of segments) {
+//     const safeContent = segment.content?.replace(/[\r\n]+/g, ' ').replace(/\s+/g, ' ').trim() || "";
+//     if (!safeContent) continue;
 
-    if (isSubheader) cursorY -= 12;
+//     // Helper: Reset to Top Margin
+//     const resetPage = () => {
+//       currentPage = pdfDoc.addPage([595, 841]);
+//       currentY = 841 - MARGIN_TOP;
+//     };
 
-    lines.forEach((line) => {
-      page.drawText(line, {
-        x: x, // Standard text blocks match original flush left-hand margin bounds
-        y: cursorY,
-        size: currentSize,
-        font: font,
-      });
-      cursorY -= (currentSize * 1.3);
-    });
+//     switch (segment.role) {
+//       case 'header': {
+//         if (currentY - 50 < MARGIN_BOTTOM) resetPage();
+//         currentPage.drawText(safeContent.toUpperCase(), { x: margin, y: currentY, size: fontSize + 4, font: fonts.bold });
+//         currentY -= (fontSize * 2.5);
+//         break;
+//       }
 
-    cursorY -= 14; // Default vertical padding spacing between distinct body paragraphs
-  }
+//       case 'subheader': {
+//         state.listIndex = 1;
+//         if (currentY - 40 < MARGIN_BOTTOM) resetPage();
+//         currentPage.drawText(safeContent.toUpperCase(), { x: margin, y: currentY, size: fontSize + 2, font: fonts.bold });
+//         currentY -= (fontSize * 1.5);
+//         break;
+//       }
 
-  return { page, y: cursorY };
-}
+//       case 'lists': {
+//         const lines = wrapText(safeContent, maxWidth - 30, fonts.regular, fontSize);
+//         if (currentY - (lines.length * LINE_HEIGHT) < MARGIN_BOTTOM) resetPage();
+        
+//         currentPage.drawText(`${state.listIndex}.`, { x: margin, y: currentY, font: fonts.bold, size: fontSize });
+//         for (const line of lines) {
+//           currentPage.drawText(line, { x: margin + 25, y: currentY, font: fonts.regular, size: fontSize });
+//           currentY -= LINE_HEIGHT;
+//         }
+//         state.listIndex++;
+//         currentY -= (LINE_HEIGHT * 0.5);
+//         break;
+//       }
+
+//       case 'paragraph':
+//       default: {
+//         const lines = wrapText(safeContent, maxWidth, fonts.regular, fontSize);
+//         for (const line of lines) {
+//           if (currentY - LINE_HEIGHT < MARGIN_BOTTOM) resetPage();
+//           currentPage.drawText(line, { x: margin, y: currentY, size: fontSize, font: fonts.regular });
+//           currentY -= LINE_HEIGHT;
+//         }
+//         currentY -= (LINE_HEIGHT * 0.5);
+//         break;
+//       }
+//     }
+//   }
+//   return { page: currentPage, y: currentY };
+//}
 //ORIGINAL CODE
 // export async function renderSequentialFlow(
 //   pdfDoc: any,

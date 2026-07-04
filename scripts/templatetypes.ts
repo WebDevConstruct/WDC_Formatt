@@ -72,19 +72,19 @@ export type studentDataType = {
 // }
 
 // This is the union type that Prisma needs to map to
-//export type PlaceholderField = HeaderField | ParagraphField;
-export type PDFPlaceholder = {
-  varName: keyof  studentDataType;
-  type: PlaceholderType;   
-  x: number;             // Horizontal coordinate on A4 (0-595)
-  y: number;             // Vertical coordinate on A4 (0-841)
-  fontSize: number;      // Pt size of the text
-  isBold: boolean;       // Determines if fontBold or fontRegular is used
-  color?: { r: number; g: number; b: number };
-  format?: 'currency' | 'date' | 'uppercase' | 'none';
-  alignment?: 'left' | 'center' | 'right';
-  maxWidth: number;
-  lineHeights: number;   // Optional: Boundary for the wrapping engine
+export interface PDFPlaceholder {
+  varName: string;
+  type: PlaceholderType;
+  x: number;
+  y: number;
+  fontSize?: number;
+  isBold?: boolean;
+  color?: 'primary' | 'secondary';
+  fontFamily?: string;
+  maxWidth?: number;
+  lineHeights?: number;  // renamed from lineHeight to match your template
+  width?: number;
+  height?: number;
 }
 
 export interface PDFTemplateConfigType {
@@ -101,7 +101,7 @@ export interface PDFTemplateConfigType {
     signatureUrl?: string;
     backgroundUrl?: string;
   };
-   placeholders: PDFPlaceholder[]
+  placeholders: PDFPlaceholder[];
 }
 
 //kEYNOTE TEMPLATE CONFIG TYPES

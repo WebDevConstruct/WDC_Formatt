@@ -1,7 +1,8 @@
 'use client';
-import { useState } from 'react';
+import { useState , useRef} from 'react';
 import { Settings2, FileText, Send, 
- Terminal, Monitor, Layers, Layout, ChevronDown, Plus, Trash2,} from "lucide-react";
+ Terminal, Monitor, Layers, Layout, ChevronDown, Plus, Trash2,
+ TruckElectric,} from "lucide-react";
 import { useGlobalContext } from '@/app/Context';
 import Image from "next/image";
 import { useUser } from '@clerk/nextjs';
@@ -133,7 +134,7 @@ type FormatDropDownType = {
 
 //The Roles played by each formatted text in the PDF.
 // 1. Define the Anatomy of the Document
-export type TextRole = 'title' | 'subheader' | 'paragraph' | "lists" | 'conclusion' |"introduction" | "header" | "reference" | "sign-off";
+export type TextRole = 'title' | 'subheader' | 'paragraph' | "lists" | 'conclusion' |"introduction" | "header" | "reference" |  "quote";
 
 export interface DocumentSegment {
   id: string;
@@ -258,188 +259,7 @@ const [bodyReq, setBodyReq] = useState<studentDataType>( {
   //FILTERING OUT THE DOCUMENT ROLES FOR EASY MODIFICATION
 //console.log(contentBlocks);
   //The Chunk Parser
-  function parseChunk(rawText: string): studentDataType {
-  const lines = rawText.split('\n').map(l => l.trim()).filter(l => l.length > 0);
-  console.log(lines);
- let listCounter = 1;
-
-  const data: studentDataType =  {
-    assignment_title:  meta?.cover?.topic ? meta?.cover?.topic : "", 
-    student_name:   meta?.cover?.author ? meta?.cover?.author: user ?
-     `${user?.firstName ? user?.firstName + " " + user?.lastName : user?.username }` : "",
-     recipientName :  meta?.cover?.recipient ? meta?.cover?.recipient : "" , 
-    intro_title : "" , 
-
-    intro_content: "",
-    body_title:  [],
-    lists : [],
-    body_content: [],
-    concl_title : "",
-    concl_content: [],
-    references:  ""
-  };
-
-  let currentSection: 'intro' | 'body' | 'concl' | 'refs' = 'intro';
-//let useAlphaList = false;
-  lines.forEach((line, index) => {
-    // 1. Detect Tags and Metadata
-    if (line.startsWith('# TITLE:') ) {
-      data.assignment_title =  meta?.cover?.topic ? meta?.cover?.topic :  line.replace('# TITLE:', '').trim()
-      const actualContent = meta?.cover?.topic ? meta?.cover?.topic : 
-      line.replace('# TITLE:', '').trim();
-      segments?.push({
-       id : `seg-${crypto.randomUUID()}`,
-       role : "title",
-      content : actualContent,
-       index : index,
-      
-      })
-      return;
-    }
-    if (line.startsWith('# HEADER:')) {
-      data.intro_title = line.replace('# HEADER:', '').trim();
-        const actualContent = line.replace('# HEADER:', '').trim();
-          segments?.push({
-       id : `seg-${crypto.randomUUID()}`,
-       role : "header",
-       content : actualContent,
-       index : index,
-
-      })
-      return;
-    }
-    
-    // 2. Section Switching Logic
-    if (line.startsWith('## INTRODUCTION:')) {
-      data.intro_content = line.replace('## INTRODUCTION:', '').trim();
-       const actualContent = line.replace('## INTRODUCTION:', '').trim();
-          segments?.push({
-       id : `seg-${crypto.randomUUID()}`,
-       role : "introduction",
-    content : actualContent,
-       index : index,
-     
-      })
-      currentSection = 'intro';
-      return;
-    }
-    if (line.startsWith('## SUBHEADER:')) {
- const actualContent = line.replace('## SUBHEADER:', '').trim()
-      currentSection = 'body'; 
-      data.body_content.push({
-        id: crypto.randomUUID(), // Native unique ID
-        role: "subheader",
-    content: line.replace('## SUBHEADER:', '').trim(),
-        index: index
-      });
-       //  const actualContent = line.replace('## SUBHEADER:', '').trim();
-          segments?.push({
-       id : `seg-${crypto.randomUUID()}`,
-       role : "subheader",
-    content : actualContent,
-       index : index,
-      })
-
-      listCounter = 1; // Reset numbering for new section
-     // const content = line.replace('## SUBHEADER:', '').trim();
-      //let useAlphaList= /^\d/.test(content); // N
-      return;
-    }
-    if (line.startsWith('## CONCLUSION:')) {
-      const concContent =  line.replace('## CONCLUSION:', '').trim();
-      currentSection = 'concl';
-      data.concl_content.push({
-        id: crypto.randomUUID(), // Native unique ID
-        role: "conclusion",
-        content: line.replace('## CONCLUSION:', '').trim(),
-        index : index
-      });
-       
-          segments?.push({
-       id : `seg-${crypto.randomUUID()}`,
-       role : "conclusion",
-      content : concContent,
-       index : index,
-    
-      })
-  
-      //   segments?.push({
-      //  id : `seg-${crypto.randomUUID()}`,
-      //  role : "paragraph",
-      //  content : actualContent,
-      //  index : index
-      // })
-      return;
-    }
-    if (line.startsWith('# REFERENCES:')) {
-      currentSection = 'refs';
-      data.references = line.replace('# REFERENCES:', '').trim();
-      return;
-    }
-
-    // 3. Content Allocation
-    const cleanContent = line.replace('### PARAGRAPH:', '').replace('### LIST:', '').trim();
-
-    if (currentSection === 'body') {
-
-   // const marker = useAlphaList ? `${String.fromCharCode(96 + listCounter)}.` : `${listCounter}.`;
-          data.body_content.push({
-            id: `seg-${crypto.randomUUID()}`,
-            role: line.startsWith('### LIST:') ? "lists" : "paragraph",
-           content: line.startsWith('### LIST:') ?   ` ${cleanContent}` : cleanContent,
-            index: index,
-  
-          });
-          if(line?.startsWith("### LIST:")){
-          listCounter++;
-          }
-      //if lists
-     
-      //if paragraphs
-         segments?.push({
-       id : `seg-${crypto?.randomUUID()}`,
-       role :line.startsWith('### LIST:') ? "lists" : "paragraph",
-     content : cleanContent,
-       index :index,
-
-      })
-
-    } else if (currentSection === 'concl') {
-        const actualContent = line.replace('## CONCLUSION:', '').replace('### PARAGRAPH:', '').trim();
-      data.concl_content.push({
-        id: `seg-${crypto?.randomUUID()}`,
-        role: "paragraph",
-       content: cleanContent,
-        index: index,
-  
-      
-      });
-      
-        segments?.push({
-       id : `seg-${crypto?.randomUUID()}`,
-       role : line?.startsWith("## CONCLUSION") ? "conclusion" : "paragraph",
-      content : actualContent,
-    index : index,
-
-      })
-      //THE SUBCONTENT UNDER CONCLUSION
-     
-    } else if (currentSection === 'refs') {
-      data.references += (data.references ? "\n" : "") + cleanContent;
-         const actualContent = line.replace('### PARAGRAPH:', '').trim();
-          segments?.push({
-       id : `seg-${crypto.randomUUID()}`,
-       role : "reference",
-       content : actualContent,
-       index : index,
-      })
-    }
-  });
-  setBodyReq(data);
-  return data;
-
-  
-}
+ 
 // const [letterReq, setLetterReq] = useState<LetterDataConfigType>({
 //     sender_name :'',
 //       recipient_name : "",
@@ -498,27 +318,16 @@ const generateAssignment = async()=> {
   setCreatingPDFState(false)
 }
 }
+ const rawBufferChunk = useRef<string>("") ;
+ const containerRef = useRef<HTMLDivElement | null>(null);
 
-   const startAssessment = (chunkValue : string) => {
-  //  setIsParsing(true);
-    setEditMode(true)
-    console.log(chunkValue)
-   // setSegments([]);
-  parseChunk(chunkValue)
+ 
+ // setIsParsing(true)
     // parseLetterOutput(chunkValue)
  
     
     // Simulate gradual UI appearance
-    let i = 0;
-    const interval = setInterval(() => {
-      setDisplayedText(chunkValue.slice(0, i));
-      i += 5;
-      if (i > chunkValue.length) {
-        clearInterval(interval);
-        setIsParsing(false);
-      }
-    }, 1000);
-  };
+
 
 
 
@@ -531,57 +340,263 @@ const generateAssignment = async()=> {
 //const paragraph = segments.filter((item)=> ( item?.role === "paragraph"));
 
 
+function parseChunk(rawText: string): studentDataType {
+  const lines = rawText.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+
+  let listCounter = 1;
+
+  // 🔥 FIX: Clear the external segments tracker array completely before re-parsing
+  // This prevents lines 1, 2, and 3 from duplicating when token 4 arrives.
+  if (segments) {
+    segments.length = 0; 
+  }
+
+  const data: studentDataType = {
+    assignment_title: meta?.cover?.topic ? meta?.cover?.topic : "", 
+    student_name: meta?.cover?.author ? meta?.cover?.author : user ?
+      `${user?.firstName ? user?.firstName + " " + user?.lastName : user?.username }` : "",
+    recipientName: meta?.cover?.recipient ? meta?.cover?.recipient : "", 
+    intro_title: "", 
+    intro_content: "",
+    body_title: [],
+    lists: [],
+    body_content: [],
+    concl_title: "",
+    concl_content: [],
+    references: ""
+  };
+
+  let currentSection: 'intro' | 'body' | 'concl' | 'refs' = 'intro';
+
+  lines.forEach((line, index) => {
+    // 1. Detect Tags and Metadata
+    if (line.startsWith('# TITLE:')) {
+      data.assignment_title = meta?.cover?.topic ? meta?.cover?.topic : line.replace('# TITLE:', '').trim();
+      const actualContent = meta?.cover?.topic ? meta?.cover?.topic : line.replace('# TITLE:', '').trim();
+      segments?.push({
+        id: `seg-${crypto.randomUUID()}`,
+        role: "title",
+        content: actualContent,
+        index: index,
+      });
+      return;
+    }
+    if (line.startsWith('# HEADER:')) {
+      data.intro_title = line.replace('# HEADER:', '').trim();
+      const actualContent = line.replace('# HEADER:', '').trim();
+      segments?.push({
+        id: `seg-${crypto.randomUUID()}`,
+        role: "header",
+        content: actualContent,
+        index: index,
+      });
+      return;
+    }
+    
+    // 2. Section Switching Logic
+    if (line.startsWith('## INTRODUCTION:')) {
+      data.intro_content = line.replace('## INTRODUCTION:', '').trim();
+      const actualContent = line.replace('## INTRODUCTION:', '').trim();
+      segments?.push({
+        id: `seg-${crypto.randomUUID()}`,
+        role: "introduction",
+        content: actualContent,
+        index: index,
+      });
+      currentSection = 'intro';
+      return;
+    }
+    if (line.startsWith('## SUBHEADER:')) {
+      const actualContent = line.replace('## SUBHEADER:', '').trim();
+      currentSection = 'body'; 
+      data.body_content.push({
+        id: crypto.randomUUID(),
+        role: "subheader",
+        content: line.replace('## SUBHEADER:', '').trim(),
+        index: index
+      });
+      segments?.push({
+        id: `seg-${crypto.randomUUID()}`,
+        role: "subheader",
+        content: actualContent,
+        index: index,
+      });
+
+      listCounter = 1; // Reset numbering for new section
+      return;
+    }
+    if (line.startsWith('## CONCLUSION:')) {
+      const concContent = line.replace('## CONCLUSION:', '').trim();
+      currentSection = 'concl';
+      data.concl_content.push({
+        id: crypto.randomUUID(),
+        role: "conclusion",
+        content: line.replace('## CONCLUSION:', '').trim(),
+        index: index
+      });
+       
+      segments?.push({
+        id: `seg-${crypto.randomUUID()}`,
+        role: "conclusion",
+        content: concContent,
+        index: index,
+      });
+      return;
+    }
+    if (line.startsWith('### QUOTE:')) {
+  const raw   = line.replace('### QUOTE:', '').trim();
+  const parts = raw.split('|').map(s => s.trim());
+  const attribution = parts[0] ?? '';
+  const quoteText   = parts[1] ?? '';
+
+  // Store as a single content string — renderer splits on | again
+  data.body_content.push({
+    id:      crypto.randomUUID(),
+    role:    'quote',
+    content: `${attribution} | ${quoteText}`,
+    index,
+  });
+
+  segments?.push({
+    id:      `seg-${crypto.randomUUID()}`,
+    role:    'quote',
+    content: `${attribution} | ${quoteText}`,
+    index,
+  });
+  return;
+}
+    if (line.startsWith('# REFERENCES:')) {
+      currentSection = 'refs';
+      data.references = line.replace('# REFERENCES:', '').trim();
+      return;
+    }
+
+    // 3. Content Allocation
+    const cleanContent = line.replace('### PARAGRAPH:', '').replace('### LIST:', '').trim();
+
+    if (currentSection === 'body') {
+      data.body_content.push({
+        id: `seg-${crypto.randomUUID()}`,
+        role: line.startsWith('### LIST:') ? "lists" : "paragraph",
+        content: line.startsWith('### LIST:') ? `${cleanContent}` : cleanContent,
+        index: index,
+      });
+      if (line?.startsWith("### LIST:")) {
+        listCounter++;
+      }
+     
+      segments?.push({
+        id: `seg-${crypto?.randomUUID()}`,
+        role: line.startsWith('### LIST:') ? "lists" : "paragraph",
+        content: listCounter  +  cleanContent,
+        index: index,
+      });
+      data?.lists?.push({
+           id: `seg-${crypto?.randomUUID()}`,
+        role: line.startsWith('### LIST:') ? "lists" : "paragraph",
+        content: listCounter  +  cleanContent,
+        index: index,
+      })
+
+    } else if (currentSection === 'concl') {
+      const actualContent = line.replace('## CONCLUSION:', '').replace('### PARAGRAPH:', '').trim();
+      data.concl_content.push({
+        id: `seg-${crypto?.randomUUID()}`,
+        role: "paragraph",
+        content: cleanContent,
+        index: index,
+      });
+      
+      segments?.push({
+        id: `seg-${crypto?.randomUUID()}`,
+        role: line?.startsWith("## CONCLUSION") ? "conclusion" : "paragraph",
+        content: actualContent,
+        index: index,
+      });
+     
+    } else if (currentSection === 'refs') {
+      data.references += (data.references ? "\n" : "") + cleanContent;
+      const actualContent = line.replace('### PARAGRAPH:', '').trim();
+      segments?.push({
+        id: `seg-${crypto.randomUUID()}`,
+        role: "reference",
+        content: actualContent,
+        index: index,
+      });
+    }
+  });
+  setBodyReq(data);
+  return data;
+}
 
 //GETTING THE CHUNK OF TEXT FROM AI SDK
-const [chunkdata, setChunkData] = useState("")
-  const handleGenerate = async () => {
-  
-  
-    setEditMode(false)
+const throttleRef = useRef<NodeJS.Timeout | null>(null);
+const handleGenerate = async () => {
+  setEditMode(false);
 
-    try {
-      setLoadingState(true)
-   const response = await fetch("/api/quickassessment", {
-      method : "POST",
-      headers : {"Content-Type" : "application/json"},
-      credentials : "include",
-      body : JSON.stringify({
+  try {
+    setLoadingState(true);
+    const response = await fetch("/api/quickassessment", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({
         prompt, 
         intent,
         wordCount,
-        track : "assignment",
-        
+        track: "assignment",
       })
-      
-     })
-     if(response.ok){
-         setIsParsing(true);
-      const data = await response.text();
-     
+    });
 
-      setChunkData(data?.toString());
-     //  if(typeof chunkData === "string"){
-  
-        startAssessment(data?.toString())
+    if (response.ok) {
+      setLoadingState(false);
+      const reader = response?.body?.getReader();
+      setEditMode(true);
+      const decoder = new TextDecoder("utf-8");
+      if (!reader) return;
      
-     //  }
-      
-     console.log("Stream data Expected:", data)
-     }else{
-alert("WDC_FORMATT AI is currently down.")
-    return;
-     }
+      // Reset your buffer clearing tracking parameters
+      rawBufferChunk.current = "";
 
+      // Stream Ingestion loop
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        const incomingTextChunk = decoder.decode(value, { stream: true });
+        
+        // 1. Instantly append incoming text fragments to your mutable ref cache
+        rawBufferChunk.current += incomingTextChunk;
+
+        // 2. 🔥 PROGRESSIVE RENDER: Execute parser inside a throttled timer block
+        // If a parser refresh is already queued up, skip execution to save cycles
+        if (!throttleRef.current) {
+          throttleRef.current = setTimeout(() => {
+            parseChunk(rawBufferChunk.current);
+            throttleRef.current = null; // Open up the processing lock
+          }, 75); // 75ms balances fluid updates with minimal Virtual DOM churn
         }
-    
-     catch (error) {
-      console.error("Axios Stream failed:", error);
-      alert("WDC_FORMATT AI is currently down.")
-    } finally {
-      setLoadingState(false)
-      setIsParsing(false);
+      }
+
+      // 3. Guarantee a final catch-up frame when the stream closes completely
+      if (throttleRef.current) {
+        clearTimeout(throttleRef.current);
+        throttleRef.current = null;
+      }
+      parseChunk(rawBufferChunk.current);
+
+    } else {
+      alert("WDC_FORMATT AI is currently down.");
+      return;
     }
-  };
+  } catch (error) {
+    console.error("Axios Stream failed:", error);
+    alert("WDC_FORMATT AI is currently down.");
+  } finally {
+    setLoadingState(false);
+    setIsParsing(false);
+  }
+};
 //Filter the headerFormats to known which of both or both goes to the backend
 const [editingId, setEditingId] = useState<string | null>(null);
 const [livePreviewDefault, setLivePreviewDefault] = useState("review")

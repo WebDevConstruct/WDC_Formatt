@@ -1,6 +1,6 @@
 "use client"
 import { LetterDataConfigType } from '@/lib/pdfEngine';
-import {useState, useEffect} from "react";
+import {useState, useEffect, useRef} from "react";
 import {useUser} from "@clerk/nextjs"
 import { InputField } from '../assignment/page';
 import {Send, Settings2, FileText} from "lucide-react"
@@ -88,171 +88,171 @@ if(data?.content?.length > 0){
        }
   }
   
-    const parseLetterOutput = (
-      rawText: string, 
-     // formInputs: Partial<LetterDataConfigType>
-    ): LetterDataConfigType => {
-      
-      // 1. Initialize the core object with your frontend form data
-      const data: LetterDataConfigType = {
-        sender_name : meta?.letter?.From || user?.firstName + " " + user?.lastName,
-          recipient_name : meta?.letter?.Receiver || "To Whom It May Concern",
-          letter_title : "Letter",
-          salutation : `Dear ${meta?.letter?.Receiver || "To Whom It May Concern"},`,
-          content : [],
-          templateName : "ACADEMIC_ASSIGNMENT",
-          phone : meta?.letter?.phone || "",
-          email : meta?.letter?.email || "",
-          address : meta?.letter?.address || "",
-          conclusion : ""
-      };
-    
-      // 2. Split the LLM response into processable lines
-      const lines = rawText.split('\n');
-      let segmentIndex = 0;
-    
-      lines.forEach((line) => {
-        const trimmedLine = line.trim();
-        if (!trimmedLine) return; // Ignore blank lines
-    
-        // --- A. Extract the Main Subject Header ---
-        if (trimmedLine.startsWith('# HEADER:')) {
-          const actualContent = trimmedLine.replace('# HEADER:', '').trim();
-          
-          // We map this to both the explicit title property and the content stream
-          data.letter_title = actualContent; 
-          
-          data.content.push({
-            id: `seg-${crypto.randomUUID()}`,
-            role: "header" as TextRole, 
-            content: actualContent,
-            index: segmentIndex++
-          });
-    
-          return;
-        }
-    
-        // --- B. Extract the Introduction / Salutation Block ---
-        if (trimmedLine.startsWith('## INTRODUCTION:')) {
-          const actualContent = trimmedLine.replace('## INTRODUCTION:', '').trim();
-          
-          data.content.push({
-            id: `seg-${crypto.randomUUID()}`,
-            role: "paragraph" as TextRole, // 'paragraph' works best for PDF rendering flow
-            content: actualContent,
-            index: segmentIndex++
-          });
-          return;
-        }
-    
-        // --- C. Extract Core Body & Sign-Off Paragraphs ---
-        if (trimmedLine.startsWith('### PARAGRAPH:')) {
-          const actualContent = trimmedLine.replace('### PARAGRAPH:', '').trim();
-          
-          // Simple heuristic: If the paragraph contains common sign-offs, tag it specifically.
-          // Otherwise, it's just a standard body paragraph.
-          const isSignOff = /sincerely|yours faithfully|best regards/i.test(actualContent);
-          
-          data.content.push({
-            id: `seg-${crypto.randomUUID()}`,
-            role: (isSignOff ? "sign-off" : "paragraph") as TextRole,
-            content: actualContent,
-            index: segmentIndex++
-          });
-         
-          return;
-        }
-        
-        // --- D. Fallback for un-tagged text (Safety Net) ---
-        // If the LLM hallucinates and drops a tag, we still capture the text
-        if (trimmedLine.length > 0 && !trimmedLine.startsWith('#')) {
-           data.content.push({
-            id: `seg-${crypto.randomUUID()}`,
-            role: "paragraph" as TextRole,
-            content: trimmedLine,
-            index: segmentIndex++
-          });
-        }
-    
-        if(trimmedLine?.length  > 0 && trimmedLine?.startsWith("## CONCLUSION:")){
-          const actualContent = trimmedLine.replace('## CONCLUSION:', '').trim();
-          data.conclusion = actualContent;
-        }
-      });
-      console.log(data);
-       setLetterReq(data)
-    //   setTimeout(()=> {
-    //     console.log("Running to generate the letter...")
-    // generateLetter(data)
-    //   },1000)
-    
-      return data;
-    };
-
-    //// =========  \\\ =====
-
-     const startAssessment = (chunkValue : string) => {
-  //  setIsParsing(true);
-    setEditMode(true)
-    console.log(chunkValue)
-   // setSegments([]);
-  
-     parseLetterOutput(chunkValue)
- 
-    
-    // Simulate gradual UI appearance
-    let i = 0;
-    const interval = setInterval(() => {
-      setDisplayedText(chunkValue.slice(0, i));
-      i += 5;
-      if (i > chunkValue.length) {
-        clearInterval(interval);
-        setIsParsing(false);
-      }
-    }, 1000);
+  const rawLetterBufferChunk = useRef<string>("");
+const letterThrottleRef = useRef<NodeJS.Timeout | null>(null);
+const parseLetterOutput = (rawText: string): LetterDataConfigType => {
+  // 1. Initialize the core object fresh on every single parse call
+  const data: LetterDataConfigType = {
+    sender_name: meta?.letter?.From || (user?.firstName ? `${user.firstName} ${user.lastName || ""}` : user?.username || ""),
+    recipient_name: meta?.letter?.Receiver || "To Whom It May Concern",
+    letter_title: "Letter",
+    salutation: `Dear ${meta?.letter?.Receiver || "To Whom It May Concern"},`,
+    content: [],
+    templateName: "ACADEMIC_ASSIGNMENT",
+    phone: meta?.letter?.phone || "",
+    email: meta?.letter?.email || "",
+    address: meta?.letter?.address || "",
+    conclusion: ""
   };
 
-//================= Calling the LLM ==========\\
+  // 2. Split the current snapshot of the LLM response into processable lines
+  const lines = rawText.split('\n');
+  let segmentIndex = 0;
+
+  lines.forEach((line) => {
+    const trimmedLine = line.trim();
+    if (!trimmedLine) return; // Ignore blank lines
+
+    // --- A. Extract the Main Subject Header ---
+    if (trimmedLine.startsWith('# HEADER:')) {
+      const actualContent = trimmedLine.replace('# HEADER:', '').trim();
+      data.letter_title = actualContent; 
+      
+      data.content.push({
+        id: `seg-${segmentIndex}`, // Avoid crypto.randomUUID() inside hot loops for streaming speed
+        role: "header" as TextRole, 
+        content: actualContent,
+        index: segmentIndex++
+      });
+      return;
+    }
+
+    // --- B. Extract the Introduction / Salutation Block ---
+    if (trimmedLine.startsWith('## INTRODUCTION:')) {
+      const actualContent = trimmedLine.replace('## INTRODUCTION:', '').trim();
+      
+      data.content.push({
+        id: `seg-${segmentIndex}`,
+        role: "paragraph" as TextRole, 
+        content: actualContent,
+        index: segmentIndex++
+      });
+      return;
+    }
+
+    // --- C. Extract Core Body & Sign-Off Paragraphs ---
+    if (trimmedLine.startsWith('### PARAGRAPH:')) {
+      const actualContent = trimmedLine.replace('### PARAGRAPH:', '').trim();
+      const isSignOff = /sincerely|yours faithfully|best regards/i.test(actualContent);
+      
+      data.content.push({
+        id: `seg-${segmentIndex}`,
+        role: (isSignOff ? "sign-off" : "paragraph") as TextRole,
+        content: actualContent,
+        index: segmentIndex++
+      });
+      return;
+    }
+
+    // --- D. Extract Conclusion Parameter ---
+    if (trimmedLine.startsWith("## CONCLUSION:")) {
+      const actualContent = trimmedLine.replace('## CONCLUSION:', '').trim();
+      data.conclusion = actualContent;
+      return;
+    }
+    
+    // --- E. Fallback for un-tagged text (Safety Net) ---
+    if (trimmedLine.length > 0 && !trimmedLine.startsWith('#')) {
+      data.content.push({
+        id: `seg-${segmentIndex}`,
+        role: "paragraph" as TextRole,
+        content: trimmedLine,
+        index: segmentIndex++
+      });
+    }
+  });
+
+  // Push the compiled data structure directly into your application state
+  setLetterReq(data);
+  return data;
+};
+
+//GETTING THE CHUNK OF TEXTS FROM ANTHROPIC
 const handleGenerate = async () => {
-    setEditMode(false)
+  setEditMode(false);
+  
   try {
-      setLoadingState(true)
-   const response = await fetch("/api/quickassessment", {
-      method : "POST",
-      headers : {"Content-Type" : "application/json"},
-      credentials : "include",
-      body : JSON.stringify({
+    setLoadingState(true);
+    const response = await fetch("/api/quickassessment", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({
         prompt, 
         wordCount,
-        intent : intent || "",
-        track : "letter",
-        TrackInfo : {
-          senderName  : meta?.letter?.From || user?.firstName + " " + user?.lastName,
-          receiverName : meta?.letter?.Receiver || "Not Set",
+        intent: intent || "",
+        track: "letter",
+        TrackInfo: {
+          senderName: meta?.letter?.From || (user?.firstName ? `${user.firstName} ${user.lastName || ""}` : user?.username || ""),
+          receiverName: meta?.letter?.Receiver || "Not Set",
         }
       })
-      
-     })
-     if(response.ok){
-         setLetterPreviewModal(true);
-      const data = await response.text();
-      startAssessment(data?.toString())
-     console.log("Stream data Expected:", data)
-     }else{
-alert("WDC_FORMATT AI is currently down.")
-    return;
-     }
+    });
 
+    if (response.ok) {
+      setLoadingState(false);
+      
+      // 1. Get the raw low-level stream reader from the network interface
+      const reader = response?.body?.getReader();
+      if (!reader) return;
+
+      // 2. Reveal the preview canvas container instantly so streaming is visible
+      setLetterPreviewModal(true);
+      setEditMode(true);
+      
+      const decoder = new TextDecoder("utf-8");
+      rawLetterBufferChunk.current = ""; // Reset the core string reference cache
+
+      // 3. Real-time stream processing loop
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        // Decode binary Uint8Array network packets directly back into plaintext strings
+        const incomingTextChunk = decoder.decode(value, { stream: true });
+        
+        // Append tokens directly to our fast reference string cache
+        rawLetterBufferChunk.current += incomingTextChunk;
+
+        // 4. 🔥 THROTTLED PROGRESSIVE RENDER
+        // Skip updating React state if a rendering window timer is already ticking
+        if (!letterThrottleRef.current) {
+          letterThrottleRef.current = setTimeout(() => {
+            parseLetterOutput(rawLetterBufferChunk.current);
+            letterThrottleRef.current = null; // Open processing gate back up
+          }, 75); // 75ms delivers fluid animations with zero CPU throttling
         }
-    
-     catch (error) {
-      console.error("Axios Stream failed:", error);
-      alert("WDC_FORMATT AI is currently down.")
-    } finally {
-      setLoadingState(false)
-      setIsParsing(false);
+      }
+
+      // 5. Final sync execution block to catch remaining tail end tokens
+      if (letterThrottleRef.current) {
+        clearTimeout(letterThrottleRef.current);
+        letterThrottleRef.current = null;
+      }
+      parseLetterOutput(rawLetterBufferChunk.current);
+
+    } else {
+      alert("WDC_FORMATT AI is currently down.");
+      return;
     }
-  };
+  } catch (error) {
+    console.error("Streaming pipeline interaction crash:", error);
+    alert("WDC_FORMATT AI is currently down.");
+  } finally {
+    setLoadingState(false);
+    setIsParsing(false);
+  }
+};
   return (
 
        
@@ -346,7 +346,7 @@ alert("WDC_FORMATT AI is currently down.")
 
             <LetterPreviewModal
              generatePDF={()=>{
-              console.log("GENERATING PDF")
+          //    console.log("GENERATING PDF")
                      generateLetter(letterReq)
              }} 
              regenerateContent ={handleGenerate}

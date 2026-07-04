@@ -132,29 +132,28 @@ const assignmentTemplate = {
 const UpdatedAcademicAssigmentTemplate = {
         layout: { pageSize: 'A4', orientation: 'portrait' },
         dimensions: { width: 595.28, height: 841.89 },
-        placeholders: [
-          // Header & Student Info
-          { varName: "assignment_title", type: "header", x: 50, y: 780, fontSize: 20, isBold: true, fontFamily: "Helvetica-Bold" },
-          { varName: "student_name", type: "subheader", x: 50, y: 755, fontSize: 12, isBold: true, fontFamily: "Helvetica-Bold" },
+        placeholders:   [
+    // Cover
+    { varName: 'assignment_title', type: 'header',    x: 50, y: 780, fontSize: 22, isBold: true,  fontFamily: 'Helvetica-Bold' },
+    { varName: 'student_name',     type: 'subheader', x: 50, y: 755, fontSize: 16, isBold: true,  fontFamily: 'Helvetica-Bold' },
 
-          // Section 1: Introduction
-          { varName: "intro_title", type: "subheader", x: 50, y: 720, fontSize: 13, isBold: true, fontFamily: "Helvetica-Bold" },
-          { varName: "intro_content", type: "paragraph", x: 50, y: 705, fontSize: 11, lineHeights: 14, maxWidth: 495, fontFamily: "Helvetica" },
-// LISTS
- { varName: "lists", type: "paragraph", x: 50, y: 705, fontSize: 11, lineHeights: 14, maxWidth: 495, fontFamily: "Helvetica" },
-  { varName: "recipientName", type: "paragraph", x: 50, y: 205, fontSize: 11, lineHeights: 14, maxWidth: 495, fontFamily: "Helvetica" },
-          // // Section 2: Methodology
-          // { varName: "method_title", type: "subheader", x: 50, y: 580, fontSize: 13, isBold: true, fontFamily: "Helvetica-Bold" },
-          // { varName: "method_content", type: "paragraph", x: 50, y: 565, fontSize: 11, lineHeights: 14, maxWidth: 495, fontFamily: "Helvetica" },
+    // Introduction
+    { varName: 'intro_title',   type: 'header', x: 50, y: 720, fontSize: 30, isBold: true,  fontFamily: 'Helvetica-Bold' },
+    { varName: 'intro_content', type: 'paragraph', x: 50, y: 705, fontSize: 12, lineHeights: 14, maxWidth: 495, fontFamily: 'Helvetica' },
 
-          // Section 3: Analysis
-          { varName: "body_title", type: "subheader", x: 50, y: 420, fontSize: 13, isBold: true, fontFamily: "Helvetica-Bold" },
-          { varName: "body_content", type: "paragraph", x: 50, y: 405, fontSize: 11, lineHeights: 14, maxWidth: 495, fontFamily: "Helvetica" },
+    // Lists
+    { varName: 'lists', type: 'paragraph', x: 50, y: 705, fontSize: 14, lineHeights: 14, maxWidth: 495, fontFamily: 'Helvetica' },
 
-          // Section 4: Conclusion
-          { varName: "concl_title", type: "subheader", x: 50, y: 220, fontSize: 13, isBold: true, fontFamily: "Helvetica-Bold" },
-          { varName: "concl_content", type: "paragraph", x: 50, y: 205, fontSize: 11, lineHeights: 14, maxWidth: 495, fontFamily: "Helvetica" },
-           { varName: "reference", type: "paragraph", x: 50, y: 205, fontSize: 11, lineHeights: 14, maxWidth: 495, fontFamily: "Helvetica" },
+    // Body
+    { varName: 'body_title',   type: 'subheader', x: 50, y: 420, fontSize: 16, isBold: true,  fontFamily: 'Helvetica-Bold' },
+    { varName: 'body_content', type: 'paragraph', x: 50, y: 405, fontSize: 14, lineHeights: 14, maxWidth: 495, fontFamily: 'Helvetica' },
+
+    // Conclusion
+    { varName: 'concl_title',   type: 'subheader', x: 50, y: 220, fontSize: 16, isBold: true,  fontFamily: 'Helvetica-Bold' },
+    { varName: 'concl_content', type: 'paragraph', x: 50, y: 205, fontSize: 14, lineHeights: 14, maxWidth: 495, fontFamily: 'Helvetica' },
+
+    // References
+    { varName: 'references', type: 'paragraph', x: 50, y: 205, fontSize: 14, lineHeights: 14, maxWidth: 495, fontFamily: 'Helvetica' },
       //   { varName: "", type: "paragraph", x: 50, y: 205, fontSize: 11, lineHeights: 14, maxWidth: 495, fontFamily: "Helvetica" }
         ]
       }

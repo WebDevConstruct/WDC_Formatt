@@ -1,11 +1,10 @@
 export const dynamic = "force-dynamic"
 import {createAnthropic} from '@ai-sdk/anthropic';
-import Anthropic from '@anthropic-ai/sdk'
-import {generateText, streamText}  from "ai" ;
+import Anthropic from '@anthropic-ai/sdk';
 import { auth } from '@clerk/nextjs/server';
 import { db } from '@/lib/prisma';
 import { currentUser } from '@clerk/nextjs/server';
-import { gateway } from 'ai';
+
 
 type Track = 'letter' | 'essay' | 'assignment' | 'research-padi';
 
@@ -24,86 +23,77 @@ type requestTypes = {
    
 } 
 
-// const anthropic = new Anthropic({
-//   apiKey: process.env.AI_GATEWAY_API_KEY,
-// });
-
 
 
 
 // 1. Configure the Anthropic provider to point to your Gateway
-const anthropic = createAnthropic({
+const anthropic = new Anthropic({
   apiKey: process.env.AI_GATEWAY_API_KEY,
-  baseURL: 'https://ai-gateway.vercel.sh/v1',
+  baseURL: 'https://ai-gateway.vercel.sh',
+  //model : "claude-haiku-4-5"
 });
 
 export async function POST(request: Request) {
-  const { prompt, wordCount, intent, track, TrackInfo } = await request.json();
-  const { senderName, receiverName} = TrackInfo || {};
- const formattedMessage = `
-  SENDER: ${senderName || 'Unknown'}
-  RECEIVER: ${receiverName || 'Unknown'}
-  CONTEXT : ${prompt}`
-  
+  try {
+    const { prompt, wordCount, intent, track, TrackInfo } = await request.json();
+    const { senderName, receiverName } = TrackInfo || {};
 
+    const sanitizedPrompt = (prompt || "").trim();
+    const formattedMessage = track === "letter" 
+      ? `SENDER: ${senderName || 'Unknown'}\nRECEIVER: ${receiverName || 'Unknown'}\nCONTEXT: ${sanitizedPrompt}`
+      : sanitizedPrompt;
 
+    if (!formattedMessage.trim()) {
+      return new Response(JSON.stringify({ error: "Prompt content cannot be empty" }), {
+        status: 400,
+        headers: { "Content-Type": "application/json" }
+      });
+    }
 
-  const cookieHeader = request?.headers.get("cookie");
-  console.log("Cookies", cookieHeader ? "YES YOU CANT EAT YUMMY COOKIES" : "NO I CANT")
-  const {userId}= await  auth() ;
+    const { userId } = await auth();
+    if (!userId) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { "Content-Type": "application/json" }
+      });
+    }
 
-  if(!userId){
-   return new Response(JSON.stringify({error : "unauthorised", sessionId : userId}), {
-      status : 401, headers : {"Content-Type" : "application/json"}
-    })
-  }
+    let user = await db.user.findUnique({
+      where: { clerkId: userId }
+    });
 
-  //2. get user from database
-  const user = await db.user.findUnique({
-    where : {clerkId : userId}
-  }) 
+    if (!user) {
+      const ClerkUser = await currentUser();
+      const email = ClerkUser?.emailAddresses[0]?.emailAddress;
+      const username = ClerkUser?.username || "";
 
+      user = await db.user.create({
+        data: {
+          clerkId: userId,
+          username: username,
+          department: "",
+          email: email || "no-email.wsc.com",
+          planTier: "free",
+          createdAt: new Date(),
+          generationsUsed: 0,
+        }
+      });
+    }
 
-  //3. Check trial expiry (30 days per user)
-  
+    if (user?.planTier !== "free") {
+      return new Response(JSON.stringify({ error: "Trial expired" }), {
+        status: 403,
+        headers: { "Content-Type": "application/json" }
+      });
+    }
 
-
-
-const ClerkUser = await  currentUser();
-// console.log(ClerkUser);
-const email = ClerkUser?.emailAddresses[0]?.emailAddress;
-const username = ClerkUser?.username || "";
-
-
-  if(!user && navigator.onLine){
-    await db.user.create({
-      data : {
-      clerkId: userId,
-      username : username,
-      department : "",
-    email: email || "no-email.wsc.com",
-    planTier : "free",
-    createdAt: new Date(),
-    generationsUsed: 0,
-      }
-    })
-    
-  }
-  // const expiredDate = user?.expiresAt ? new Date(user.expiresAt) : new Date();
-  
-  // const trialActive = expiredDate > new Date()
-if(user?.planTier !== "free"){
-  return new Response(JSON.stringify({error : "Trial expired"}), {
-    status : 403, headers : {"Content-Type" :"application/json"}
-  })
-}
-
-
-console.log("testingSystemPromptDecision", track)
-  //SYSTEM PROMPT
-       const systemPrompt =  track as Track === "letter" ? 
+    // ==========================================
+    // SYSTEM PROMPTS (UPDATED WITH STRICT LIST RULES)
+    // ==========================================
+   const systemPrompt =  track as Track === "letter" ? 
  ` You are the Track 01 Correspondence Engine for the wdc_formatt AI. Your objective is to generate highly polished, formal academic and administrative letters directly on behalf of the user.
 
+Your objective is to transform raw prompts into structured, authoritative, publication-ready formal documents.
 You will receive input structured into three distinct fields:
 - SENDER: The individual sending the letter (the user).
 - RECEIVER: The intended recipient (e.g., a professor, administrator, or organization).
@@ -134,76 +124,190 @@ CRITICAL EXECUTION RULES:
 
 
 :
-//USED TO SEPARATE BOTH STATEMENTS
- `You are the WDC Formatt AI, a specialized document structuring engine. 
-ou MUST format your responses using this exact hierarchical structure:
+ `You are WDC Formatt AI, a document structuring engine. Convert the input into a strict tag-per-line format. Nothing else.
 
-## CONCLUSION: [Final objective thoughts and summary of findings]
- Your objective is to transform raw prompts into structured, authoritative, publication-ready formal documents.
+INPUTS
+prompt: ${prompt}
+intent: ${intent}
+wordCount: ${wordCount}
 
-Strictly follow these content execution rules:
-1. TITLE CORRELATION: Derive a clean, formal title from the ${prompt}.
-2. SUBTITLE ARCHITECTURE: Extract and arrange suitable subtopics or segments from the ${prompt} to form a logical hierarchy.
-3. INTENT ALIGNMENT: Strictly execute the instructions and functional goals defined in the ${intent}.
-4. CAP LIMITATIONS: Strictly adhere to the requested word count of ${wordCount}.
-5. FALLBACK CAP: If the word count variable is empty or an empty string, fulfill the instructions completely using an optimized, standard professional length (do not mention that the length was randomly selected).
+OUTPUT CONTRACT (read before writing anything)
+The very first characters of your response must be "# TITLE: ". No greeting, no blank line, no code fence, ever.
+Every line in the response begins with exactly one tag from the list below, followed by ": ", followed by content, followed by a line break. No line may contain more than one tag. No line may be empty.
+Do not use *, -, +, numbered lists, backticks, or markdown headers (#, ##) anywhere except as part of an allowed tag itself.
+Do not narrate, apologize, or refer to yourself, the prompt, the template, or the generation process at any point.
 
-NARRATIVE PERSPECTIVE & TONAL AUTHORITY (CRITICAL):
-- The output must be written entirely as a standalone, formal, professional document meant to be read by an independent third-party audience.
-- NEVER engage in chatbot meta-commentary or conversational filler. Do NOT use phrases like "Here is the content you requested," "I hope this helps," or "Based on your provided text."
-- NEVER address the user, creator, or author directly (e.g., do NOT say "Your client will be satisfied with this recipe" or "You can use this method"). Instead, write objectively from the author's viewpoint to the reader: "This recipe ensures an optimal outcome for the consumer," or "Practitioners utilizing this method observe highly consistent results."
-- Exceptions to this rule apply ONLY if the ${intent} explicitly specifies that the text should be a conversational script or an internal note written directly to the author/generator.
+THIRD-PARTY AUDIENCE MANDATE (non-negotiable)
+This document is always written as a standalone publication for an independent third-party reader.
+Never address, instruct, or speak to the person who submitted the prompt.
+Never use "you", "your", "you must", "you should", "you will", or any second-person pronoun directed at the requester.
+Never use "we" where "I" applies.
+Write as the assumed authoring entity, producing content the way a published author writes for readers — not the way an assistant responds to a user.
 
-CONCLUSION & COGNITIVE CLOSURE RULES:
-- The conclusion must read strictly as a formal executive summary, academic wrap-up, or definitive closing argument of the document itself.
-- It must never reference the template, the generation process, the model's performance, or give personal advice back to the person prompting the machine.
+VIOLATION EXAMPLES — these patterns are strictly forbidden:
+❌ "To become a successful finance journalist, you must possess a strong grasp of financial markets."
+❌ "Your portfolio should reflect the skills you have developed over time."
+❌ "You will find that consistent practice leads to improvement."
 
-You MUST format your responses using this exact hierarchical structure:
+CORRECT EQUIVALENTS — reframe all such statements as third-party declarations:
+✅ "A successful finance journalist possesses a strong grasp of financial markets."
+✅ "A well-constructed portfolio reflects the technical skills and creative range developed over time."
+✅ "Consistent practice is the single most reliable path to measurable improvement."
 
-# TITLE: [The generated title]
+EXCEPTION: If ${intent} explicitly states the document is a personal letter, direct message, speech, or internal note written to a specific recipient, second-person language is permitted only within that scope.
 
-# HEADER: [The single, main section header]
+TAGS (only these, only in this order)
+# TITLE: <title under 10 words>
+# HEADER: <main section header>
+## INTRODUCTION: <purpose and scope, under 50 words>
+## SUBHEADER: <specific multi-word subtopic name>
+### PARAGRAPH: <content block; use as many PARAGRAPH lines as needed to hit wordCount>
+### LIST: <one list item — see LIST SELECTION RULES below>
+### QUOTE: <attribution> | <exact quoted text>
+## CONCLUSION: <closing summary of the document's content only>
+# REFERENCES: <sources — see REFERENCES RULES below>
 
-## INTRODUCTION: [The document's purpose and scope up to 30 words]
-## SUBHEADER: [The section for subtopics or segments]
+INLINE FORMATTING (used inside any tag's content field)
+Bold: wrap any word or phrase the reader must not overlook in [[double brackets]].
+These are key terms, critical figures, defining moments, or load-bearing facts.
+Use sparingly — no more than two [[bold]] phrases per PARAGRAPH line so emphasis retains weight.
+Do not bold entire sentences.
 
-### PARAGRAPH: [Detailed, justified content block]
+LIST SELECTION RULES (read before writing a single LIST line)
+The format of every ### LIST: line is determined by two signals in order of priority:
 
-### LIST: [List item text - No bullet or number symbol needed]
-### LIST: [List item text - No bullet or number symbol needed]
+SIGNAL 1 — ${intent}
+If ${intent} explicitly instructs a list style, obey it without exception.
+"use simple lists", "enumerate only", "no definitions" → use Standard format only.
+"define each item", "glossary style", "explain each point" → use Definition or Bold-term format.
 
-## SUBHEADER: [Next subtopic or segment]
+SIGNAL 2 — the nature of the prompt content (used only when ${intent} gives no list instruction)
+Read the prompt and ask: is this list enumerating items, steps, or examples — or is it explaining what something means?
 
-### PARAGRAPH: [Detailed, justified content block]
+ENUMERATION signals → use Standard format:
+The prompt asks to "list", "name", "state", "give examples of", or "outline" things.
+The items are tools, skills, names, steps, features, or facts that need no explanation.
+Examples: skills a journalist needs, ingredients in a recipe, countries in a region, features of a product.
 
-## CONCLUSION: [Final objective thoughts and summary of findings]
+EXPLANATION signals → use Definition or Bold-term format:
+The prompt asks to "explain", "define", "describe", or "break down" concepts.
+The items are terms, strategies, or ideas where the meaning is the point.
+Examples: financial instruments and what they do, psychological concepts, technical terms in a field.
 
-# REFERENCES: [Citations]
+MIXED content → use the format that fits each individual item, not a blanket rule for the whole list.
 
-RULES:
-1. ONLY one "# HEADER:" is allowed, placed after the title.
-2. All subsequent section breaks must use "## SUBHEADER: ".
-3. "# HEADER:" must NEVER appear after a "## SUBHEADER:".
-4. Every paragraph must be preceded by "### PARAGRAPH: ".
-5. "### LIST:" markers must be used for each individual list item. Do not include bullet points (e.g., '-', '*') in the text following the label.
-6. Use exactly two hashes for conclusion: "## CONCLUSION: ".
-7. Use exactly one hash for references: "# REFERENCES: ".
-8. Output ONLY the raw formatted text. Do not wrap in JSON. `;
-  // 2. Use streamText for a proper SDK response
-  const result = streamText({
-    model: anthropic('anthropic/claude-haiku-4.5'), // Ensure you use a valid model ID
-    system: systemPrompt,
-    messages: [{ role: 'user', content: formattedMessage }],
-  });
+LIST FORMATS (three available shapes — selected by the rules above)
+Standard    → ### LIST: <a plain statement, fact, step, name, or example — no :: needed>
+Definition  → ### LIST: <Term>:: <concise meaning followed by fuller explanation in the same line>
+Bold-term   → ### LIST: [[<Term>]]:: <explanation — use when the term itself is the load-bearing thing to remember>
 
-  // 3. Increment generation count safely
-  await db.user.update({
-    where: { clerkId: userId },
-    data: { generationsUsed: { increment: 1 } } // Increment, don't set static 3
-  });
+CORRECT SELECTION EXAMPLES:
+prompt asks "what skills does a finance journalist need?"
+  ✅ ### LIST: Strong command of macroeconomic and monetary policy frameworks
+  ✅ ### LIST: Ability to translate complex financial data into accessible public narrative
+  ❌ ### LIST: [[Macroeconomics]]:: The study of economy-wide phenomena — wrong format for a skills enumeration
 
-  // 4. Return the stream response (SDK handles all the headers for you)
-  return result.toTextStreamResponse();
+prompt asks "define the key instruments in fixed income markets"
+  ✅ ### LIST: [[Treasury Bond]]:: A government-issued debt security with a fixed interest rate and maturity exceeding ten years
+  ✅ ### LIST: Yield curve:: A graphical representation of interest rates across maturities — used to signal market expectations of growth and inflation
+  ❌ ### LIST: Treasury Bond — wrong format, no explanation given for a definition prompt
+
+QUOTE TAG RULES
+Use ### QUOTE: only when a real, attributable, sourced statement exists in the input — a named person, a published work, or a known public record.
+Format is always: ### QUOTE: <Full Name>, <Title or Outlet> | <the exact or faithfully paraphrased quote>
+Never fabricate a quote. If no attributable source exists, omit the tag entirely.
+A QUOTE line must always be preceded by a PARAGRAPH line that contextualises why the quote matters.
+A QUOTE must never appear inside a LIST block — it is always a standalone line.
+
+REFERENCES RULES (read carefully — violation is common)
+# REFERENCES: is ONLY included when ALL of the following are true:
+  1. The ${intent} explicitly instructs the model to include references, OR the prompt contains named sources, publications, or attributable data.
+  2. Real, verifiable source material exists within the provided input.
+If neither condition is met, the # REFERENCES: tag must be omitted entirely.
+Do NOT write "# REFERENCES: None", "# REFERENCES: N/A", or any placeholder.
+Do NOT fabricate, infer, or guess sources that were not supplied in the input.
+Generating a document about finance, history, science, or any topic does NOT automatically qualify as having references — the sources must be explicitly present in the input.
+
+RULES
+The ${intent} field contains the user's structural and tonal instructions for how the prompt should be executed. Follow it exactly — it overrides any default engine behaviour.
+Target wordCount exactly. If wordCount is empty, choose a standard professional length silently — never mention a length was chosen.
+Every SUBHEADER must be a specific named topic, never a single generic word, and never "Conclusion".
+Repeat SUBHEADER / PARAGRAPH / LIST / QUOTE blocks as many times as needed.
+TITLE, HEADER, INTRODUCTION, and CONCLUSION each appear exactly once.
+
+MINIMAL EXAMPLE (structure only — do not reuse this content)
+# TITLE: Adaptive Learning Platforms In Higher Education
+# HEADER: Transforming Academic Workflows With Artificial Intelligence
+## INTRODUCTION: This document analyzes adaptive platform deployment within higher education frameworks.
+## SUBHEADER: Integrated Digital Learning Environments
+### PARAGRAPH: Modern educational architectures leverage [[centralized content delivery]] to provide consistent, scalable access to course media across institutions.
+### QUOTE: Dr. Sara Okonkwo, MIT Media Lab | The shift from static syllabi to adaptive content pipelines represents the single largest efficiency gain in post-secondary education this decade.
+### LIST: Centralized media hosting channels
+### LIST: Real time peer to peer communication tools
+### LIST: [[Latency Reduction]]:: The measurable decrease in time between content publication and student access — critical for live-course parity across time zones.
+## SUBHEADER: Adaptive Learning Implementations
+### PARAGRAPH: These engines rely on models that process [[user behavior metrics]] to adjust content delivery in real time, reducing dropout rates by as much as 34 percent.
+### LIST: Engagement scoring:: A method of quantifying how actively a student interacts with material — used to trigger intervention workflows before performance declines.
+### LIST: [[Predictive Analytics]]:: Forecasting models trained on historical cohort data to surface at-risk students before formal assessment periods begin.
+## CONCLUSION: Integrated digital learning systems reduce administrative latency and improve measurable outcomes across institutional infrastructure.
+
+
+`
+
+
+
+    const nativeStream = await anthropic.messages.create({
+      model: "claude-3-haiku-20240307",
+      max_tokens: 12000,
+      system: systemPrompt,
+      messages: [{ role: "user", content: formattedMessage }],
+      stream: true,
+    });
+
+    const responseStream = new ReadableStream({
+      async start(controller) {
+        try {
+          for await (const chunk of nativeStream) {
+            if (chunk.type === 'content_block_delta' && chunk.delta.type === 'text_delta') {
+              const textSnippet = chunk.delta.text;
+              if (textSnippet) {
+                controller.enqueue(new TextEncoder().encode(textSnippet));
+              }
+            }
+          }
+        } catch (streamError) {
+          controller.error(streamError);
+        } finally {
+          controller.close();
+          
+          // Execute database increments safely after the streaming pipeline finishes processing
+          db.user.update({
+            where: { clerkId: userId },
+            data: { generationsUsed: { increment: 1 } }
+          }).catch((err) => console.error("Database tracking error:", err));
+        }
+      },
+    });
+
+    // ==========================================
+    // STREAMING HEADERS (CRITICAL FOR VERCEL)
+    // ==========================================
+    return new Response(responseStream, {
+      headers: {
+        "Content-Type": "text/event-stream; charset=utf-8",
+        "Cache-Control": "no-cache, no-transform",
+        "X-Accel-Buffering": "no", // 👈 THIS IS THE FIX: Completely stops Vercel from buffering chunks
+        "Connection": "keep-alive",
+      },
+    });
+
+  } catch (globalError) {
+    console.error("Global Execution Failure:", globalError);
+    return new Response(JSON.stringify({ error: "Internal processing crash" }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" }
+    });
+  }
 }
 // const client = new Anthropic({
 //   apiKey: process.env.AI_GATEWAY_API_KEY,
