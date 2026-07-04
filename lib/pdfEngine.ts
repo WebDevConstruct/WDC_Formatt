@@ -6,7 +6,6 @@ import { PDFTemplateConfigType, KeyNoteTheme} from "@/scripts/templatetypes";
 import { KeynotePresentation, } from "@/app/dashboard/Slides/page";
 import { KeyNoteTemplateConfig } from "@/scripts/seed-template";
 import { studentDataType } from "@/scripts/templatetypes";
-import { renderStaticField, renderSequentialFlow , renderPageBlock} from "./utils/renderingChunkText";
 import { additionalHeaders } from "@/scripts/templatetypes";
 import {DocumentSegment } from "@/app/dashboard/Files/quick_assessment/assignment/page";
 // Helper to convert Hex to RGB for pdf-lib
@@ -137,222 +136,24 @@ export interface LetterDataConfigType {
 
 
 
-//ENGINE TEST
+// //ENGINE TEST
 
-export async function compilePDF(
-  template: PDFTemplateConfigType,
-  studentData: studentDataType,
-  headers: Array<additionalHeaders>
-): Promise<Uint8Array> {
-  const pdfDoc = await PDFDocument.create();
-  const fonts = await loadFonts(pdfDoc);
-  const margin = 50;
-  const PAGE_WIDTH = 595;
-  const PAGE_HEIGHT = 841;
-
-  
-  
-
-  // 1. COVER PAGE (Isolated from the stateful content flow)
-   const coverPage = pdfDoc.addPage([PAGE_WIDTH, PAGE_HEIGHT]);
-  let coverY = 600;
-  
-  const renderCover = (label: string, val: string, y: number) => {
-    if (!val) return y;
-    const text = label ? `${label.toUpperCase()} ${val.toUpperCase()}` : val.toUpperCase();
-    const lines = wrapText(text, 450, fonts.serifBold, 22); 
-    let curY = y;
-    lines.forEach(l => {
-      const w = fonts.serifBold.widthOfTextAtSize(l, 22);
-      coverPage.drawText(l, { x: 297.5 - (w/2), y: curY, size: 22, font: fonts.serifBold });
-      curY -= 28;
-    });
-    return curY - 45;
-  };
-
-  coverY = renderCover(studentData.assignment_title ? "TOPIC:" : "", studentData.assignment_title || "", coverY);
-  coverY = renderCover("NAME:", studentData.student_name || "", coverY);
-  coverY = renderCover(studentData.recipientName ? "TO:" : "", studentData.recipientName || "", coverY);
- headers?.forEach((item) => {
-  coverY = renderCover(item?.subHeader ? `${item.subHeader}:` : "", item?.paragraph || "", coverY);
-});
-
-  // 2. INITIALIZE CONTENT STATE
-  const state = {
-    page: pdfDoc.addPage([PAGE_WIDTH, PAGE_HEIGHT]),
-    y: 780,
-    doc: pdfDoc,
-    listIndex: 1 // Persistent index
-  };
-
-  const cleanData = deepSanitize(studentData);
-
-  // 3. DEFINE UNIFIED RENDER TASKS
-  const renderTasks = [
-    { role: 'header', content: cleanData.intro_title },
-    { role: 'paragraph', content: cleanData.intro_content },
-    ...(cleanData.body_content || []),
-    { role: 'subheader', content: 'CONCLUSION' },
-    ...(cleanData.concl_content || []),
-    { role: 'subheader', content: 'REFERENCES' },
-    { role: 'paragraph', content: cleanData.references }
-  ];
-
-  // 4. EXECUTION LOOP
-  for (const task of renderTasks) {
-    if (!task.content) continue;
-
-    // A. Validate space before drawing
-    await renderPageBlock(task.role, task.content, state);
-
-    // B. Draw content (Pass 'state' to enable global numbering)
-    const result = await renderSequentialFlow(
-      state.doc,
-      state.page,
-      [task],
-      state.y,
-      margin,
-      12,
-      { regular: fonts.sansRegular, bold: fonts.sansBold },
-      state // <--- Crucial: Pass state here
-    );
-
-    // C. Sync state back to controller
-    state.page = result.page;
-    state.y = result.y;
-  }
-
-  return await pdfDoc.save();
-}
-
-
-//THE ORIGINAL FUNCTION
 // export async function compilePDF(
-//   template: PDFTemplateConfigType, 
-//   studentData: studentDataType, 
-//   headers: Array<additionalHeaders>,
+//   template: PDFTemplateConfigType,
+//   studentData: studentDataType,
+//   headers: Array<additionalHeaders>
 // ): Promise<Uint8Array> {
 //   const pdfDoc = await PDFDocument.create();
-  
-//   const fonts = {
-//     serifBold: await pdfDoc.embedFont(StandardFonts.TimesRomanBold),
-//     sansRegular: await pdfDoc.embedFont(StandardFonts.TimesRoman),
-//     sansBold: await pdfDoc.embedFont(StandardFonts.HelveticaBold),
-//   };
-
+//   const fonts = await loadFonts(pdfDoc);
+//   const margin = 50;
 //   const PAGE_WIDTH = 595;
 //   const PAGE_HEIGHT = 841;
-//   const marginX = 50;
 
-//   // --- Sanitization Pass ---
-//   // Clean all top-level strings and segment arrays immediately
-//   const cleanBody = studentData.body_content?.map(s => ({ ...s, content: sanitizeString(s.content) }));
-//   const cleanConcl = studentData.concl_content?.map(s => ({ ...s, content: sanitizeString(s.content) }));
-//   const cleanIntroTitle = sanitizeString(studentData.intro_title);
-//   const cleanIntroContent = sanitizeString(studentData.intro_content);
-//   const cleanRefs = sanitizeString(studentData.references);
-
-//   // --- PAGE 1: COVER SHEETS ---
-//   const coverPage = pdfDoc.addPage([PAGE_WIDTH, PAGE_HEIGHT]);
-//   let coverY = 600;
   
-//   const renderCover = (label: string, val: string, y: number) => {
-//     const cleanVal = sanitizeString(val);
-//     if (!cleanVal) return y;
-//     const text = label ? `${label.toUpperCase()} ${cleanVal.toUpperCase()}` : cleanVal.toUpperCase();
-//     const lines = wrapText(text, 450, fonts.serifBold, 22); 
-//     let curY = y;
-//     lines.forEach(l => {
-//       const w = fonts.serifBold.widthOfTextAtSize(l, 22);
-//       coverPage.drawText(l, { x: 297.5 - (w/2), y: curY, size: 22, font: fonts.serifBold });
-//       curY -= 28;
-//     });
-//     return curY - 45;
-//   };
-
-//   coverY = renderCover(studentData.assignment_title ? "TOPIC:" : "", studentData.assignment_title || "", coverY);
-//   coverY = renderCover("NAME:", studentData.student_name || "", coverY);
-//   coverY = renderCover(studentData.recipientName ? "TO:" : "", studentData.recipientName || "", coverY);
   
-//   headers?.forEach((item) => {
-//     coverY = renderCover(item?.subHeader ? `${item.subHeader}:` : "", item?.paragraph || "", coverY);
-//   });
- 
-//   // --- PAGE 2+: DYNAMIC CONTENT ---
-//   let contentPage = pdfDoc.addPage([PAGE_WIDTH, PAGE_HEIGHT]);
-//   let cursorY = 780; 
 
-//   // --- 1. MAIN INTRO TITLE ---
-//   if (cleanIntroTitle) {
-//     const mainTitleLines = wrapText(cleanIntroTitle.toUpperCase(), PAGE_WIDTH - (marginX * 2), fonts.serifBold, 24);
-//     mainTitleLines.forEach(line => {
-//       const lineWidth = fonts.serifBold.widthOfTextAtSize(line, 24);
-//       contentPage.drawText(line, { x: (PAGE_WIDTH / 2) - (lineWidth / 2), y: cursorY, size: 24, font: fonts.serifBold });
-//       cursorY -= 30;
-//     });
-//     cursorY -= 24; 
-//   }
-
-//   // --- 2. INTRODUCTION ---
-//   if (cleanIntroContent) {
-//     const introResult = await renderStaticField(pdfDoc, contentPage, cleanIntroContent, cursorY, marginX, 12, fonts.sansRegular);
-//     contentPage = introResult.page;
-//     cursorY = introResult.y - 24; 
-//   }
-
-//   // --- 3. BODY CONTENT ---
-//   if (cleanBody) {
-//     cursorY -= SPACING.SECTION_TOP;
-//     const bodyResult = await renderSequentialFlow(pdfDoc, contentPage, cleanBody, cursorY, marginX, 12, { regular: fonts.sansRegular, bold: fonts.sansBold });
-//     contentPage = bodyResult.page;
-//     cursorY = bodyResult.y - 24;
-//   }
-
-//   // --- 4. CONCLUSION ---
-//   if (cleanConcl) {
-//     if (cursorY - 30 < marginX) { contentPage = pdfDoc.addPage([PAGE_WIDTH, PAGE_HEIGHT]); cursorY = 780; }
-//     contentPage.drawText("CONCLUSION", { x: marginX, y: cursorY, size: 12, font: fonts.sansBold });
-//     cursorY -= 16;
-//     const conclResult = await renderSequentialFlow(pdfDoc, contentPage, cleanConcl, cursorY, marginX, 12, { regular: fonts.sansRegular, bold: fonts.sansBold });
-//     contentPage = conclResult.page;
-//     cursorY = conclResult.y - 35;
-//   }
-
-//   // --- 5. REFERENCES ---
-//   if (cleanRefs) {
-//     if (cursorY - 40 < marginX) { contentPage = pdfDoc.addPage([PAGE_WIDTH, PAGE_HEIGHT]); cursorY = 780; }
-//     contentPage.drawLine({ start: { x: marginX, y: cursorY }, end: { x: PAGE_WIDTH - marginX, y: cursorY }, thickness: 1.0, color: rgb(0, 0, 0) });
-//     cursorY -= 20;
-//     contentPage.drawText("REFERENCES", { x: marginX, y: cursorY, size: 14, font: fonts.serifBold });
-//     cursorY -= 16;
-//     await renderStaticField(pdfDoc, contentPage, cleanRefs, cursorY, marginX, 10, fonts.sansRegular);
-//   }
-  
-//   return await pdfDoc.save();
-// }
-//THE ORIGINAL FUNCTION
-// export async function compilePDF(
-//   template: PDFTemplateConfigType, 
-//   studentData: studentDataType, 
-//   headers: Array<additionalHeaders>,
-// ): Promise<Uint8Array> {
-//   const pdfDoc = await PDFDocument.create();
-  
-//   // Embed clear high-contrast academic typefaces
-//   const fonts = {
-//     serifBold: await pdfDoc.embedFont(StandardFonts.TimesRomanBold),
-//     sansRegular: await pdfDoc.embedFont(StandardFonts.TimesRoman),
-//     sansBold: await pdfDoc.embedFont(StandardFonts.HelveticaBold),
-//   };
-
-//   const PAGE_WIDTH = 595;
-//   const PAGE_HEIGHT = 841;
-//   const marginX = 50;
-
-//   // =================================================================
-//   // --- PAGE 1: COVER SHEETS SYSTEM ---
-//   // =================================================================
-//   const coverPage = pdfDoc.addPage([PAGE_WIDTH, PAGE_HEIGHT]);
+//   // 1. COVER PAGE (Isolated from the stateful content flow)
+//    const coverPage = pdfDoc.addPage([PAGE_WIDTH, PAGE_HEIGHT]);
 //   let coverY = 600;
   
 //   const renderCover = (label: string, val: string, y: number) => {
@@ -371,144 +172,342 @@ export async function compilePDF(
 //   coverY = renderCover(studentData.assignment_title ? "TOPIC:" : "", studentData.assignment_title || "", coverY);
 //   coverY = renderCover("NAME:", studentData.student_name || "", coverY);
 //   coverY = renderCover(studentData.recipientName ? "TO:" : "", studentData.recipientName || "", coverY);
-  
-//   headers?.forEach((item) => {
-//     coverY = renderCover(item?.subHeader ? `${item.subHeader}:` : "", item?.paragraph || "", coverY);
-//   });
- 
-//   // =================================================================
-//   // --- PAGE 2+: REPORT SHEETS / DYNAMIC CONTENT STREAM ---
-//   // =================================================================
-//   let contentPage = pdfDoc.addPage([PAGE_WIDTH, PAGE_HEIGHT]);
-//   let cursorY = 780; 
+//  headers?.forEach((item) => {
+//   coverY = renderCover(item?.subHeader ? `${item.subHeader}:` : "", item?.paragraph || "", coverY);
+// });
 
-//   // --- 1. MAIN INTRO TITLE SECTION (NO UNDERLINE) ---
+//   // 2. INITIALIZE CONTENT STATE
+//   const state = {
+//     page: pdfDoc.addPage([PAGE_WIDTH, PAGE_HEIGHT]),
+//     y: 780,
+//     doc: pdfDoc,
+//     listIndex: 1 // Persistent index
+//   };
 
-//   if (studentData.intro_title) {
-//     const mainTitleText = studentData.intro_title.toUpperCase();
-//     const titleFontSize = 24; 
-//     const mainTitleLines = wrapText(mainTitleText, PAGE_WIDTH - (marginX * 2), fonts.serifBold, titleFontSize);
-    
-//     mainTitleLines.forEach(line => {
-//       const lineWidth = fonts.serifBold.widthOfTextAtSize(line, titleFontSize);
-//       contentPage.drawText(line, {
-//         x: (PAGE_WIDTH / 2) - (lineWidth / 2),
-//         y: cursorY,
-//         size: titleFontSize,
-//         font: fonts.serifBold
-//       });
-//       cursorY -= 30;
-//     });
+//   const cleanData = deepSanitize(studentData);
 
-//     // Uniform structural padding without drawing an architectural line rule
-//     cursorY -= 24; 
-//   }
+//   // 3. DEFINE UNIFIED RENDER TASKS
+//   const renderTasks = [
+//     { role: 'header', content: cleanData.intro_title },
+//     { role: 'paragraph', content: cleanData.intro_content },
+//     ...(cleanData.body_content || []),
+//     { role: 'subheader', content: 'CONCLUSION' },
+//     ...(cleanData.concl_content || []),
+//     { role: 'subheader', content: 'REFERENCES' },
+//     { role: 'paragraph', content: cleanData.references }
+//   ];
 
-//   // --- 2. INTRODUCTION NARRATIVE BLOCK ---
+//   // 4. EXECUTION LOOP
+//   for (const task of renderTasks) {
+//     if (!task.content) continue;
 
-//   if (studentData.intro_content) {
-//     const introResult = await renderStaticField(
-//       pdfDoc, 
-//       contentPage, 
-//       studentData.intro_content, 
-//       cursorY, 
-//       marginX, 
-//       12, 
-//       fonts.sansRegular
+//     // A. Validate space before drawing
+//     await renderPageBlock(task.role, task.content, state);
+
+//     // B. Draw content (Pass 'state' to enable global numbering)
+//     const result = await renderSequentialFlow(
+//       state.doc,
+//       state.page,
+//       [task],
+//       state.y,
+//       margin,
+//       12,
+//       { regular: fonts.sansRegular, bold: fonts.sansBold },
+//       state // <--- Crucial: Pass state here
 //     );
-//     contentPage = introResult.page;
-//     cursorY = introResult.y - 24; 
+
+//     // C. Sync state back to controller
+//     state.page = result.page;
+//     state.y = result.y;
 //   }
 
-//   // --- 3. RUNTIME BODY BLOCK PROCESSING ---
-
-//   if (studentData.body_content) {
-//     const bodyResult = await renderSequentialFlow(
-//       pdfDoc, 
-//       contentPage, 
-//       studentData?.body_content, 
-//       cursorY, 
-//       marginX, 
-//       12, 
-//       { regular: fonts.sansRegular, bold: fonts.sansBold }
-//     );
-//     contentPage = bodyResult.page;
-//     cursorY = bodyResult.y - 24;
-//   }
-
-//   // --- 4. THE CONCLUSION MARKER ---
-//   //const contentConcl = cleanNewlines(studentData?.concl_content)
-  
-//   if (studentData.concl_content) {
-//     if (cursorY - 30 < marginX) {
-//       contentPage = pdfDoc.addPage([PAGE_WIDTH, PAGE_HEIGHT]);
-//       cursorY = 780;
-//     }
-
-//     contentPage.drawText("CONCLUSION", {
-//       x: marginX,
-//       y: cursorY,
-//       size: 12,
-//       font: fonts.sansBold,
-//     });
-    
-//     cursorY -= 16;
-
-//     const conclResult = await renderSequentialFlow(
-//       pdfDoc, 
-//       contentPage, 
-//       studentData?.concl_content, 
-//       cursorY, 
-//       marginX, 
-//       12, 
-//       { regular: fonts.sansRegular, bold: fonts.sansBold }
-//     );
-//     contentPage = conclResult.page;
-//     cursorY = conclResult.y - 35;
-//   }
-
-//   // --- 5. BIBLIOGRAPHIC REFERENCE LAYER ---
-//   if (studentData.references) {
-//     if (cursorY - 40 < marginX) {
-//       contentPage = pdfDoc.addPage([PAGE_WIDTH, PAGE_HEIGHT]);
-//       cursorY = 780;
-//     }
-
-//     contentPage.drawLine({
-//       start: { x: marginX, y: cursorY },
-//       end: { x: PAGE_WIDTH - marginX, y: cursorY },
-//       thickness: 1.0,
-//       color: rgb(0, 0, 0),
-//     });
-    
-//     cursorY -= 20;
-
-//     contentPage.drawText("REFERENCES", { 
-//       x: marginX, 
-//       y: cursorY, 
-//       size: 14, 
-//       font: fonts.serifBold 
-//     });
-    
-//     cursorY -= 16;
-
-//     await renderStaticField(
-//       pdfDoc, 
-//       contentPage, 
-//      studentData?.references, 
-//       cursorY, 
-//       marginX, 
-//       10, 
-//       fonts.sansRegular
-//     );
-//   }
-  
 //   return await pdfDoc.save();
 // }
-//LETTER ENGINE
 
 
-// Define the precise structure sent from your frontend Track 1 Form
+// //THE ORIGINAL FUNCTION
+// // export async function compilePDF(
+// //   template: PDFTemplateConfigType, 
+// //   studentData: studentDataType, 
+// //   headers: Array<additionalHeaders>,
+// // ): Promise<Uint8Array> {
+// //   const pdfDoc = await PDFDocument.create();
+  
+// //   const fonts = {
+// //     serifBold: await pdfDoc.embedFont(StandardFonts.TimesRomanBold),
+// //     sansRegular: await pdfDoc.embedFont(StandardFonts.TimesRoman),
+// //     sansBold: await pdfDoc.embedFont(StandardFonts.HelveticaBold),
+// //   };
+
+// //   const PAGE_WIDTH = 595;
+// //   const PAGE_HEIGHT = 841;
+// //   const marginX = 50;
+
+// //   // --- Sanitization Pass ---
+// //   // Clean all top-level strings and segment arrays immediately
+// //   const cleanBody = studentData.body_content?.map(s => ({ ...s, content: sanitizeString(s.content) }));
+// //   const cleanConcl = studentData.concl_content?.map(s => ({ ...s, content: sanitizeString(s.content) }));
+// //   const cleanIntroTitle = sanitizeString(studentData.intro_title);
+// //   const cleanIntroContent = sanitizeString(studentData.intro_content);
+// //   const cleanRefs = sanitizeString(studentData.references);
+
+// //   // --- PAGE 1: COVER SHEETS ---
+// //   const coverPage = pdfDoc.addPage([PAGE_WIDTH, PAGE_HEIGHT]);
+// //   let coverY = 600;
+  
+// //   const renderCover = (label: string, val: string, y: number) => {
+// //     const cleanVal = sanitizeString(val);
+// //     if (!cleanVal) return y;
+// //     const text = label ? `${label.toUpperCase()} ${cleanVal.toUpperCase()}` : cleanVal.toUpperCase();
+// //     const lines = wrapText(text, 450, fonts.serifBold, 22); 
+// //     let curY = y;
+// //     lines.forEach(l => {
+// //       const w = fonts.serifBold.widthOfTextAtSize(l, 22);
+// //       coverPage.drawText(l, { x: 297.5 - (w/2), y: curY, size: 22, font: fonts.serifBold });
+// //       curY -= 28;
+// //     });
+// //     return curY - 45;
+// //   };
+
+// //   coverY = renderCover(studentData.assignment_title ? "TOPIC:" : "", studentData.assignment_title || "", coverY);
+// //   coverY = renderCover("NAME:", studentData.student_name || "", coverY);
+// //   coverY = renderCover(studentData.recipientName ? "TO:" : "", studentData.recipientName || "", coverY);
+  
+// //   headers?.forEach((item) => {
+// //     coverY = renderCover(item?.subHeader ? `${item.subHeader}:` : "", item?.paragraph || "", coverY);
+// //   });
+ 
+// //   // --- PAGE 2+: DYNAMIC CONTENT ---
+// //   let contentPage = pdfDoc.addPage([PAGE_WIDTH, PAGE_HEIGHT]);
+// //   let cursorY = 780; 
+
+// //   // --- 1. MAIN INTRO TITLE ---
+// //   if (cleanIntroTitle) {
+// //     const mainTitleLines = wrapText(cleanIntroTitle.toUpperCase(), PAGE_WIDTH - (marginX * 2), fonts.serifBold, 24);
+// //     mainTitleLines.forEach(line => {
+// //       const lineWidth = fonts.serifBold.widthOfTextAtSize(line, 24);
+// //       contentPage.drawText(line, { x: (PAGE_WIDTH / 2) - (lineWidth / 2), y: cursorY, size: 24, font: fonts.serifBold });
+// //       cursorY -= 30;
+// //     });
+// //     cursorY -= 24; 
+// //   }
+
+// //   // --- 2. INTRODUCTION ---
+// //   if (cleanIntroContent) {
+// //     const introResult = await renderStaticField(pdfDoc, contentPage, cleanIntroContent, cursorY, marginX, 12, fonts.sansRegular);
+// //     contentPage = introResult.page;
+// //     cursorY = introResult.y - 24; 
+// //   }
+
+// //   // --- 3. BODY CONTENT ---
+// //   if (cleanBody) {
+// //     cursorY -= SPACING.SECTION_TOP;
+// //     const bodyResult = await renderSequentialFlow(pdfDoc, contentPage, cleanBody, cursorY, marginX, 12, { regular: fonts.sansRegular, bold: fonts.sansBold });
+// //     contentPage = bodyResult.page;
+// //     cursorY = bodyResult.y - 24;
+// //   }
+
+// //   // --- 4. CONCLUSION ---
+// //   if (cleanConcl) {
+// //     if (cursorY - 30 < marginX) { contentPage = pdfDoc.addPage([PAGE_WIDTH, PAGE_HEIGHT]); cursorY = 780; }
+// //     contentPage.drawText("CONCLUSION", { x: marginX, y: cursorY, size: 12, font: fonts.sansBold });
+// //     cursorY -= 16;
+// //     const conclResult = await renderSequentialFlow(pdfDoc, contentPage, cleanConcl, cursorY, marginX, 12, { regular: fonts.sansRegular, bold: fonts.sansBold });
+// //     contentPage = conclResult.page;
+// //     cursorY = conclResult.y - 35;
+// //   }
+
+// //   // --- 5. REFERENCES ---
+// //   if (cleanRefs) {
+// //     if (cursorY - 40 < marginX) { contentPage = pdfDoc.addPage([PAGE_WIDTH, PAGE_HEIGHT]); cursorY = 780; }
+// //     contentPage.drawLine({ start: { x: marginX, y: cursorY }, end: { x: PAGE_WIDTH - marginX, y: cursorY }, thickness: 1.0, color: rgb(0, 0, 0) });
+// //     cursorY -= 20;
+// //     contentPage.drawText("REFERENCES", { x: marginX, y: cursorY, size: 14, font: fonts.serifBold });
+// //     cursorY -= 16;
+// //     await renderStaticField(pdfDoc, contentPage, cleanRefs, cursorY, marginX, 10, fonts.sansRegular);
+// //   }
+  
+// //   return await pdfDoc.save();
+// // }
+// //THE ORIGINAL FUNCTION
+// // export async function compilePDF(
+// //   template: PDFTemplateConfigType, 
+// //   studentData: studentDataType, 
+// //   headers: Array<additionalHeaders>,
+// // ): Promise<Uint8Array> {
+// //   const pdfDoc = await PDFDocument.create();
+  
+// //   // Embed clear high-contrast academic typefaces
+// //   const fonts = {
+// //     serifBold: await pdfDoc.embedFont(StandardFonts.TimesRomanBold),
+// //     sansRegular: await pdfDoc.embedFont(StandardFonts.TimesRoman),
+// //     sansBold: await pdfDoc.embedFont(StandardFonts.HelveticaBold),
+// //   };
+
+// //   const PAGE_WIDTH = 595;
+// //   const PAGE_HEIGHT = 841;
+// //   const marginX = 50;
+
+// //   // =================================================================
+// //   // --- PAGE 1: COVER SHEETS SYSTEM ---
+// //   // =================================================================
+// //   const coverPage = pdfDoc.addPage([PAGE_WIDTH, PAGE_HEIGHT]);
+// //   let coverY = 600;
+  
+// //   const renderCover = (label: string, val: string, y: number) => {
+// //     if (!val) return y;
+// //     const text = label ? `${label.toUpperCase()} ${val.toUpperCase()}` : val.toUpperCase();
+// //     const lines = wrapText(text, 450, fonts.serifBold, 22); 
+// //     let curY = y;
+// //     lines.forEach(l => {
+// //       const w = fonts.serifBold.widthOfTextAtSize(l, 22);
+// //       coverPage.drawText(l, { x: 297.5 - (w/2), y: curY, size: 22, font: fonts.serifBold });
+// //       curY -= 28;
+// //     });
+// //     return curY - 45;
+// //   };
+
+// //   coverY = renderCover(studentData.assignment_title ? "TOPIC:" : "", studentData.assignment_title || "", coverY);
+// //   coverY = renderCover("NAME:", studentData.student_name || "", coverY);
+// //   coverY = renderCover(studentData.recipientName ? "TO:" : "", studentData.recipientName || "", coverY);
+  
+// //   headers?.forEach((item) => {
+// //     coverY = renderCover(item?.subHeader ? `${item.subHeader}:` : "", item?.paragraph || "", coverY);
+// //   });
+ 
+// //   // =================================================================
+// //   // --- PAGE 2+: REPORT SHEETS / DYNAMIC CONTENT STREAM ---
+// //   // =================================================================
+// //   let contentPage = pdfDoc.addPage([PAGE_WIDTH, PAGE_HEIGHT]);
+// //   let cursorY = 780; 
+
+// //   // --- 1. MAIN INTRO TITLE SECTION (NO UNDERLINE) ---
+
+// //   if (studentData.intro_title) {
+// //     const mainTitleText = studentData.intro_title.toUpperCase();
+// //     const titleFontSize = 24; 
+// //     const mainTitleLines = wrapText(mainTitleText, PAGE_WIDTH - (marginX * 2), fonts.serifBold, titleFontSize);
+    
+// //     mainTitleLines.forEach(line => {
+// //       const lineWidth = fonts.serifBold.widthOfTextAtSize(line, titleFontSize);
+// //       contentPage.drawText(line, {
+// //         x: (PAGE_WIDTH / 2) - (lineWidth / 2),
+// //         y: cursorY,
+// //         size: titleFontSize,
+// //         font: fonts.serifBold
+// //       });
+// //       cursorY -= 30;
+// //     });
+
+// //     // Uniform structural padding without drawing an architectural line rule
+// //     cursorY -= 24; 
+// //   }
+
+// //   // --- 2. INTRODUCTION NARRATIVE BLOCK ---
+
+// //   if (studentData.intro_content) {
+// //     const introResult = await renderStaticField(
+// //       pdfDoc, 
+// //       contentPage, 
+// //       studentData.intro_content, 
+// //       cursorY, 
+// //       marginX, 
+// //       12, 
+// //       fonts.sansRegular
+// //     );
+// //     contentPage = introResult.page;
+// //     cursorY = introResult.y - 24; 
+// //   }
+
+// //   // --- 3. RUNTIME BODY BLOCK PROCESSING ---
+
+// //   if (studentData.body_content) {
+// //     const bodyResult = await renderSequentialFlow(
+// //       pdfDoc, 
+// //       contentPage, 
+// //       studentData?.body_content, 
+// //       cursorY, 
+// //       marginX, 
+// //       12, 
+// //       { regular: fonts.sansRegular, bold: fonts.sansBold }
+// //     );
+// //     contentPage = bodyResult.page;
+// //     cursorY = bodyResult.y - 24;
+// //   }
+
+// //   // --- 4. THE CONCLUSION MARKER ---
+// //   //const contentConcl = cleanNewlines(studentData?.concl_content)
+  
+// //   if (studentData.concl_content) {
+// //     if (cursorY - 30 < marginX) {
+// //       contentPage = pdfDoc.addPage([PAGE_WIDTH, PAGE_HEIGHT]);
+// //       cursorY = 780;
+// //     }
+
+// //     contentPage.drawText("CONCLUSION", {
+// //       x: marginX,
+// //       y: cursorY,
+// //       size: 12,
+// //       font: fonts.sansBold,
+// //     });
+    
+// //     cursorY -= 16;
+
+// //     const conclResult = await renderSequentialFlow(
+// //       pdfDoc, 
+// //       contentPage, 
+// //       studentData?.concl_content, 
+// //       cursorY, 
+// //       marginX, 
+// //       12, 
+// //       { regular: fonts.sansRegular, bold: fonts.sansBold }
+// //     );
+// //     contentPage = conclResult.page;
+// //     cursorY = conclResult.y - 35;
+// //   }
+
+// //   // --- 5. BIBLIOGRAPHIC REFERENCE LAYER ---
+// //   if (studentData.references) {
+// //     if (cursorY - 40 < marginX) {
+// //       contentPage = pdfDoc.addPage([PAGE_WIDTH, PAGE_HEIGHT]);
+// //       cursorY = 780;
+// //     }
+
+// //     contentPage.drawLine({
+// //       start: { x: marginX, y: cursorY },
+// //       end: { x: PAGE_WIDTH - marginX, y: cursorY },
+// //       thickness: 1.0,
+// //       color: rgb(0, 0, 0),
+// //     });
+    
+// //     cursorY -= 20;
+
+// //     contentPage.drawText("REFERENCES", { 
+// //       x: marginX, 
+// //       y: cursorY, 
+// //       size: 14, 
+// //       font: fonts.serifBold 
+// //     });
+    
+// //     cursorY -= 16;
+
+// //     await renderStaticField(
+// //       pdfDoc, 
+// //       contentPage, 
+// //      studentData?.references, 
+// //       cursorY, 
+// //       marginX, 
+// //       10, 
+// //       fonts.sansRegular
+// //     );
+// //   }
+  
+// //   return await pdfDoc.save();
+// // }
+// //LETTER ENGINE
+
+
+// // Define the precise structure sent from your frontend Track 1 Form
 
 
 export async function compileLetterPDF(letterData: LetterDataConfigType) {
@@ -667,213 +666,213 @@ export async function compileLetterPDF(letterData: LetterDataConfigType) {
   return await pdfDoc.save();
 }
 
-//NEW ENGINE CODE
-// export async function compilePDF(template : PDFTemplateConfigType, studentData: studentDataType) {
-//   const pdfDoc = await PDFDocument.create();
-//   const page = pdfDoc.addPage([595, 841]); // A4 Standard
+// //NEW ENGINE CODE
+// // export async function compilePDF(template : PDFTemplateConfigType, studentData: studentDataType) {
+// //   const pdfDoc = await PDFDocument.create();
+// //   const page = pdfDoc.addPage([595, 841]); // A4 Standard
   
-//   // 1. Prepare Font Styles
-//   const fontRegular = await pdfDoc.embedFont(StandardFonts.Helvetica);
-//   const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+// //   // 1. Prepare Font Styles
+// //   const fontRegular = await pdfDoc.embedFont(StandardFonts.Helvetica);
+// //   const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
 
-//   // 2. The Smart Dispatcher Loop
-//   for (const placeholder of template.placeholders) {
-//     const dataValue = studentData[placeholder.varName];
+// //   // 2. The Smart Dispatcher Loop
+// //   for (const placeholder of template.placeholders) {
+// //     const dataValue = studentData[placeholder.varName];
 
-//     // CASE A: The field is a simple string (Title, Name, Intro)
-//     if (typeof dataValue === 'string') {
-//       renderSingleField(page, dataValue, placeholder, { regular: fontRegular, bold: fontBold });
-//     } 
+// //     // CASE A: The field is a simple string (Title, Name, Intro)
+// //     if (typeof dataValue === 'string') {
+// //       renderSingleField(page, dataValue, placeholder, { regular: fontRegular, bold: fontBold });
+// //     } 
     
-//     // CASE B: The field is a Sequential Array (Body Content, Conclusion)
-//     else if (Array.isArray(dataValue)) {
-//       // We pass the current placeholder's Y as the 'Starting Anchor'
-//       await renderSequentialFlow(page, dataValue, placeholder, { regular: fontRegular, bold: fontBold });
-//     }
-//   }
-//   //Finalize
-//   const pdfBytes = await pdfDoc?.save();
-//   return pdfBytes;
-// }
+// //     // CASE B: The field is a Sequential Array (Body Content, Conclusion)
+// //     else if (Array.isArray(dataValue)) {
+// //       // We pass the current placeholder's Y as the 'Starting Anchor'
+// //       await renderSequentialFlow(page, dataValue, placeholder, { regular: fontRegular, bold: fontBold });
+// //     }
+// //   }
+// //   //Finalize
+// //   const pdfBytes = await pdfDoc?.save();
+// //   return pdfBytes;
+// // }
 
-// OLD ENGINE CODE
-// export async function compilePDF(studentData: PDFPlaceholder) {
-//   // 1. Fetch Template & Config
-//   const template = await db.pDFTemplate.findUnique({
-//     where: { name: "ACADEMIC_ASSIGNMENT" }
-//   });
+// // OLD ENGINE CODE
+// // export async function compilePDF(studentData: PDFPlaceholder) {
+// //   // 1. Fetch Template & Config
+// //   const template = await db.pDFTemplate.findUnique({
+// //     where: { name: "ACADEMIC_ASSIGNMENT" }
+// //   });
 
-//   if (!template) throw new Error("Template not found");
-//   const config = template.config as unknown as PDFTemplateConfigType;
-//   const { placeholders } = config;
+// //   if (!template) throw new Error("Template not found");
+// //   const config = template.config as unknown as PDFTemplateConfigType;
+// //   const { placeholders } = config;
 
-//   // 2. Setup Document
-//   const pdfDoc = await PDFDocument.create();
-//   const page = pdfDoc.addPage([595.28, 841.89]); // A4 Size
+// //   // 2. Setup Document
+// //   const pdfDoc = await PDFDocument.create();
+// //   const page = pdfDoc.addPage([595.28, 841.89]); // A4 Size
 
-//   const fontRegular = await pdfDoc.embedFont(StandardFonts.Helvetica);
-//   const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+// //   const fontRegular = await pdfDoc.embedFont(StandardFonts.Helvetica);
+// //   const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
 
-//   // --- THE FLOWING CURSOR LOGIC ---
-//   // We start the cursor at the highest Y value defined in your template
-//   let cursorY = Math.max(...placeholders.map(p => p.y)); 
-//   const PAGE_MARGIN_BOTTOM = 50;
+// //   // --- THE FLOWING CURSOR LOGIC ---
+// //   // We start the cursor at the highest Y value defined in your template
+// //   let cursorY = Math.max(...placeholders.map(p => p.y)); 
+// //   const PAGE_MARGIN_BOTTOM = 50;
 
-//   // Sort placeholders from top to bottom based on their original template Y
-//   const sortedPlaceholders = [...placeholders].sort((a, b) => b.y - a.y);
+// //   // Sort placeholders from top to bottom based on their original template Y
+// //   const sortedPlaceholders = [...placeholders].sort((a, b) => b.y - a.y);
 
-//   // 3. The Dynamic Execution Loop
-//   sortedPlaceholders.forEach((item) => {
+// //   // 3. The Dynamic Execution Loop
+// //   sortedPlaceholders.forEach((item) => {
    
-//    // 1. Target the data value using the varName key
-// const rawData = (studentData as Record<string, any>)[item?.varName];
+// //    // 1. Target the data value using the varName key
+// // const rawData = (studentData as Record<string, any>)[item?.varName];
 
-// // 2. Transform the data into a unified string
-// const content = Array.isArray(rawData)
-//   ? rawData
-//       .map((entry: contentRoles) => entry.content || "") // Extract ONLY the content property
-//       .filter(text => text.length > 0)                  // Remove empty strings
-//       .join("\n")                                       // Join with newlines for the wrapping engine
-//   : String(rawData || "");
-//     const activeFont = item.isBold ? fontBold : fontRegular;
-// console.log(content);
+// // // 2. Transform the data into a unified string
+// // const content = Array.isArray(rawData)
+// //   ? rawData
+// //       .map((entry: contentRoles) => entry.content || "") // Extract ONLY the content property
+// //       .filter(text => text.length > 0)                  // Remove empty strings
+// //       .join("\n")                                       // Join with newlines for the wrapping engine
+// //   : String(rawData || "");
+// //     const activeFont = item.isBold ? fontBold : fontRegular;
+// // console.log(content);
 
-//     // Identify if we need a "Section Break" (more space before subheaders)
-//     const sectionPadding = item.type === "subheader" ? 20 : 10;
-//     cursorY -= sectionPadding;
+// //     // Identify if we need a "Section Break" (more space before subheaders)
+// //     const sectionPadding = item.type === "subheader" ? 20 : 10;
+// //     cursorY -= sectionPadding;
 
-//     // Wrap the text based on its specific maxWidth
-//     const lines = wrapText(content, item.maxWidth || 500, activeFont, item.fontSize);
+// //     // Wrap the text based on its specific maxWidth
+// //     const lines = wrapText(content, item.maxWidth || 500, activeFont, item.fontSize);
 
-//     lines.forEach((line) => {
-//       // Safety: Prevent drawing off the page
-//       if (cursorY < PAGE_MARGIN_BOTTOM) return;
+// //     lines.forEach((line) => {
+// //       // Safety: Prevent drawing off the page
+// //       if (cursorY < PAGE_MARGIN_BOTTOM) return;
 
-//       page.drawText(line, {
-//         x: item.x,
-//         y: cursorY,
-//         size: item.fontSize,
-//         font: activeFont,
-//       });
+// //       page.drawText(line, {
+// //         x: item.x,
+// //         y: cursorY,
+// //         size: item.fontSize,
+// //         font: activeFont,
+// //       });
 
-//       // Move cursor down based on the specific line height or a font-size ratio
-//       const drop = item.lineHeights || (item.fontSize * 1.2);
-//       cursorY -= drop;
-//     });
+// //       // Move cursor down based on the specific line height or a font-size ratio
+// //       const drop = item.lineHeights || (item.fontSize * 1.2);
+// //       cursorY -= drop;
+// //     });
 
-//     // Add a small buffer after each completed block
-//     cursorY -= 5; 
+// //     // Add a small buffer after each completed block
+// //     cursorY -= 5; 
  
-//   });
+// //   });
 
-//   // 4. Finalize
-//   const pdfBytes = await pdfDoc.save();
-//   return pdfBytes;
-// }
+// //   // 4. Finalize
+// //   const pdfBytes = await pdfDoc.save();
+// //   return pdfBytes;
+// // }
 
 
-// export const compileKeynotePDF = async (data: KeynotePresentation, slideTheme : KeyNoteTheme,  ) => {
-//   const pdfDoc = await PDFDocument.create();
-//   const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
-//   //const regularFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
-// const config = KeyNoteTemplateConfig
-// const {width, height } = config.dimensions;
+// // export const compileKeynotePDF = async (data: KeynotePresentation, slideTheme : KeyNoteTheme,  ) => {
+// //   const pdfDoc = await PDFDocument.create();
+// //   const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+// //   //const regularFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
+// // const config = KeyNoteTemplateConfig
+// // const {width, height } = config.dimensions;
    
-//   // Colors from our WDC Theme
-//   // const primaryColor = hexToRgbScale(slideTheme.primary);
-//   const secondaryColor = hexToRgb(slideTheme.secondary);
-//   const surfaceColor = hexToRgb(slideTheme.surface);
-//   const primaryColor = hexToRgb(slideTheme?.primary)
-//   // 1. GENERATE TITLE SLIDE
-//   const titlePage = pdfDoc.addPage([841.89, 595.28]); // Landscape A4
-//   titlePage.drawRectangle({ x: 0, y: 0, width: 841.89, height: 595.28, color: rgb(surfaceColor?.r, surfaceColor?.g, surfaceColor?.b)});
+// //   // Colors from our WDC Theme
+// //   // const primaryColor = hexToRgbScale(slideTheme.primary);
+// //   const secondaryColor = hexToRgb(slideTheme.secondary);
+// //   const surfaceColor = hexToRgb(slideTheme.surface);
+// //   const primaryColor = hexToRgb(slideTheme?.primary)
+// //   // 1. GENERATE TITLE SLIDE
+// //   const titlePage = pdfDoc.addPage([841.89, 595.28]); // Landscape A4
+// //   titlePage.drawRectangle({ x: 0, y: 0, width: 841.89, height: 595.28, color: rgb(surfaceColor?.r, surfaceColor?.g, surfaceColor?.b)});
 
 
-//   titlePage.drawText(data.topic.toUpperCase(), {
-//     x: 60,
-//     y: 300,
-//     size: 48,
-//     font: boldFont,
-//     color:  rgb(primaryColor?.r, primaryColor?.g, primaryColor?.b),
-//   });
+// //   titlePage.drawText(data.topic.toUpperCase(), {
+// //     x: 60,
+// //     y: 300,
+// //     size: 48,
+// //     font: boldFont,
+// //     color:  rgb(primaryColor?.r, primaryColor?.g, primaryColor?.b),
+// //   });
 
-//   // 2. GENERATE CONTENT SLIDES
-//   for (const section of data.sections) {
-//   //  const page = pdfDoc.addPage([841.89, 595.28]);
-//     const page = pdfDoc.addPage([width, height]);
+// //   // 2. GENERATE CONTENT SLIDES
+// //   for (const section of data.sections) {
+// //   //  const page = pdfDoc.addPage([841.89, 595.28]);
+// //     const page = pdfDoc.addPage([width, height]);
 
-//     // 1. Apply the Surface (Background)
-//     page.drawRectangle({
-//       x: 0,
-//       y: 0,
-//       width: width,
-//       height: height,
-//       color: rgb(surfaceColor.r, surfaceColor.g, surfaceColor.b),
-//     });
+// //     // 1. Apply the Surface (Background)
+// //     page.drawRectangle({
+// //       x: 0,
+// //       y: 0,
+// //       width: width,
+// //       height: height,
+// //       color: rgb(surfaceColor.r, surfaceColor.g, surfaceColor.b),
+// //     });
 
-//     // 2. Apply the Primary Color (Top Accent Bar)
-//     page.drawRectangle({
-//       x: 0,
-//       y: height - 5,
-//       width: width,
-//       height: 5,
-//       color: rgb(primaryColor.r, primaryColor.g, primaryColor.b),
-//     });
+// //     // 2. Apply the Primary Color (Top Accent Bar)
+// //     page.drawRectangle({
+// //       x: 0,
+// //       y: height - 5,
+// //       width: width,
+// //       height: 5,
+// //       color: rgb(primaryColor.r, primaryColor.g, primaryColor.b),
+// //     });
 
-//     // 3. Apply Primary Color to the Subheader
-//     page.drawText(section.subheader, {
-//       x: 50,
-//       y: height - 50,
-//       size: 10,
-//       color: rgb(primaryColor.r, primaryColor.g, primaryColor.b),
-//     });
+// //     // 3. Apply Primary Color to the Subheader
+// //     page.drawText(section.subheader, {
+// //       x: 50,
+// //       y: height - 50,
+// //       size: 10,
+// //       color: rgb(primaryColor.r, primaryColor.g, primaryColor.b),
+// //     });
 
-//     // 4. Apply Secondary Color to the Headline & Body
-//     page.drawText(section.headline, {
-//       x: 50,
-//       y: height - 120,
-//       size: 32,
-//       color: rgb(secondaryColor.r, secondaryColor.g, secondaryColor.b),
-//     });
+// //     // 4. Apply Secondary Color to the Headline & Body
+// //     page.drawText(section.headline, {
+// //       x: 50,
+// //       y: height - 120,
+// //       size: 32,
+// //       color: rgb(secondaryColor.r, secondaryColor.g, secondaryColor.b),
+// //     });
 
    
-//      page.drawText(section.body_content, {
-//       x: 50,
-//       y: height -180 ,
-//       size: 32,
-//       color: rgb(0, 0, 0),
-//     });
+// //      page.drawText(section.body_content, {
+// //       x: 50,
+// //       y: height -180 ,
+// //       size: 32,
+// //       color: rgb(0, 0, 0),
+// //     });
 
-//     // 3. OPTIONAL IMAGE HANDLING
-//     if ( section.imageUrl) {
-//       try {
-//         const imageBytes = await fetch(section.imageUrl).then((res) => res.arrayBuffer());
-//         const image = section.imageUrl.includes('png') 
-//           ? await pdfDoc.embedPng(imageBytes) 
-//           : await pdfDoc.embedJpg(imageBytes);
+// //     // 3. OPTIONAL IMAGE HANDLING
+// //     if ( section.imageUrl) {
+// //       try {
+// //         const imageBytes = await fetch(section.imageUrl).then((res) => res.arrayBuffer());
+// //         const image = section.imageUrl.includes('png') 
+// //           ? await pdfDoc.embedPng(imageBytes) 
+// //           : await pdfDoc.embedJpg(imageBytes);
 
-//         // Position on the right 2/5ths of the slide
-//         page.drawImage(image, {
-//           x: 520,
-//           y: 60,
-//           width: 280,
-//           height: 480,
-//         });
-//       } catch (e) {
-//         console.error("Failed to embed image for section:", section.id);
-//       }
-//     }
-//   }
+// //         // Position on the right 2/5ths of the slide
+// //         page.drawImage(image, {
+// //           x: 520,
+// //           y: 60,
+// //           width: 280,
+// //           height: 480,
+// //         });
+// //       } catch (e) {
+// //         console.error("Failed to embed image for section:", section.id);
+// //       }
+// //     }
+// //   }
 
-//   const pdfBytes = await pdfDoc.save();
-//   return pdfBytes;
-// };
+// //   const pdfBytes = await pdfDoc.save();
+// //   return pdfBytes;
+// // };
 
 
 
-/**
- * UTILITY: Wraps text into an array of strings based on maxWidth
- */
+// /**
+//  * UTILITY: Wraps text into an array of strings based on maxWidth
+//  */
 const TextWrap = (text: string, maxWidth: number, font: PDFFont, fontSize: number) => {
   // FIX: Remove newlines and carriage returns that cause the 0x000a error
   const cleanText = text.replace(/[\r\n]+/g, ' ').trim();

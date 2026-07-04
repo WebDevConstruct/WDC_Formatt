@@ -13,7 +13,7 @@ import PDFGeneratingLoader from "@/app/components/PDFGenerationLoader";
 import {FileIcon, SpatulaIcon} from "@/app/components/PDFGenerationLoader";
 import TrackDropDown from "@/app/components/TrackdropDown";
 import {TrackType} from "@/app/components/TrackdropDown";
-import {LetterDataConfigType} from "@/lib/pdfEngine";
+// import {LetterDataConfigType} from "@/lib/pdfEngine";
 
 export const dynamic = 'force-dynamic';
 
@@ -134,7 +134,7 @@ type FormatDropDownType = {
 
 //The Roles played by each formatted text in the PDF.
 // 1. Define the Anatomy of the Document
-export type TextRole = 'title' | 'subheader' | 'paragraph' | "lists" | 'conclusion' |"introduction" | "header" | "reference" |  "quote";
+export type TextRole = 'title' | 'subheader' | 'paragraph' | "lists" | 'conclusion' |"introduction" | "header" | "reference" |  "quote" | "sign-off";
 
 export interface DocumentSegment {
   id: string;
