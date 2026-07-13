@@ -16,8 +16,16 @@ const hexToRgb = (hex: string) => {
   const b = hex ?  parseInt(hex.slice(5, 7), 16) / 255 : 0 ;
   return {r, g, b};
 }
+export type AddressAlignment = "left" | "right"
 export interface LetterDataConfigType {
   sender_name: string;
+   recipientAddress?: string;
+    recipientPosition?: string;
+    recipientOrganization?: string;
+    recipientAdditionalInfo?: string;
+    senderAdditionalInfo?: string[];
+    date?: string;
+    addressAlignment?: AddressAlignment;
   recipient_name: string;
   letter_title ? : string;
    content : DocumentSegment[];
@@ -510,161 +518,161 @@ export interface LetterDataConfigType {
 // // Define the precise structure sent from your frontend Track 1 Form
 
 
-export async function compileLetterPDF(letterData: LetterDataConfigType) {
-  const pdfDoc = await PDFDocument.create();
+// export async function compileLetterPDF(letterData: LetterDataConfigType) {
+//   const pdfDoc = await PDFDocument.create();
   
-  const fonts = {
-    regular: await pdfDoc.embedFont(StandardFonts.TimesRoman),
-    bold: await pdfDoc.embedFont(StandardFonts.TimesRomanBold),
-    italic: await pdfDoc.embedFont(StandardFonts.TimesRomanItalic),
-  };
+//   const fonts = {
+//     regular: await pdfDoc.embedFont(StandardFonts.TimesRoman),
+//     bold: await pdfDoc.embedFont(StandardFonts.TimesRomanBold),
+//     italic: await pdfDoc.embedFont(StandardFonts.TimesRomanItalic),
+//   };
 
-  const PAGE_WIDTH = 595;  // A4 Standard Dimensions
-  const PAGE_HEIGHT = 841;
-  const marginX = 54;      // Professional 0.75-inch margins
-  const maxTextWidth = PAGE_WIDTH - (marginX * 2);
+//   const PAGE_WIDTH = 595;  // A4 Standard Dimensions
+//   const PAGE_HEIGHT = 841;
+//   const marginX = 54;      // Professional 0.75-inch margins
+//   const maxTextWidth = PAGE_WIDTH - (marginX * 2);
 
-  let currentPage = pdfDoc.addPage([PAGE_WIDTH, PAGE_HEIGHT]);
-  let cursorY = 750; 
+//   let currentPage = pdfDoc.addPage([PAGE_WIDTH, PAGE_HEIGHT]);
+//   let cursorY = 750; 
 
-  // --- Core Text Wrapping and Overflow Handler ---
-  const renderTextBlock = (text: string, size: number, font: any, lineSpacing: number) => {
-    if (!text) return; 
+//   // --- Core Text Wrapping and Overflow Handler ---
+//   const renderTextBlock = (text: string, size: number, font: any, lineSpacing: number) => {
+//     if (!text) return; 
     
-    // Split incoming string segments on hard returns to honor explicit paragraph breaks
-    const paragraphs = text.split('\n');
+//     // Split incoming string segments on hard returns to honor explicit paragraph breaks
+//     const paragraphs = text.split('\n');
 
-    paragraphs.forEach((paragraph) => {
-      if (paragraph.trim() === '') {
-        cursorY -= (lineSpacing * 0.5);
-        return;
-      }
+//     paragraphs.forEach((paragraph) => {
+//       if (paragraph.trim() === '') {
+//         cursorY -= (lineSpacing * 0.5);
+//         return;
+//       }
 
-      const words = paragraph.split(' ');
-      let currentLine = '';
+//       const words = paragraph.split(' ');
+//       let currentLine = '';
 
-      words.forEach((word) => {
-        const testLine = currentLine ? `${currentLine} ${word}` : word;
-        const width = font.widthOfTextAtSize(testLine, size);
+//       words.forEach((word) => {
+//         const testLine = currentLine ? `${currentLine} ${word}` : word;
+//         const width = font.widthOfTextAtSize(testLine, size);
 
-        if (width > maxTextWidth) {
-          if (cursorY < marginX) { 
-            currentPage = pdfDoc.addPage([PAGE_WIDTH, PAGE_HEIGHT]);
-            cursorY = 780;
-          }
-          currentPage.drawText(currentLine, { x: marginX, y: cursorY, size, font });
-          cursorY -= lineSpacing;
-          currentLine = word;
-        } else {
-          currentLine = testLine;
-        }
-      });
+//         if (width > maxTextWidth) {
+//           if (cursorY < marginX) { 
+//             currentPage = pdfDoc.addPage([PAGE_WIDTH, PAGE_HEIGHT]);
+//             cursorY = 780;
+//           }
+//           currentPage.drawText(currentLine, { x: marginX, y: cursorY, size, font });
+//           cursorY -= lineSpacing;
+//           currentLine = word;
+//         } else {
+//           currentLine = testLine;
+//         }
+//       });
 
-      if (currentLine) {
-        if (cursorY < marginX) {
-          currentPage = pdfDoc.addPage([PAGE_WIDTH, PAGE_HEIGHT]);
-          cursorY = 780;
-        }
-        currentPage.drawText(currentLine, { x: marginX, y: cursorY, size, font });
-        cursorY -= lineSpacing;
-      }
-      cursorY -= 6; // Compact block padding for sleek corporate letter layouts
-    });
-  };
+//       if (currentLine) {
+//         if (cursorY < marginX) {
+//           currentPage = pdfDoc.addPage([PAGE_WIDTH, PAGE_HEIGHT]);
+//           cursorY = 780;
+//         }
+//         currentPage.drawText(currentLine, { x: marginX, y: cursorY, size, font });
+//         cursorY -= lineSpacing;
+//       }
+//       cursorY -= 6; // Compact block padding for sleek corporate letter layouts
+//     });
+//   };
 
-  // =================================================================
-  // --- SECTION 1: SENDER METADATA BLOCK (Right-Aligned) ---
-  // =================================================================
-  const renderRightAligned = (text: string, font: any, size: number) => {
-    if (!text) return;
-    const textWidth = font.widthOfTextAtSize(text, size);
-    currentPage.drawText(text, {
-      x: PAGE_WIDTH - marginX - textWidth,
-      y: cursorY,
-      size,
-      font,
-    });
-    cursorY -= (size + 4);
-  };
+//   // =================================================================
+//   // --- SECTION 1: SENDER METADATA BLOCK (Right-Aligned) ---
+//   // =================================================================
+//   const renderRightAligned = (text: string, font: any, size: number) => {
+//     if (!text) return;
+//     const textWidth = font.widthOfTextAtSize(text, size);
+//     currentPage.drawText(text, {
+//       x: PAGE_WIDTH - marginX - textWidth,
+//       y: cursorY,
+//       size,
+//       font,
+//     });
+//     cursorY -= (size + 4);
+//   };
 
-  renderRightAligned(letterData.sender_name.toUpperCase(), fonts.bold, 11);
-  renderRightAligned(letterData.address, fonts.regular, 10);
-  renderRightAligned(`Phone: ${letterData.phone}`, fonts.regular, 10);
-  renderRightAligned(`Email: ${letterData.email}`, fonts.regular, 10);
+//   renderRightAligned(letterData.sender_name.toUpperCase(), fonts.bold, 11);
+//   renderRightAligned(letterData.address, fonts.regular, 10);
+//   renderRightAligned(`Phone: ${letterData.phone}`, fonts.regular, 10);
+//   renderRightAligned(`Email: ${letterData.email}`, fonts.regular, 10);
 
-  cursorY -= 20; 
+//   cursorY -= 20; 
 
-  // =================================================================
-  // --- SECTION 2: TIMESTAMP & RECIPIENT BLOCK (Left-Aligned) ---
-  // =================================================================
-  const currentDate = new Date().toLocaleDateString('en-US', {
-    year: 'numeric', month: 'long', day: 'numeric'
-  });
+//   // =================================================================
+//   // --- SECTION 2: TIMESTAMP & RECIPIENT BLOCK (Left-Aligned) ---
+//   // =================================================================
+//   const currentDate = new Date().toLocaleDateString('en-US', {
+//     year: 'numeric', month: 'long', day: 'numeric'
+//   });
   
-  currentPage.drawText(currentDate, { x: marginX, y: cursorY, size: 11, font: fonts.regular });
-  cursorY -= 24;
+//   currentPage.drawText(currentDate, { x: marginX, y: cursorY, size: 11, font: fonts.regular });
+//   cursorY -= 24;
 
-  currentPage.drawText(letterData.recipient_name.toUpperCase(), { 
-    x: marginX, y: cursorY, size: 11, font: fonts.bold 
-  });
-  cursorY -= 30;
+//   currentPage.drawText(letterData.recipient_name.toUpperCase(), { 
+//     x: marginX, y: cursorY, size: 11, font: fonts.bold 
+//   });
+//   cursorY -= 30;
 
-  // =================================================================
-  // --- SECTION 3: SALUTATION ---
-  // =================================================================
-  currentPage.drawText(letterData.salutation, { 
-    x: marginX, y: cursorY, size: 11, font: fonts.regular 
-  });
-  cursorY -= 24;
+//   // =================================================================
+//   // --- SECTION 3: SALUTATION ---
+//   // =================================================================
+//   currentPage.drawText(letterData.salutation, { 
+//     x: marginX, y: cursorY, size: 11, font: fonts.regular 
+//   });
+//   cursorY -= 24;
 
-  // =================================================================
-  // --- SECTION 4: SEQUENTIAL CONTENT STREAM PARSING ---
-  // =================================================================
-  // Sorting items dynamically by their structural parsing index to guarantee precise delivery order
+//   // =================================================================
+//   // --- SECTION 4: SEQUENTIAL CONTENT STREAM PARSING ---
+//   // =================================================================
+//   // Sorting items dynamically by their structural parsing index to guarantee precise delivery order
 
-  const sortedContent = [...letterData.content].sort((a, b) => a.index - b.index) || [{ id: 'default', role: 'paragraph', content: '', index: 0 }];
+//   const sortedContent = [...letterData.content].sort((a, b) => a.index - b.index) || [{ id: 'default', role: 'paragraph', content: '', index: 0 }];
 
-  sortedContent.forEach((segment) => {
-    switch (segment.role) {
-      case 'header':
-        // Renders the single formal letter subject line (# HEADER:)
-        cursorY -= 4;
-        const subjectText = `RE: ${segment.content.toUpperCase()}`;
-        renderTextBlock(subjectText, 11, fonts.bold, 16);
+//   sortedContent.forEach((segment) => {
+//     switch (segment.role) {
+//       case 'header':
+//         // Renders the single formal letter subject line (# HEADER:)
+//         cursorY -= 4;
+//         const subjectText = `RE: ${segment.content.toUpperCase()}`;
+//         renderTextBlock(subjectText, 11, fonts.bold, 16);
         
-        // Append crisp horizontal accent line strictly under the subject line text
-        cursorY -= 2;
-        const textWidth = fonts.bold.widthOfTextAtSize(subjectText, 11);
-        currentPage.drawLine({
-          start: { x: marginX, y: cursorY },
-          end: { x: marginX + textWidth, y: cursorY },
-          thickness: 1,
-        });
-        cursorY -= 20;
-        break;
+//         // Append crisp horizontal accent line strictly under the subject line text
+//         cursorY -= 2;
+//         const textWidth = fonts.bold.widthOfTextAtSize(subjectText, 11);
+//         currentPage.drawLine({
+//           start: { x: marginX, y: cursorY },
+//           end: { x: marginX + textWidth, y: cursorY },
+//           thickness: 1,
+//         });
+//         cursorY -= 20;
+//         break;
 
-      case 'introduction':
-      case 'paragraph':
-      case 'conclusion':
-        // Continuous block processing for narrative components
-        renderTextBlock(segment.content, 11, fonts.regular, 16);
-        cursorY -= 8;
-        break;
+//       case 'introduction':
+//       case 'paragraph':
+//       case 'conclusion':
+//         // Continuous block processing for narrative components
+//         renderTextBlock(segment.content, 11, fonts.regular, 16);
+//         cursorY -= 8;
+//         break;
 
-      case 'sign-off':
-        // Adds generous separation spacing layout prior to executing final signature rows
-        cursorY -= 24; 
-        renderTextBlock(segment.content, 11, fonts.regular, 16);
-        break;
+//       case 'sign-off':
+//         // Adds generous separation spacing layout prior to executing final signature rows
+//         cursorY -= 24; 
+//         renderTextBlock(segment.content, 11, fonts.regular, 16);
+//         break;
 
-      default:
-        renderTextBlock(segment.content, 11, fonts.regular, 16);
-        cursorY -= 8;
-    }
-  });
+//       default:
+//         renderTextBlock(segment.content, 11, fonts.regular, 16);
+//         cursorY -= 8;
+//     }
+//   });
 
-  return await pdfDoc.save();
-}
+//   return await pdfDoc.save();
+// }
 
 // //NEW ENGINE CODE
 // // export async function compilePDF(template : PDFTemplateConfigType, studentData: studentDataType) {

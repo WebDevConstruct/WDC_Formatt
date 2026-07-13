@@ -1,5 +1,5 @@
 import { db } from "@/lib/prisma";
- import { compileLetterPDF,} from "@/lib/pdfEngine";
+ import { compileLetterPDF,} from "@/lib/utils/pdf-engine/compile";
 import {LetterDataConfigType } from "@/lib/pdfEngine";
 export async function POST(req : Request){
     const body = await req.json();

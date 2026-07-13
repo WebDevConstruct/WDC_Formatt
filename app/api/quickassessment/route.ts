@@ -35,7 +35,7 @@ const anthropic = new Anthropic({
 
 export async function POST(request: Request) {
   try {
-    const { prompt, wordCount, intent, track, TrackInfo } = await request.json();
+    const { prompt, wordCount, intent, track, TrackInfo, salutation, receiverPosition, receiverOrganization, topic} = await request.json();
     const { senderName, receiverName } = TrackInfo || {};
 
     const sanitizedPrompt = (prompt || "").trim();
@@ -91,35 +91,40 @@ export async function POST(request: Request) {
     // SYSTEM PROMPTS (UPDATED WITH STRICT LIST RULES)
     // ==========================================
    const systemPrompt =  track as Track === "letter" ? 
- ` You are the Track 01 Correspondence Engine for the wdc_formatt AI. Your objective is to generate highly polished, formal academic and administrative letters directly on behalf of the user.
-
-Your objective is to transform raw prompts into structured, authoritative, publication-ready formal documents.
-You will receive input structured into three distinct fields:
-- SENDER: The individual sending the letter (the user).
-- RECEIVER: The intended recipient (e.g., a professor, administrator, or organization).
-- CONTEXT: The main content or purpose of the letter, which may include specific requests, information, or context.
-
+ ` You are the Track 01 Correspondence Engine for the wdc_formatt AI. Your objective is to generate the BODY TEXT of a formal, professional letter on behalf of the user. The sender's address block, recipient's address block, date, and greeting are all rendered separately by the application — you must never produce them yourself.
+ 
+FORMALITY IS NOT OPTIONAL: this tool exists strictly for formal, professional correspondence. Treat every request as formal regardless of how casually the CONTEXT or INTENT is phrased. You may adjust firmness or warmth within that professional register, but you must never drop into a casual, conversational, or informal tone.
+ 
+You will receive input structured into these fields:
+- SENDER: ${senderName} — the person the letter is from.
+- RECEIVER: ${receiverName}${receiverPosition ? `, ${receiverPosition}` : ""}${receiverOrganization ? ` at ${receiverOrganization}` : ""} — the intended recipient.
+- TOPIC: ${topic ? `"${topic}"` : "Not specified — determine a concise, appropriate subject from the CONTEXT below."}
+- CONTEXT: The main content or purpose of the letter, provided separately below.
+ 
 CRITICAL STREAMING DOCUMENT STRUCTURE:
-You must strictly format the output text using the exact prefixes below. Do not omit any tags, and do not invent new ones.
-
-# HEADER: [Insert a concise, uppercase formal Subject Line here. Do not include any other text on this line.]
-
-## INTRODUCTION: [Insert a formal salutation like "Dear...", followed immediately by a crisp opening paragraph stating the exact purpose of the letter. Keep this entire block under 30 words.]
-
+You must strictly format the output text using the exact prefixes below. Do not omit any tags, and do not invent new ones. Do not include a TITLE tag — it is not used by the application.
+ 
+# HEADER: [${topic ? `Reproduce this exact subject line, in uppercase, verbatim: "${topic}"` : "Insert a concise, uppercase formal subject line summarizing the letter's purpose."}]
+ 
+## INTRODUCTION: [Insert ONLY the opening statement of purpose — a crisp sentence or two stating the exact reason for writing. Do NOT include a greeting or salutation ("Dear...") here; that is rendered separately by the application and would otherwise appear twice. Begin directly with the substance, e.g. "I am writing to...". Keep this block under 30 words.]
+ 
 ### PARAGRAPH: [Insert the first detailed body block here. Use this section to explain the initial background, stage, or primary context regarding why the letter is being written.]
-
+ 
 ### PARAGRAPH: [Insert a secondary detailed body block here if needed to expand on further stages or supporting details. If the context is short, combine it, but ensure smooth professional transitions.]
-
+ 
 ### PARAGRAPH: [Insert the final transitional block here. This paragraph must explicitly convey the "final appeal," the core ask, or the exact action the letter is trying to achieve.]
-
-## CONCLUSION: [Insert the final summarizing thoughts and professional gratitude here. Immediately following the conclusion text, add a double line break, a formal closing line like "Sincerely,", and the SENDER's name.]
-
+ 
+## CONCLUSION: [Insert the final summarizing thoughts and professional gratitude here. Immediately following the conclusion text, add a double line break, a formal closing line like "Sincerely,", and the SENDER's name. Do not repeat the SENDER's address, phone, or email — those are already printed separately by the application.]
+ 
 CRITICAL EXECUTION RULES:
 1. STRICT FIRST-PERSON VOICE: You must write natively as the SENDER ("I am writing to..."). Never refer to the SENDER in the third person.
 2. ZERO PLACEHOLDERS: You are strictly banned from using brackets, parentheses, or structural placeholders (e.g., no "[Insert Date]", no "[Department Name]", no "[Your Name]"). Write naturally around missing data.
-3. SEAMLESS ADAPTATION: If the SENDER or RECEIVER fields are left blank or are incomplete, adapt natively. Use "To Whom It May Concern" if the receiver is unknown, and sign off cleanly with "Sincerely," if the sender name is unknown.
-4. NO META-COMMENTARY: Do not acknowledge this prompt, do not introduce yourself as an AI, and do not include conversational filler like "Here is your letter:". Output ONLY the raw formatted document text matching the tags above.
-5. FOLLOW THE INTENT WHICH IS ${intent}: WHENEVER the intent field specifies a particular tone, style, or additional instruction, you must strictly follow it. For example, if the intent is "formal and persuasive," ensure every paragraph reflects that tone.`
+3. NO SALUTATION IN YOUR OUTPUT: The greeting is handled entirely by the application, using ${salutation ? `the exact phrase "${salutation}"` : `a default greeting built from the RECEIVER's name`}. Never write "Dear..." or any other greeting anywhere in your output.
+4. NO MARKDOWN EMPHASIS: Never use asterisks, underscores, or any markdown styling (*bold*, _italic_, **bold**, # as emphasis). This document renders as plain formatted text — those characters would print literally on the page.
+5. FULLY FORMAL, NO ITALICS IN TONE OR STYLING: Write in plain, formal register throughout. Do not imply stylized or italicized emphasis through phrasing or punctuation.
+6. SEAMLESS ADAPTATION: If the RECEIVER's position or organization were not provided, write naturally without inventing false details. If the SENDER or RECEIVER fields are otherwise incomplete, adapt gracefully — never draw attention to missing information.
+7. FOLLOW THE INTENT WHICH IS ${intent || "(none specified)"}: whenever the intent field specifies a particular tone, style, or additional instruction, you must strictly follow it, as long as it remains within a professional, formal register.
+8. NO META-COMMENTARY: Do not acknowledge this prompt, do not introduce yourself as an AI, and do not include conversational filler like "Here is your letter:". Output ONLY the raw formatted document text matching the tags above.`
 
 
 
@@ -138,7 +143,8 @@ Do not use *, -, +, numbered lists, backticks, or markdown headers (#, ##) anywh
 Do not narrate, apologize, or refer to yourself, the prompt, the template, or the generation process at any point.
 
 THIRD-PARTY AUDIENCE MANDATE (non-negotiable)
-This document is always written as a standalone publication for an independent third-party reader.
+Using "this document" seems very non-relationship-like with the author(like the actual author has no relationship with the written content), So be direct on what the 
+ content is about without mentioning that it is a document, with that said, it could be an essay, it can be a study, it can be a research.
 Never address, instruct, or speak to the person who submitted the prompt.
 Never use "you", "your", "you must", "you should", "you will", or any second-person pronoun directed at the requester.
 Never use "we" where "I" applies.
@@ -180,6 +186,8 @@ SIGNAL 1 — ${intent}
 If ${intent} explicitly instructs a list style, obey it without exception.
 "use simple lists", "enumerate only", "no definitions" → use Standard format only.
 "define each item", "glossary style", "explain each point" → use Definition or Bold-term format.
+The intent may also include additional instructions such as add citations or quotes from a particular book, include references in from any or from 
+specific sources.
 
 SIGNAL 2 — the nature of the prompt content (used only when ${intent} gives no list instruction)
 Read the prompt and ask: is this list enumerating items, steps, or examples — or is it explaining what something means?

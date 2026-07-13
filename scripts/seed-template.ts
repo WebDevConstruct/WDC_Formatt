@@ -134,7 +134,7 @@ const UpdatedAcademicAssigmentTemplate = {
         dimensions: { width: 595.28, height: 841.89 },
         placeholders:   [
     // Cover
-    { varName: 'assignment_title', type: 'header',    x: 50, y: 780, fontSize: 22, isBold: true,  fontFamily: 'Helvetica-Bold' },
+    { varName: 'assignment_title', type: 'subheader',    x: 50, y: 780, fontSize: 22, isBold: true,  fontFamily: 'Helvetica-Bold' },
     { varName: 'student_name',     type: 'subheader', x: 50, y: 755, fontSize: 16, isBold: true,  fontFamily: 'Helvetica-Bold' },
 
     // Introduction

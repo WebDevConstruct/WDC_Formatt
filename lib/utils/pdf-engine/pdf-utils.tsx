@@ -22,7 +22,7 @@ export async function loadFonts(pdfDoc : PDFDocument){
     return{
         serifBold : await pdfDoc.embedFont(StandardFonts?.TimesRomanBold),
         sansRegular : await pdfDoc?.embedFont(StandardFonts?.TimesRoman),
-        sansBold : await pdfDoc?.embedFont(StandardFonts?.HelveticaBold)
+        sansBold : await pdfDoc?.embedFont(StandardFonts?.TimesRomanBold)
     }
 }
 

@@ -280,18 +280,18 @@ case 'quote': {
   const [attribution, quoteText] = content.split('|').map(s => s.trim());
 
   // Left accent bar — visual cue that this is a pull quote
-  state.page.drawLine({
-    start:     { x: layout.margin,     y: state.y - 4 },
-    end:       { x: layout.margin,     y: state.y - lh(sizes.paragraph) * 2 - 4 },
-    thickness: 2.5,
-    color:     rgb(0.1, 0.1, 0.1),
-  });
+  // state.page.drawLine({
+  //   start:     { x: layout.margin,     y: state.y - 4 },
+  //   end:       { x: layout.margin,     y: state.y - lh(sizes.paragraph) * 2 - 4 },
+  //   thickness: 2.5,
+  //   color:     rgb(0.1, 0.1, 0.1),
+  // });
 
-  const quoteIndent = 14;
+  const quoteIndent = 0;
   const quoteWidth  = contentWidth - quoteIndent;
 
   // Quote body — italic weight via sansRegular at slightly smaller size
-  const quoteLines = wrapText(`"${quoteText}"`, quoteWidth, fonts.sansRegular, sizes.paragraph);
+  const quoteLines = wrapText(`"${quoteText}"`, contentWidth, fonts.sansRegular, sizes.paragraph);
   drawLines(state, quoteLines, fonts.sansRegular, sizes.paragraph, rgb(0.12, 0.12, 0.12), quoteIndent, layout, fonts);
 
   // Attribution — muted, smaller

@@ -11,7 +11,6 @@ import { studentDataType } from '@/scripts/templatetypes';
 import { Modal } from '@/components/Modal';
 import PDFGeneratingLoader from "@/app/components/PDFGenerationLoader";
 import {FileIcon, SpatulaIcon} from "@/app/components/PDFGenerationLoader";
-import TrackDropDown from "@/app/components/TrackdropDown";
 import {TrackType} from "@/app/components/TrackdropDown";
 // import {LetterDataConfigType} from "@/lib/pdfEngine";
 
@@ -610,6 +609,7 @@ const handleSegmentChange = (id: string, newContent: string, role : string) => {
   setSegments(prev => prev.map(seg => 
     seg.id === id ? { ...seg, content: newContent } : seg
   ));
+  setBodyReq(prev => ({...prev, body_content: prev?.body_content?.map((seg)=>  seg?.id === id && seg?.role === role ? {...seg, content : newContent} : seg ) }))
 //   if(role === "header"){
 // setBodyReq((prev)=> ({...prev, assignment_title : newContent}))
 //   }else if(role === "conclusion"){
@@ -956,7 +956,7 @@ const updateListStyle = (newType: 'bullet' | 'number') => {
                 </div>
               ) : (
                 <div className="space-y-2">
-                  {seg.role === 'subheader' && <h2 className="text-sm font-bold text-black uppercase tracking-wide opacity-90">{seg.content}</h2>}
+                  {seg.role === 'subheader' && <h2  className="text-sm font-bold text-black uppercase tracking-wide opacity-90">{seg.content}</h2>}
                   {seg.role === 'lists' && <ol className="list-disc list-inside text-black">{<li>{seg.content}</li>}</ol>}
                   {seg.role === 'paragraph' && <p className="text-xs text-black/70 leading-relaxed font-medium">{seg.content}</p>}
                 </div>
