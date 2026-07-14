@@ -219,11 +219,10 @@ export async function compileLetterPDF(letterData: LetterDataConfigType) {
   };
 
   // --- Convenience wrapper for "Label: value" lines ---
-  const drawLabeledLine = (label: string, value: string, size = 10, align: Align = "left") => {
+  const drawLabeledLine = ( value: string, size = 10, align: Align = "left") => {
     if (!value) return;
     drawMixedLine(
       [
-        { text: `${label}: `, font: fonts.bold, size },
         { text: value, font: fonts.regular, size },
       ],
       align
@@ -277,10 +276,10 @@ export async function compileLetterPDF(letterData: LetterDataConfigType) {
   // =================================================================
   const senderAlign: Align = letterData.addressAlignment === "right" ? "right" : "left";
 
-  drawLine(letterData.sender_name.toUpperCase(), fonts.bold, 11, senderAlign);
+  drawLine(letterData.sender_name, fonts.bold, 11, senderAlign);
   drawLines(letterData.address, fonts.regular, 10, senderAlign);
-  if (letterData.phone) drawLabeledLine("Phone", letterData.phone, 10, senderAlign);
-  if (letterData.email) drawLabeledLine("Email", letterData.email, 10, senderAlign);
+  if (letterData.phone) drawLabeledLine( letterData.phone, 10, senderAlign);
+  if (letterData.email) drawLabeledLine(letterData.email, 10, senderAlign);
   if (letterData.senderAdditionalInfo) {
   //  drawLines(letterData.senderAdditionalInfo, fonts.regular, 10, senderAlign);
   }
@@ -297,12 +296,12 @@ export async function compileLetterPDF(letterData: LetterDataConfigType) {
   // =================================================================
   // --- SECTION 2: RECIPIENT BLOCK (always left-aligned) ---
   // =================================================================
-  drawLine(letterData.recipient_name.toUpperCase(), fonts.bold, 11, "left");
-  if (letterData.recipientPosition) drawLine(letterData.recipientPosition, fonts.regular, 10, "left");
-  if (letterData.recipientOrganization) drawLine(letterData.recipientOrganization, fonts.regular, 10, "left");
-  if (letterData.recipientAddress) drawLines(letterData.recipientAddress, fonts.regular, 10, "left");
+  drawLine(letterData.recipient_name, fonts.bold, 12, "left");
+  if (letterData.recipientPosition) drawLine(letterData.recipientPosition, fonts.regular, 12, "left");
+  if (letterData.recipientOrganization) drawLine(letterData.recipientOrganization, fonts.regular, 12, "left");
+  if (letterData.recipientAddress) drawLines(letterData.recipientAddress, fonts.regular, 12, "left");
   if (letterData.recipientAdditionalInfo) {
-    drawLines(letterData.recipientAdditionalInfo, fonts.regular, 10, "left");
+    drawLines(letterData.recipientAdditionalInfo, fonts.regular, 12, "left");
   }
 
   cursorY -= 20;
@@ -310,7 +309,7 @@ export async function compileLetterPDF(letterData: LetterDataConfigType) {
   // =================================================================
   // --- SECTION 3: SALUTATION ---
   // =================================================================
-  drawLine(letterData.salutation, fonts.regular, 11, "left");
+  drawLine(letterData.salutation, fonts.regular, 14, "left");
   cursorY -= 14;
 
   // =================================================================
@@ -325,15 +324,15 @@ export async function compileLetterPDF(letterData: LetterDataConfigType) {
       case 'header': {
         // The letter's topic — always uppercase, always underlined.
         cursorY -= 4;
-        const subjectText = `RE: ${segment.content.toUpperCase()}`;
-        renderTextBlock(subjectText, 11, fonts.bold, 16);
+        const subjectText = `${segment.content.toUpperCase()}`;
+        renderTextBlock(subjectText, 16, fonts.bold, 18);
 
         cursorY -= 2;
         const textWidth = fonts.bold.widthOfTextAtSize(subjectText, 11);
         ensureSpace();
         currentPage.drawLine({
           start: { x: marginX, y: cursorY },
-          end: { x: marginX + textWidth, y: cursorY },
+          end: { x: marginX + textWidth , y: cursorY },
           thickness: 1,
         });
         cursorY -= 20;
@@ -343,17 +342,17 @@ export async function compileLetterPDF(letterData: LetterDataConfigType) {
       case 'introduction':
       case 'paragraph':
       case 'conclusion':
-        renderTextBlock(segment.content, 11, fonts.regular, 16);
+        renderTextBlock(segment.content, 14, fonts.regular, 18);
         cursorY -= 8;
         break;
 
       case 'sign-off':
         cursorY -= 24;
-        renderTextBlock(segment.content, 11, fonts.regular, 16);
+        renderTextBlock(segment.content, 14, fonts.regular, 18);
         break;
 
       default:
-        renderTextBlock(segment.content, 11, fonts.regular, 16);
+        renderTextBlock(segment.content, 14, fonts.regular, 18);
         cursorY -= 8;
     }
   });

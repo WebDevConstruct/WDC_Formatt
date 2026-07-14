@@ -102,9 +102,9 @@ You will receive input structured into these fields:
 - CONTEXT: The main content or purpose of the letter, provided separately below.
  
 CRITICAL STREAMING DOCUMENT STRUCTURE:
-You must strictly format the output text using the exact prefixes below. Do not omit any tags, and do not invent new ones. Do not include a TITLE tag — it is not used by the application.
+You must strictly format the output text using the exact prefixes below. .
  
-# HEADER: [${topic ? `Reproduce this exact subject line, in uppercase, verbatim: "${topic}"` : "Insert a concise, uppercase formal subject line summarizing the letter's purpose."}]
+# HEADER: [Create a suitable header that explains the purpose of writing the letter , while representing the Contents of the letter in a short, professional manner based on the niche or area of whom it is being written to.]
  
 ## INTRODUCTION: [Insert ONLY the opening statement of purpose — a crisp sentence or two stating the exact reason for writing. Do NOT include a greeting or salutation ("Dear...") here; that is rendered separately by the application and would otherwise appear twice. Begin directly with the substance, e.g. "I am writing to...". Keep this block under 30 words.]
  
@@ -123,8 +123,9 @@ CRITICAL EXECUTION RULES:
 4. NO MARKDOWN EMPHASIS: Never use asterisks, underscores, or any markdown styling (*bold*, _italic_, **bold**, # as emphasis). This document renders as plain formatted text — those characters would print literally on the page.
 5. FULLY FORMAL, NO ITALICS IN TONE OR STYLING: Write in plain, formal register throughout. Do not imply stylized or italicized emphasis through phrasing or punctuation.
 6. SEAMLESS ADAPTATION: If the RECEIVER's position or organization were not provided, write naturally without inventing false details. If the SENDER or RECEIVER fields are otherwise incomplete, adapt gracefully — never draw attention to missing information.
-7. FOLLOW THE INTENT WHICH IS ${intent || "(none specified)"}: whenever the intent field specifies a particular tone, style, or additional instruction, you must strictly follow it, as long as it remains within a professional, formal register.
-8. NO META-COMMENTARY: Do not acknowledge this prompt, do not introduce yourself as an AI, and do not include conversational filler like "Here is your letter:". Output ONLY the raw formatted document text matching the tags above.`
+7. FOLLOW THE CONTEXT WHICH IS ${intent || "(none specified)"}: whenever the context field specifies a particular tone, style, or additional instruction, you must strictly follow it, as long as it remains within a professional, formal register.
+8. NO META-COMMENTARY: Do not acknowledge this prompt, do not introduce yourself as an AI, and do not include conversational filler like "Here is your letter:". Output ONLY the raw formatted document text matching the tags above.
+9. AS MENTIONED EVERY SINGLE PREFIX FORMING THE DOCUMENT STRUCTURE SHOULD BE USED ACCORDINGLY SUCH AS THE # HEADER: , ## INTROCUTION: , ### PARGRAPH: , ## CONCLUSION: . ENSURE THE SIGNOFF OR SIGNATURE IS ALSO INCLUDED.`
 
 
 

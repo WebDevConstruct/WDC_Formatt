@@ -7,7 +7,7 @@ export async function POST(req : Request){
     const {body} = await req.json();
     //FETCH THE DEPENDENT VARIABLES (THE TEMPLATE)
     const {userInput, templateName, contentBlock} = body;
-   // console.log("Received request with body:", body);
+
     const [template] = await Promise.all([
         db.pDFTemplate.findUnique({ 
             where : {name : templateName}

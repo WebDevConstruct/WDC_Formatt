@@ -6,15 +6,15 @@ import Image from "next/image";
 const TEMPLATES = [
   {
     id: 'quick',
-    title: 'Quick Assessment',
+    title: 'Quick Research',
     tagline: 'Velocity Through Clarity',
     navigateTo :"/dashboard/Files/quick_assessment",
     serviceVibe: 'Flex', 
     description: 'A PDF engine designed and ready exactly when you are ready, SPEED, CLARTITY AND PROFESSIONALISM.',
     perks: [
-      { label: 'Quick Project', detail: 'Have an idea lets get get it done.' },
-      { label: 'Enhanced Formatting', detail: 'Professional-looking documents with minimal effort or no editing.' },
-      { label: 'Smart File Engine', detail: 'Intelligent File Handling for best document editing practice' }
+      { label: 'Assessment Research', detail: 'Create, think, edit and get unlimited pages and words assessment done' },
+      { label: 'Letters', detail: 'With proper intention or context, relevant identified terms and clear success definition' },
+      { label: 'Essays', detail: 'Get any type of structured essay done with ease.' }
     ],
     features: ["Unlimited Pages", 'Collects Intent to give best output'],
     theme: {

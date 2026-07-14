@@ -377,6 +377,8 @@ import {
 import LetterPreviewModal from '@/app/components/LetterPreview';
 import {useGlobalContext} from "@/app/Context"
 import {AddressAlignment} from "@/lib/pdfEngine";
+import Link from "next/link";
+import Image from "next/image"
 type TextRole = "header" | "introduction" | "paragraph" | "sign-off"
 
 type AccordionSection = "sender" | "receiver"
@@ -409,7 +411,8 @@ export interface MetadataState {
 // clean formal document, not a grid of generic inputs.
 // ============================================================
 const FieldLabel = ({ icon: Icon, children, required }: { icon?: any; children: React.ReactNode; required?: boolean }) => (
-  <label className="text-xs font-black uppercase tracking-[0.18em] flex items-center gap-2 text-[#483C32]">
+  <label className="text-base font-black uppercase tracking-[0.18em]
+  font-serif flex items-center gap-2 text-[#483C32]">
     {Icon && <Icon className="w-4 h-4 text-[#D4AF37]" />}
     {children}
     {required && <span className="text-[#B3261E] normal-case tracking-normal">*</span>}
@@ -831,9 +834,15 @@ const handleGenerate = async () => {
 };
   return (
 
-  <div className="bg-[#F2F0E9] h-auto py-8 flex items-start lg:px-[20%] px-5
-  flex-col gap-8 lg:gap-10 w-full not-italic">
+  <div className="bg-[#F2F0E9] h-auto py-8 flex items-start lg:px-[10%] px-5
+  flex-col gap-10 lg:gap-10 w-full not-italic font-serif ">
 
+   <Link href="/dashboard/Files" 
+      className ="flex gap-2 items-center my-4">
+        <Image src="/ArrowBack.svg" alt="Back to Dashboard" width={24} height={24}/>
+        <p className="text-lg font-bold text-[#483C32]/80 hover:opacity-90 hover:text-[17px]">
+        Files Engine Room</p>  
+      </Link>
     {/* ===== STEP 0 — Topic ===== 
         What the letter is about. Shown uppercase + underlined, matching
         how it will sit at the top of the finished document. */}
@@ -845,21 +854,12 @@ const handleGenerate = async () => {
         onChange={(e) => setMeta((prev) => ({ ...prev, letter: { ...prev.letter, topic: e.target.value } }))}
         className="!py-3.5 !text-base !border-[#483C32] shadow-[6px_6px_0px_0px_rgba(72,60,50,1)] !rounded-2xl"
       />
-      {meta.letter.topic ? (
-        <p className="text-sm font-black uppercase underline underline-offset-4 decoration-2 decoration-[#D4AF37] text-[#483C32] pt-1">
-          {meta.letter.topic}
-        </p>
-      ) : (
-        <p className="text-xs text-[#483C32]/50">This is treated as a formal letter — leave blank and {`we'll`} title it for you.</p>
-      )}
+     
     </div>
 
     {/* ===== STEP 1 & 2 — Address ===== */}
-    <div className="w-full space-y-3">
-      <p className="text-xs text-[#483C32]/60">
-        Every formal letter starts with knowing who {`it's`} from and who {`it's`}  for. Start with your own details below.
-      </p>
-
+    <div className="w-full flex flex-col md:gap-10 gap-10  ">
+   
       <AccordionSection
         step={1}
         title="Sender Information"
@@ -867,8 +867,8 @@ const handleGenerate = async () => {
         isOpen={activeSection === "sender"}
         onToggle={() => setActiveSection("sender")}
       >
-        <div className="grid lg:grid-cols-2 gap-4">
-          <div className="space-y-2">
+        <div className="grid lg:grid-cols-2 gap-7">
+          <div className="space-y-3">
             <FieldLabel icon={User} required>Full Name</FieldLabel>
             <TextInput
               placeholder="e.g. Adaeze Okonkwo"
@@ -876,7 +876,7 @@ const handleGenerate = async () => {
               onChange={(e) => setSenderField("fullName", e.target.value)}
             />
           </div>
-          <div className="space-y-2">
+          <div className="space-y-3">
             <FieldLabel icon={CalendarDays}>Date</FieldLabel>
             <TextInput
               type="date"
@@ -884,7 +884,7 @@ const handleGenerate = async () => {
               onChange={(e) => setSenderField("date", e.target.value)}
             />
           </div>
-          <div className="space-y-2 lg:col-span-2">
+          <div className="space-y-3 lg:col-span-2">
             <FieldLabel icon={MapPin} required>Full Address</FieldLabel>
             <textarea
               placeholder="Street, city, state, zip, country"
@@ -895,7 +895,7 @@ const handleGenerate = async () => {
                 placeholder:not-italic placeholder:text-[#483C32]/40"
             />
           </div>
-          <div className="space-y-2">
+          <div className="space-y-3">
             <FieldLabel icon={Mail}>Email {meta.letter.sender.email || meta.letter.sender.phone ? "" : "(or Phone)"}</FieldLabel>
             <TextInput
               type="email"
@@ -904,7 +904,7 @@ const handleGenerate = async () => {
               onChange={(e) => setSenderField("email", e.target.value)}
             />
           </div>
-          <div className="space-y-2">
+          <div className="space-y-3">
             <FieldLabel icon={Phone}>Phone {meta.letter.sender.email || meta.letter.sender.phone ? "" : "(or Email)"}</FieldLabel>
             <TextInput
               type="tel"
@@ -914,7 +914,7 @@ const handleGenerate = async () => {
             />
           </div>
 
-          <div className="space-y-2 lg:col-span-2">
+          <div className="space-y-3 lg:col-span-2">
             <FieldLabel>Address Alignment</FieldLabel>
             <div className="flex gap-4">
               <label className={`flex-1 flex items-center gap-2 border-2 rounded-xl px-4 py-3 cursor-pointer transition-all
@@ -998,8 +998,8 @@ const handleGenerate = async () => {
         isOpen={activeSection === "receiver"}
         onToggle={() => setActiveSection("receiver")}
       >
-        <div className="grid lg:grid-cols-2 gap-4">
-          <div className="space-y-2">
+        <div className="grid lg:grid-cols-2 gap-8">
+          <div className="space-y-3">
             <FieldLabel icon={User}>Full Name</FieldLabel>
             <TextInput
               placeholder="e.g. Dr. Musa Ibrahim"
@@ -1007,7 +1007,7 @@ const handleGenerate = async () => {
               onChange={(e) => setReceiverField("fullName", e.target.value)}
             />
           </div>
-          <div className="space-y-2">
+          <div className="space-y-3">
             <FieldLabel icon={Building2}>Position</FieldLabel>
             <TextInput
               placeholder="e.g. Head of Admissions"
@@ -1015,7 +1015,7 @@ const handleGenerate = async () => {
               onChange={(e) => setReceiverField("position", e.target.value)}
             />
           </div>
-          <div className="space-y-2">
+          <div className="space-y-3">
             <FieldLabel icon={Building2}>Organization</FieldLabel>
             <TextInput
               placeholder="e.g. University of Lagos"
@@ -1023,7 +1023,7 @@ const handleGenerate = async () => {
               onChange={(e) => setReceiverField("organization", e.target.value)}
             />
           </div>
-          <div className="space-y-2">
+          <div className="space-y-3">
             <FieldLabel>How to Address Them</FieldLabel>
             <TextInput
               placeholder="Dear Sir/Ma, Dear Recruitment Team"
@@ -1031,7 +1031,7 @@ const handleGenerate = async () => {
               onChange={(e) => setReceiverField("salutation", e.target.value)}
             />
           </div>
-          <div className="space-y-2 lg:col-span-2">
+          <div className="space-y-3 lg:col-span-2">
             <FieldLabel icon={MapPin}>Address</FieldLabel>
             <textarea
               placeholder="Street, city, state, zip, country"
@@ -1043,7 +1043,7 @@ const handleGenerate = async () => {
             />
           </div>
 
-          <div className="space-y-2 lg:col-span-2">
+          <div className="space-y-3 lg:col-span-2">
             <FieldLabel>Additional Information</FieldLabel>
             {meta.letter.receiver.additionalInfo.map((val, idx) => (
               <div key={idx} className="flex items-center gap-2">
@@ -1102,9 +1102,10 @@ const handleGenerate = async () => {
 
     {/* ===== STEP 3 — Prompt & Intent ===== */}
      <div className= {`flex lg:flex-row flex-col w-full
-     justify-between gap-4`}>
+     justify-between gap-10 lg:gap-10 `}>
+      
       {/* PROMPT TEXT AREA */}
-        <div className="space-y-2">
+        <div className="space-y-2 md:w-1/2 w-full">
                 <FieldLabel icon={FileText}>The Prompt (Actual Assessment)</FieldLabel>
                 <textarea 
                   placeholder="Paste the core assessment content here. Avoid adding instructions..."
@@ -1117,7 +1118,7 @@ const handleGenerate = async () => {
               </div>
 
               {/* INTENT TEXTAREA */}
-                  <div className="space-y-2">
+                  <div className="space-y-2 md:w-1/2 w-full">
                 <FieldLabel icon={Settings2}>Intent / Strategy (Instructions)</FieldLabel>
                 <textarea 
                   placeholder="Define the prompt strategy (e.g., Use Nigerian case studies, keep tone formal)..."
