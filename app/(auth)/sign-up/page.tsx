@@ -2,7 +2,6 @@
 import { useSignUp } from "@clerk/nextjs"; 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { verifyWaitlistInvite } from "@/lib/actions/waitlist";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useUser } from "@clerk/nextjs";
@@ -25,6 +24,7 @@ export default function PremiumSignUp() {
   const [password, setPassword] = useState("");
   const [code, setCode] = useState("");
   const [localError, setLocalError] = useState("");
+  const [emailInput, setEmailInput] = useState("")
  const router = useRouter();
    const [departmentChosen, setDepartmentChosen] = useState("");
    const {user} = useUser()
@@ -40,33 +40,7 @@ export default function PremiumSignUp() {
   }
 
   // --- PHASE 1: Institutional Check (Neon) ---
-  const handleInitialVerify = async () => {
-    setLocalError("");
 
-   
-    try {
-      const check = await verifyWaitlistInvite(email);
-      // Checking if the Email is Valid at all
-      if(check.error === "Invalid Email format" ){
-        return  setLocalError("Invalid Email Format")
-      }
-
-// After the check of the format, we request from the neon database if it is exists
-  if (check.allowed) {
-        setStep(2);
-      } else if(check.allowed === false && 
-        (check.error === "Email not on the the waitlist") ) {
-        setLocalError("Email not authorized as a waitlist invitee.");
-      }else if(check.allowed === false && check?.error === "Invite already claimed"){
-      setLocalError("Email already used for SignUp")
-      }
-      else{
-    return setLocalError("An unexpected error ha occured")
-      }
-    } catch (err) {
-      setLocalError("Verification server unreachable.");
-    }
-  };
 
   // --- PHASE 2: Create Credentials (Clerk) ---
 
@@ -96,6 +70,8 @@ const handleSync = async () => {
       console.error("Sync Error:", err);
      }
   };
+
+  
   const handleEstablishSession = async () => {
         if(!departmentChosen || !password ||!username) {
           return setLocalError("Fill in all the fields to proceed");
@@ -105,7 +81,7 @@ const handleSync = async () => {
     if (!signUp) return;
  try {
  const {error : emailError} = 
-      await signUp?.create({ emailAddress : email , username : username  })
+      await signUp?.create({ emailAddress : emailInput , username : username  })
       //Checking if the email Used for SignUp already exists
       if(emailError){
      //   console.log("EmailError", emailError)
@@ -119,7 +95,7 @@ const handleSync = async () => {
       }
  const {error : EmailSentError} =  await signUp?.verifications?.sendEmailCode();
  if(!EmailSentError){
-  setStep(3);
+  setStep(2);
  }
  } catch (err) {
       setLocalError("Initialization failed.");
@@ -195,69 +171,73 @@ const handleSync = async () => {
   //console.log(clerkId);
 
   return (
-  <div className="min-h-screen bg-[#1A1512] flex items-center justify-center p-6 selection:bg-[#D4AF37] selection:text-[#1A1512] font-sans text-[#F2F0E9]">
+  <div className="min-h-screen bg-[#F2F0E] flex items-center justify-center p-6 selection:bg-[#D4AF37] selection:text-[#1A1512] font-sans text-[#F2F0E9]">
   <motion.div 
     layout 
-    className="w-full max-w-lg bg-[#2C2520] border border-[#D4AF37]/20 p-12 relative shadow-[24px_24px_0px_rgba(212,175,55,0.05)] rounded-[2rem]"
+    className="w-full max-w-lg bg-[#F2F0E] border-2 border-[#D4AF37]/20 p-12 relative shadow-[24px_24px_0px_rgba(212,175,55,0.05)] rounded-[2rem]"
   >
     <header className="mb-12">
       <div className="flex items-center gap-3 mb-4">
         <span className="h-[1px] w-12 bg-[#D4AF37]" />
         <span className="text-[9px] font-mono uppercase tracking-[0.4em] text-[#D4AF37]">Step 0{step}</span>
       </div>
-      <h1 className="text-4xl font-serif text-[#F2F0E9] italic leading-tight">
+      <h1 className="text-4xl font-serif text-black italic leading-tight">
         Scholar <br /><span className="not-italic text-[#D4AF37]">Authorization</span>
       </h1>
     </header>
 
     <AnimatePresence mode="wait">
+     
+
       {step === 1 && (
         <motion.div key="step1" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-8">
-          <input 
-            type="email" 
-            placeholder="YOUR INSTITUTIONAL EMAIL"
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full border-b border-[#D4AF37]/20 p-4 outline-none font-mono text-sm bg-transparent focus:border-[#D4AF37] transition-all placeholder:text-[#D4AF37]/30 text-[#F2F0E9]"
-          />
-          <button 
-            onClick={(e: React.FormEvent) => {
-              e.preventDefault();
-              handleInitialVerify();
-            }} 
-            className="w-full bg-[#D4AF37] text-[#1A1512] p-5 text-[11px] font-black uppercase tracking-widest hover:bg-[#F2F0E9] transition-colors"
-          >
-            Verify Identity →
-          </button>
-          <div className="flex w-full justify-between">
-            <Link href="/signin" className="text-right mt-3 text-xs font-black uppercase tracking-widest text-[#D4AF37]/60 hover:text-[#D4AF37] transition-colors">
-              Sign in instead
-            </Link>
-            <Link href="/waitlist" className="text-right mt-3 text-xs font-black uppercase tracking-widest text-[#D4AF37]/60 hover:text-[#D4AF37] transition-colors">
-              Join Waitlist 
-            </Link>
-          </div>
-        </motion.div>
-      )}
+        
 
-      {step === 2 && (
-        <motion.div key="step2" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-8">
-          <div className="border-l-2 border-[#D4AF37] p-4 bg-[#D4AF37]/5 flex justify-between items-center">
-            <span className="font-mono text-xs text-[#D4AF37]">{email}</span>
-            <span className="text-[8px] uppercase font-black text-[#D4AF37] bg-[#D4AF37]/10 px-2 py-1 rounded-full">Matched</span>
-          </div>
-          <div className="flex flex-col gap-5">
+          <div className="flex flex-col gap-3">
+       <label className="text-[14px] leadingg-[20px] target:
+        font-bold text-[#D4AF37] uppercase tracking-[0.2em]">
+          Username
+       </label>
+       
             <input 
               type="text" 
-              placeholder="LEGAL NAME"
+              placeholder="John"
               onChange={(e) => setUsername(e.target.value)}
-              className="w-full border-b border-[#D4AF37]/20 p-4 outline-none font-mono text-sm bg-transparent focus:border-[#D4AF37] text-[#F2F0E9]"
+              className="w-full border-b border-[#D4AF37]/20 p-4 outline-none font-mono text-sm bg-transparent focus:border-[#D4AF37] text-black"
             />
+         
+            </div>
+
+          {/* Emaiil Field */}
+           <div className="flex flex-col gap-3">
+       <label className="text-[14px] leadingg-[20px] target:
+        font-bold text-[#D4AF37] uppercase tracking-[0.2em]">
+          Email Address
+       </label>
+       
+            <input 
+              type="email" 
+              placeholder="example@mail.com"
+              onChange={(e) => setEmailInput(e.target.value)}
+              className="w-full border-b border-[#D4AF37]/20 p-4 outline-none font-mono text-sm
+               bg-transparent focus:border-[#D4AF37]  text-black"
+            />
+            </div>
+
+
+    <div className="flex flex-col gap-3">
+       <label className="text-[14px] leadingg-[20px] target:
+        font-bold text-[#D4AF37] uppercase tracking-[0.2em]">
+        Password
+       </label>
             <input 
               type="password" 
               placeholder="ASSIGN PASSCODE"
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full border-b border-[#D4AF37]/20 p-4 outline-none font-mono text-sm bg-transparent focus:border-[#D4AF37] text-[#F2F0E9]"
+              className="w-full border-b border-[#D4AF37]/20 p-4 outline-none 
+              font-mono text-sm bg-transparent focus:border-[#D4AF37] text-black"
             />
+            </div>
 
             {/* Department */}
             <div className="border-b-2 border-[#D4AF37]/30 pb-2 focus-within:border-[#D4AF37] transition-all relative">
@@ -266,11 +246,11 @@ const handleSync = async () => {
                 value={departmentChosen} 
                 onChange={(e) => setDepartmentChosen(e.currentTarget.value)}
                 required 
-                className="w-full bg-transparent outline-none font-serif text-xl text-[#F2F0E9] cursor-pointer appearance-none"
+                className="w-full bg-transparent outline-none font-serif text-xl text-black cursor-pointer appearance-none"
               >
                 <option disabled selected className="bg-[#2C2520]">Choose field...</option>
                 {DEPARTMENTS.map(dept => (
-                  <option key={dept} value={dept} className="bg-[#2C2520] text-[#F2F0E9]">{dept}</option>
+                  <option key={dept} value={dept} className="bg-[#2C2520] text-black">{dept}</option>
                 ))}
               </select>
               <div className="absolute right-0 bottom-4 pointer-events-none text-[#D4AF37]">
@@ -283,12 +263,13 @@ const handleSync = async () => {
             >
               Establish Credentials →
             </button>
-          </div>
+        
+       
         </motion.div>
       )}
 
-      {step === 3 && (
-        <motion.div key="step3" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-8 text-center">
+      {step === 2 && (
+        <motion.div key="step2" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-8 text-center">
           <p className="text-[10px] uppercase font-bold text-[#D4AF37] tracking-[0.2em]">Security Handshake Required</p>
           <input 
             placeholder="000000"

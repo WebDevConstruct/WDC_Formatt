@@ -4,24 +4,24 @@ import { auth } from "@clerk/nextjs/server";
 
 //This is carried out to verify user's identity from the neon database 
 //through their email
-export async function verifyWaitlistInvite(email : string){
-    if(!email || !email?.includes("@")){
-        return {allowed : false, error : "Invalid Email format"}
-           }
-    try{
-        const entry = await db.waitlist.findUnique({
-             where:  {email : email?.toLowerCase()}
-        })
-        if(!entry) return {allowed : false, error  : "Email not on the the waitlist"}
-        if(entry.isClaimed) return {allowed : false, error : "Invite already claimed"}
-        return {allowed : true, error : null}
-    }catch(err){
-        return {allowed : false, error: "System error"}
-    }
-}
+// export async function verifyWaitlistInvite(email : string){
+//     if(!email || !email?.includes("@")){
+//         return {allowed : false, error : "Invalid Email format"}
+//            }
+//     try{
+//         const entry = await db.user.findFirst({
+//              where:  {email : email?.toLowerCase()}
+//         })
+//         if(!entry) return {allowed : true, error  : "Email not on the users list"}
+//         if(entry) return {allowed : false, error : "Email Exists in the database"}
+//         return {allowed : true, error : null}
+//     }catch(err){
+//         return {allowed : false, error: "System error"}
+//     }
+// }
 
 // The institution initialization error
-export async function initialiazeWaitlistStudent(
+export async function SignUp(
      username : string,
     email : string, department : string){
   // const ClerkUser = await currentUser();

@@ -340,7 +340,7 @@ const generateAssignment = async()=> {
 
 
 function parseChunk(rawText: string): studentDataType {
-  const lines = rawText.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+  const lines = rawText?.replace(/\[\d+(?:(?:,\s*\d+)|(?:-\d+))?\]/g, '')?.split('\n').map(l => l.trim()).filter(l => l.length > 0);
 
   let listCounter = 1;
 

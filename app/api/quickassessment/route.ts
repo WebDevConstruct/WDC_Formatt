@@ -1,13 +1,14 @@
 export const dynamic = "force-dynamic"
-import {createAnthropic} from '@ai-sdk/anthropic';
 import Anthropic from '@anthropic-ai/sdk';
 import { auth } from '@clerk/nextjs/server';
 import { db } from '@/lib/prisma';
+import {streamText} from "ai";
 import { currentUser } from '@clerk/nextjs/server';
-
-
+import {GoogleGenAI} from "@google/genai";
+import {google} from "@ai-sdk/google";
+//import {GoogleGenerativeAI} from "@google/generative-ai"
 type Track = 'letter' | 'essay' | 'assignment' | 'research-padi';
-
+export const maxduration = 30;
 
 
 
@@ -23,6 +24,7 @@ type requestTypes = {
    
 } 
 
+//const ai = new GoogleGenAI(process.env.AI_GATEWAY_API_KEY || "")
 
 
 
@@ -38,7 +40,7 @@ export async function POST(request: Request) {
     const { prompt, wordCount, intent, track, TrackInfo, salutation, receiverPosition, receiverOrganization, topic} = await request.json();
     const { senderName, receiverName } = TrackInfo || {};
 
-    const sanitizedPrompt = (prompt || "").trim();
+    const sanitizedPrompt = (prompt + intent || "").trim();
     const formattedMessage = track === "letter" 
       ? `SENDER: ${senderName || 'Unknown'}\nRECEIVER: ${receiverName || 'Unknown'}\nCONTEXT: ${sanitizedPrompt}`
       : sanitizedPrompt;
@@ -133,9 +135,9 @@ CRITICAL EXECUTION RULES:
  `You are WDC Formatt AI, a document structuring engine. Convert the input into a strict tag-per-line format. Nothing else.
 
 INPUTS
-prompt: ${prompt}
-intent: ${intent}
-wordCount: ${wordCount}
+prompt: <input>${prompt}</input>
+Context: <Context>${intent}</Context>
+wordCount: ${wordCount} - <instruction>The wordings alone are the word count, not tags, hashes and any other characters not forming a valid word. The Word count must strictly be adhered to.</instruction>
 
 OUTPUT CONTRACT (read before writing anything)
 The very first characters of your response must be "# TITLE: ". No greeting, no blank line, no code fence, ever.
@@ -193,6 +195,14 @@ specific sources.
 SIGNAL 2 — the nature of the prompt content (used only when ${intent} gives no list instruction)
 Read the prompt and ask: is this list enumerating items, steps, or examples — or is it explaining what something means?
 
+The value from ${intent} serves as a source for context, it could be explaining, describing, defining, explicitly
+ calling out a tone, a language, a style, format, that should be used in refining the output from the initial prompt written,
+ reducing the foreign relationship between the model and the user, Adhere to the instructions.
+ intent also acts as the contexts of the prompt, long written explanations as expected output by the user,
+or bulletin lists explaining the mental model behind how the response should
+be. Long written explanation - example "I am a software engineer, who studies and has a deep understanding
+ finance create the assignment from that perspective". example  Bulletin - "1. start with giving an analogy 2. Explain the intersection between the analogy and the 
+ content, topic or subject matter". <instruction>Pay attention to the intention as it serves as the context from the user that we dont have</instruction>.
 ENUMERATION signals → use Standard format:
 The prompt asks to "list", "name", "state", "give examples of", or "outline" things.
 The items are tools, skills, names, steps, features, or facts that need no explanation.
@@ -228,22 +238,33 @@ Never fabricate a quote. If no attributable source exists, omit the tag entirely
 A QUOTE line must always be preceded by a PARAGRAPH line that contextualises why the quote matters.
 A QUOTE must never appear inside a LIST block — it is always a standalone line.
 
-REFERENCES RULES (read carefully — violation is common)
-# REFERENCES: is ONLY included when ALL of the following are true:
-  1. The ${intent} explicitly instructs the model to include references, OR the prompt contains named sources, publications, or attributable data.
-  2. Real, verifiable source material exists within the provided input.
-If neither condition is met, the # REFERENCES: tag must be omitted entirely.
-Do NOT write "# REFERENCES: None", "# REFERENCES: N/A", or any placeholder.
-Do NOT fabricate, infer, or guess sources that were not supplied in the input.
-Generating a document about finance, history, science, or any topic does NOT automatically qualify as having references — the sources must be explicitly present in the input.
+REFERENCES RULES (CRITICAL — hallucination here is a source-of-truth violation)
+# REFERENCES: is ONLY included when ALL of the following conditions are simultaneously true:
 
+  1. ${intent} explicitly instructs references to be included.
+  2. The prompt contains named, specific, verifiable sources — a real author name,
+     a real publication title, a real institution, or a real date the user provided.
+  3. You are reproducing what the user gave you — NOT generating what sounds plausible.
+
+YOU ARE STRICTLY FORBIDDEN FROM:
+  Inventing author names, paper titles, volume numbers, issue numbers, or dates.
+  Constructing a reference that "sounds right" for the topic.
+  Inferring sources from the subject matter of the prompt.
+  Padding a reference list to appear thorough or credible.
+
+If the user did not supply a source in the prompt, that source does not exist in this document.
+A fabricated reference is worse than no reference — it is a factual error presented as truth.
+When in doubt, omit # REFERENCES: entirely. Omission is always safer than invention.
+
+ONLY legal reference input: text the user explicitly wrote in ${prompt} or ${intent}
+that names a specific real source. Reproduce it faithfully. Do not embellish it.
 RULES
 The ${intent} field contains the user's structural and tonal instructions for how the prompt should be executed. Follow it exactly — it overrides any default engine behaviour.
 Target wordCount exactly. If wordCount is empty, choose a standard professional length silently — never mention a length was chosen.
 Every SUBHEADER must be a specific named topic, never a single generic word, and never "Conclusion".
 Repeat SUBHEADER / PARAGRAPH / LIST / QUOTE blocks as many times as needed.
 TITLE, HEADER, INTRODUCTION, and CONCLUSION each appear exactly once.
-
+Also do not include numbers like [1], [22] or [1][11] trying to reference sources — those are not allowed in this document. Only use the # REFERENCES: tag if the user explicitly provided a source in the prompt or intent.
 MINIMAL EXAMPLE (structure only — do not reuse this content)
 # TITLE: Adaptive Learning Platforms In Higher Education
 # HEADER: Transforming Academic Workflows With Artificial Intelligence
@@ -265,58 +286,139 @@ MINIMAL EXAMPLE (structure only — do not reuse this content)
 
 
 
-    const nativeStream = await anthropic.messages.create({
-      model: "claude-3-haiku-20240307",
-      max_tokens: 12000,
-      system: systemPrompt,
-      messages: [{ role: "user", content: formattedMessage }],
-      stream: true,
-    });
+  //   const nativeStream = await anthropic.messages.create({
+  //     model: "claude-haiku-4.5",
+  //     max_tokens: 1024,
+  //     system: systemPrompt,
+  //     tools : [{
+  //       name : "perplexitySearch",
+  //       description : 'Search the web for current information using Perplexity.',
+  //        input_schema: {
+  //       type: 'object',
+  //       properties: {
+  //         query: { type: 'string', description: 'The search query' },
+  //       },
+  //        required : ["query"]
+  //     },
+     
+  //     }],
+  //     messages: [{ role: "user", content: formattedMessage }],
+  //     stream: true,
+  //   });
 
-    const responseStream = new ReadableStream({
-      async start(controller) {
-        try {
-          for await (const chunk of nativeStream) {
-            if (chunk.type === 'content_block_delta' && chunk.delta.type === 'text_delta') {
-              const textSnippet = chunk.delta.text;
-              if (textSnippet) {
-                controller.enqueue(new TextEncoder().encode(textSnippet));
-              }
-            }
-          }
-        } catch (streamError) {
-          controller.error(streamError);
-        } finally {
-          controller.close();
+  //   const responseStream = new ReadableStream({
+  //     async start(controller) {
+  //       try {
+  //         for await (const chunk of nativeStream) {
+  //           if (chunk.type === 'content_block_delta' && chunk.delta.type === 'text_delta') {
+  //             const textSnippet = chunk.delta.text;
+  //             if (textSnippet) {
+  //               controller.enqueue(new TextEncoder().encode(textSnippet));
+  //             }
+  //           }
+  //           if(chunk?.type === "content_block_start" && chunk?.content_block?.type === "tool_use"){
+                   
+  //  const toolName = chunk.content_block?.type;
+  //   console.log("Tool call started, Perplexity is active and working:", toolName);
+  //           }
+  //         }
+  //       } catch (streamError) {
+  //         controller.error(streamError);
+  //       } finally {
+  //         controller.close();
           
-          // Execute database increments safely after the streaming pipeline finishes processing
-          db.user.update({
-            where: { clerkId: userId },
-            data: { generationsUsed: { increment: 1 } }
-          }).catch((err) => console.error("Database tracking error:", err));
-        }
-      },
-    });
+  //         // Execute database increments safely after the streaming pipeline finishes processing
+  //         db.user.update({
+  //           where: { clerkId: userId },
+  //           data: { generationsUsed: { increment: 1 } }
+  //         }).catch((err) => console.error("Database tracking error:", err));
+  //       }
+  //     },
+  //   });
+  
 
-    // ==========================================
-    // STREAMING HEADERS (CRITICAL FOR VERCEL)
-    // ==========================================
-    return new Response(responseStream, {
-      headers: {
-        "Content-Type": "text/event-stream; charset=utf-8",
-        "Cache-Control": "no-cache, no-transform",
-        "X-Accel-Buffering": "no", // 👈 THIS IS THE FIX: Completely stops Vercel from buffering chunks
-        "Connection": "keep-alive",
-      },
-    });
 
-  } catch (globalError) {
-    console.error("Global Execution Failure:", globalError);
-    return new Response(JSON.stringify({ error: "Internal processing crash" }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" }
-    });
-  }
+
+
+ 
+//   const ai = new GoogleGenAI({apiKey: process.env.GEMINI_API_KEY || ""});
+
+// const nativeStream = await ai.models.generateContentStream({
+//   model: 'gemini-3.5-flash',
+//   config: {
+//     systemInstruction: systemPrompt,
+//     tools: [
+//       {
+//         googleSearch: {}, // native grounding — no external call needed
+//       },
+//     ],
+//   },
+//   contents: [{ role: 'user', parts: [{ text: formattedMessage }] }],
+// });
+
+// const responseStream = new ReadableStream({
+//   async start(controller) {
+//     try {
+//       for await (const chunk of nativeStream) {
+//         // Same pattern as before — just chunk.text instead of chunk.delta.text
+//         const textSnippet = chunk.text;
+//         if (textSnippet) {
+//           controller.enqueue(new TextEncoder().encode(textSnippet));
+//         }
+
+//         // Grounding metadata available if you want to extract sources later
+//         const groundingMeta = chunk.candidates?.[0]?.groundingMetadata;
+//         if (groundingMeta?.webSearchQueries?.length) {
+//           console.log('Gemini searched:', groundingMeta.webSearchQueries);
+//         }
+//       }
+//     } catch (streamError) {
+//       controller.error(streamError);
+//     } finally {
+//       controller.close();
+
+//       db.user.update({
+//         where: { clerkId: userId },
+//         data: { generationsUsed: { increment: 1 } },
+//       }).catch((err) => console.error('Database tracking error:', err));
+//     }
+//   },
+// });
+
+
+//     return new Response(responseStream, {
+//       headers: {
+//         "Content-Type": "text/event-stream; charset=utf-8",
+//         "Cache-Control": "no-cache, no-transform",
+//         "X-Accel-Buffering": "no", 
+//         "Connection": "keep-alive",
+//       },
+//     });
+
+//   } catch (globalError) {
+//     console.error("Global Execution Failure:", globalError);
+//     return new Response(JSON.stringify({ error: "Internal processing crash" }), {
+//       status: 500,
+//       headers: { "Content-Type": "application/json" }
+//     });
+//   }
+// }
+const modelByTrack = track === "letter" ? "claude-haiku-4.5" : "perplexity/sonar";
+const result  =  streamText({
+  model : modelByTrack,
+  prompt : formattedMessage,
+  system : systemPrompt,
+
+})
+return result?.toTextStreamResponse()
+}catch(error){
+  return new Response(JSON.stringify({error : error}), {
+    status : 500, headers : {"Content-Type" : "application/json"}
+  })
+  
+}finally{
+  console.log("DONE")
+}
 }
 // const client = new Anthropic({
 //   apiKey: process.env.AI_GATEWAY_API_KEY,
