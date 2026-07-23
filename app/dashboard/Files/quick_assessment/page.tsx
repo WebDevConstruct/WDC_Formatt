@@ -19,13 +19,13 @@ export default function TrackDropdown({ currentTrack, onTrackChange }: DropdownP
       description: 'Draft crisp correspondence to faculty or administrators. Writes natively in the first person ("I") with completely seamless, bracket-free layout transitions.',
       nav : "/dashboard/Files/quick_assessment/letter"
     },
-    {
-      id: 'essay' as const,
-      num: '02',
-      title: 'Structured Essays',
-      description: 'Build high-level academic prose. Enforces rigorous paragraph flow, robust thesis defenses, and formal transitions. Lists and bullets are strictly banned.',
-      nav : "/dashboard/Files/quick_assessment/essay"
-    },
+    // {
+    //   id: 'essay' as const,
+    //   num: '02',
+    //   title: 'Structured Essays',
+    //   description: 'Build high-level academic prose. Enforces rigorous paragraph flow, robust thesis defenses, and formal transitions. Lists and bullets are strictly banned.',
+    //   nav : "/dashboard/Files/quick_assessment/essay"
+    // },
     {
       id: 'assignment' as const,
       num: '03',
@@ -33,13 +33,13 @@ export default function TrackDropdown({ currentTrack, onTrackChange }: DropdownP
       description: 'Solve direct technical questions and problem sets. Designed for absolute scannability, incorporating itemized lists, clear steps, and concise formatting.',
         nav : "/dashboard/Files/quick_assessment/assignment"
     },
-    {
-      id: 'research-padi' as const,
-      num: '04',
-      title: 'Research Padi',
-      description: 'Consult an interactive research mentor. Brainstorm arguments, audit thesis ideas, and receive critical guidance from an expert senior lecturer perspective.',
-        nav : "/dashboard/Files/quick_assessment/research_padi"
-    }
+    // {
+    //   id: 'research-padi' as const,
+    //   num: '04',
+    //   title: 'Research Padi',
+    //   description: 'Consult an interactive research mentor. Brainstorm arguments, audit thesis ideas, and receive critical guidance from an expert senior lecturer perspective.',
+    //     nav : "/dashboard/Files/quick_assessment/research_padi"
+    // }
   ];
 
  

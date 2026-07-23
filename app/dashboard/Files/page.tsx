@@ -32,7 +32,7 @@ const TEMPLATES = [
     title: 'Critical Assessment',
     tagline: 'The Executive Masterpiece',
     serviceVibe: 'The Control Room',
-    navigateTo : "/dashboard/Files/critical_assessment",
+    navigateTo : "#",
     description: 'The gold standard for scholars. A bespoke workspace for data-driven precision and heavy-duty reports.',
     perks: [
       { label: 'Bespoke Sovereignty', detail: 'Total structural control over every header and sub-header.' },
@@ -54,7 +54,7 @@ const TEMPLATES = [
     id: 'image',
     title: 'Image Assessment',
     tagline: 'PDF caricature of image',
-    navigateTo :"/dashboard/Files/image_assessment",
+    navigateTo :"#",
     serviceVibe: 'Image-To-PDF_TEXT-Gen', 
     description: 'A high-velocity framework for the precise student. Refined, rapid, and inherently professional.',
     perks: [
@@ -172,7 +172,7 @@ const MajesticBrownSelection = () => {
               </div>
 
               {/* FINAL ACTION */}
-              <Link href={template?.navigateTo} 
+              <Link href={template.navigateTo} 
                className={`flex items-center py-3 w-full text-white ${template.theme.buttonBg} justify-center rounded-full
                md:w-[200px] ${template.theme.accent} font-black text-xs
                uppercase tracking-[0.3em] group-hover:gap-6 transition-all duration-500`}>

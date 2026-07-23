@@ -6,6 +6,7 @@ import {streamText} from "ai";
 import { currentUser } from '@clerk/nextjs/server';
 import {GoogleGenAI} from "@google/genai";
 import {google} from "@ai-sdk/google";
+import {GatewayProviderOptions} from "@ai-sdk/gateway";
 //import {GoogleGenerativeAI} from "@google/generative-ai"
 type Track = 'letter' | 'essay' | 'assignment' | 'research-padi';
 export const maxduration = 30;
@@ -408,7 +409,12 @@ const result  =  streamText({
   model : modelByTrack,
   prompt : formattedMessage,
   system : systemPrompt,
-
+  // providerOptions : {
+  //    gateway : {
+  //  //   cache : "auto",
+  //     zeroDataRetention : true
+  //    }satisfies GatewayProviderOptions
+  // }
 })
 return result?.toTextStreamResponse()
 }catch(error){
