@@ -40,7 +40,7 @@ export async function POST(request: Request) {
   try {
     const { prompt, wordCount, intent, track, TrackInfo, salutation, receiverPosition, receiverOrganization, topic} = await request.json();
     const { senderName, receiverName } = TrackInfo || {};
-
+    const body = request.json()
     const sanitizedPrompt = (prompt + intent || "").trim();
     const formattedMessage = track === "letter" 
       ? `SENDER: ${senderName || 'Unknown'}\nRECEIVER: ${receiverName || 'Unknown'}\nCONTEXT: ${sanitizedPrompt}`
@@ -378,14 +378,7 @@ MINIMAL EXAMPLE (structure only — do not reuse this content)
 //     } finally {
 //       controller.close();
 
-//       db.user.update({
-//         where: { clerkId: userId },
-//         data: { generationsUsed: { increment: 1 } },
-//       }).catch((err) => console.error('Database tracking error:', err));
-//     }
-//   },
-// });
-
+//     
 
 //     return new Response(responseStream, {
 //       headers: {
@@ -416,7 +409,17 @@ const result  =  streamText({
   //    }satisfies GatewayProviderOptions
   // }
 })
+
+    if(result){
+       await  db.user.update({
+        where: { clerkId: userId },
+         data: { generationsUsed: { increment: 1 } },
+      }).catch((err) => console.error('Database tracking error:', err));
+    }
+
+
 return result?.toTextStreamResponse()
+
 }catch(error){
   return new Response(JSON.stringify({error : error}), {
     status : 500, headers : {"Content-Type" : "application/json"}
@@ -554,24 +557,7 @@ return result?.toTextStreamResponse()
 // // }
 // console.log(db?.user);
 //     //8. Save generation to DB
-//     // await db.generation.create({
-//     //   data:{
-//     //     relateToDepartment : courseType === "main" ? true : false,
-//     //     studentId: user?.clerkId || "0",
-//     //     prompt,
-//     //     title  : "",
-//     //    generatedContent : text,
-//     //    isCurrent : true,
-//     //    createdAt : new Date(),
-//     //    formatting : JSON.stringify(body),
-//     //    intent : intent,
-//     //    maxRefinements : 3,
-//     //    refinementCount : 1,
-//     //    updatedAt : new Date(),
-//     //    status : "PROCESSING"
-      
-//     //   }
-//     // })
+   
   
 //   // return new Response(JSON.stringify({text}), {
 //   //   status  : 200, headers : {"Content-Type" :"application/json"}
