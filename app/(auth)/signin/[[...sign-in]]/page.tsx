@@ -6,16 +6,30 @@ import { useSignIn } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import Googlecallback from "@/app/components/Googlecallback"
+import {Alert} from "@/app/components/Alert";
+import { Loader } from '@/app/components/LoadingState';
+import {useUser} from "@clerk/nextjs";
 
-
-export default function SignInPage({children} : {children : React.DO_NOT_USE_OR_YOU_WILL_BE_FIRED_EXPERIMENTAL_REACT_NODES}) {
+export default function SignInPage({children} : {children : React.ReactNode}) {
   const { signIn, errors, fetchStatus} = useSignIn();
   const router = useRouter();
-
+ 
   const [email, setEmail]       = useState('');
   const [password, setPassword] = useState('');
   const [error, setError]       = useState('');
   const [loading, setLoading]   = useState(false);
+  const {isSignedIn} = useUser();
+  const [alert, setAlert] = useState<AlertState>(null);
+ // console.log(signIn?.status)
+type AlertState = {
+  variant: AlertVariant;
+  title: string;
+  message?: string;
+  primaryAction ? : {label : string, onClick : ()=> void}
+} | null;
+//prompt(isSignedIn ? "Yes, I am truly Signed In" : "NO I Arent")
+if(isSignedIn) return router?.replace("/dashboard")
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,22 +38,34 @@ export default function SignInPage({children} : {children : React.DO_NOT_USE_OR_
     setError('');
 
     try {
-    await signIn.password({
+      setLoading(true)
+  const response =  await signIn.password({
         emailAddress : email,
         password,
       });
+   const {error : ErrorResponse} = response;
+   const {message : errorMessage} = ErrorResponse || {}
+
+   // prompt(errorMessage);
+      // if(response?.error && errorMessage === "Enter Password."){
+      // prompt(response?.error?.message);
+      //   setAlert({variant : "error", title : errorMessage, message : "Your Password Field is Empty, Please enter your password"})
+      // }
 
      if (signIn.status === 'complete') {
       await signIn.finalize({
         navigate: ({ session, decorateUrl }) => {
+          setAlert({variant : "progress", title : "Finalizing SignIn...", message : "Almost There"})
           // Handle pending session tasks
           // See https://clerk.com/docs/guides/development/custom-flows/authentication/session-tasks
           if (session?.currentTask) {
             console.log(session?.currentTask)
-            return
+            return;
           }
 
           // If no session tasks, navigate the signed-in user to the home page
+          setAlert({variant : "success", title : "Successfully Signed In😎", 
+            message : "Redirecting you to your Dashboard😤"})
           const url = decorateUrl('/dashboard')
           if (url.startsWith('http')) {
             window.location.href = url
@@ -48,16 +74,52 @@ export default function SignInPage({children} : {children : React.DO_NOT_USE_OR_
           }
         },
       })
+     
+     // console.log(errors)
+      if(errors?.fields?.code){
+        console.log(errors?.fields?.code?.longMessage)
+     setAlert(({variant : "error", title : ",An Error Occured", message : errors?.fields?.code?.message}))
+      }
+    }else if(signIn?.status === "needs_first_factor"){
+ if(response?.error && errorMessage === "Enter password."){
+  //  prompt(response?.error?.message);
+        setAlert({variant : "error", title : errorMessage || "",
+           message : "Your Password Field is Empty, Please enter your password"})
+           //Incorrect Password
+     }else if(errorMessage === "Password is incorrect. Try again, or use another method."){
+     setAlert({variant : "error", title : "Password Incorrect",
+           message : errorMessage})
+     }else{
+      setAlert({variant : "error", title : "Unexpected Error Occured", message : errorMessage })
+     }
     } else if (signIn.status === 'needs_second_factor') {
       await signIn.mfa.sendPhoneCode()
     } else if (signIn.status === 'needs_client_trust') {
       // See https://clerk.com/docs/guides/development/custom-flows/authentication/client-trust
+    }else if(signIn?.status === "needs_identifier"){
+if(errorMessage === "Couldn't find your account."){
+      setAlert({variant : "error", title : "Account Not Found",
+            message : errorMessage})
+     }else if(errorMessage === "You're already signed in."){
+      setAlert({variant : "error", title : "Active Session", message : errorMessage})
+     }
     } else {
       // Check why the sign-in is not complete
-      console.error('Sign-in attempt not complete:', signIn)
+  
+    
+     // console.log(errors?.fields?.code?.message)
+      // setAlert({variant : "error", title : "Unexpected error occured", message : errorMessage})
+      // prompt(signIn?.status);
+    //  console.log(errors);
     }
   }catch(error){
+      
+     console.log(errors?.fields?.code?.message)
+     setAlert(({variant : "error", title : ",An Error Occured", message : "Empty Jor" }))
+      
     throw new Error("Error Occureed while trying to sign in:" + error)
+  }finally{
+    setLoading(false);
   }
 }
 
@@ -151,7 +213,7 @@ export default function SignInPage({children} : {children : React.DO_NOT_USE_OR_
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-[#F5EDD8] px-4">
+    <main className="flex min-h-screen font-serif items-center justify-center bg-[#F5EDD8] px-4">
       <div className="flex w-full max-w-3xl overflow-hidden rounded-xl shadow-sm">
 
         {/* ── Left panel ── */}
@@ -172,7 +234,7 @@ export default function SignInPage({children} : {children : React.DO_NOT_USE_OR_
 
         {/* ── Right panel ── */}
         <div className="flex flex-1 flex-col justify-center bg-white px-10 py-12">
-          <h1 className="text-xl font-medium text-gray-900">Welcome back</h1>
+          <h1 className="text-[30px] leading-[40px] font-medium text-gray-900">Welcome back</h1>
           <p className="mt-1 text-sm text-gray-500">Sign in to continue to Formatt</p>
 
           <form onSubmit={handleSubmit} className="mt-8 space-y-5" noValidate>
@@ -221,11 +283,11 @@ export default function SignInPage({children} : {children : React.DO_NOT_USE_OR_
 
             <button
               type="submit"
-              disabled={loading}
+            //  disabled={loading}
               className="w-full rounded-lg bg-[#2C2417] py-2.5 text-sm font-medium text-[#F5EDD8]
                transition-colors hover:bg-[#3D3020] disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {loading ? 'Signing in…' : 'Sign in'}
+             Sign In
             </button>
           </form>
 
@@ -242,7 +304,7 @@ export default function SignInPage({children} : {children : React.DO_NOT_USE_OR_
   </div>
  
 
-          <p className="mt-6 text-center text-xs text-gray-400">
+          <p className="mt-6 text-center text-xs  text-gray-400">
            {`Don't have an account? `} {' '}
             <a href="/sign-up" className="font-medium text-[#C4915A] hover:underline">
               Create one
@@ -250,6 +312,17 @@ export default function SignInPage({children} : {children : React.DO_NOT_USE_OR_
           </p>
         </div>
       </div>
+      {alert && (<Alert isOpen={alert?.variant?.length}
+       autoDismiss={alert?.variant === "success"}
+       variant={alert.variant} 
+       title={alert.title} 
+       message={alert.message}
+       onDismiss={()=> setAlert(null)} />
+       )}
+       {/* SIGNIN STATE */}
+       <Loader isOpen={loading}
+        title ={"Getting You Ready"}
+         message ={"Patience is a Virtue"}/>
     </main>
   );
 }

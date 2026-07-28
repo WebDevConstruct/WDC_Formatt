@@ -23,7 +23,7 @@ const [index, setIndex] = useState(0);
 
   const ADMIN_PROMPTS = [
     "Get me a list of insurance companies in Nigeria",
-    "WhO are the big 4 auditing Companies",
+    "What are the big 4 auditing Companies",
     "A proposal to a potential sponsorship company",
     "Why does Fischer believe the Nigeria financial environment is not developed enough..."
   ];
