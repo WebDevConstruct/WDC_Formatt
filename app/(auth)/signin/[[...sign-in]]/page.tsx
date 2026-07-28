@@ -22,7 +22,7 @@ export default function SignInPage({children} : {children : React.ReactNode}) {
   const [alert, setAlert] = useState<AlertState>(null);
  // console.log(signIn?.status)
 type AlertState = {
-  variant: AlertVariant;
+  variant:"error" | "success" | "warning" | "progress";
   title: string;
   message?: string;
   primaryAction ? : {label : string, onClick : ()=> void}
@@ -312,7 +312,7 @@ if(errorMessage === "Couldn't find your account."){
           </p>
         </div>
       </div>
-      {alert && (<Alert isOpen={alert?.variant?.length}
+      {alert && (<Alert isOpen={!!alert}
        autoDismiss={alert?.variant === "success"}
        variant={alert.variant} 
        title={alert.title} 
