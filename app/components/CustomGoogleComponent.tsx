@@ -29,7 +29,7 @@ export function CustomGoogleOneTap({ children }: { children: React.ReactNode }) 
     if (google) {
       google.accounts.id.initialize({
         // Add your Google Client ID here.
-        client_id: process.env.ClientID ||  "",
+        client_id: process.env.ClientID ||  "863785584203-t3nma67imr7bfl6qb60812ebh8gq6p77.apps.googleusercontent.com",
         callback: async (response: any) => {
           // Here we call our provider with the token provided by Google
           call(response.credential)

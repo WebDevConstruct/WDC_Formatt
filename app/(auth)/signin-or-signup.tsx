@@ -93,7 +93,7 @@ export default function Page() {
     // the code 'sign_up_if_missing_transfer'. Check for this error
     // to determine if we need to transfer to sign-up.
     if (error) {
-      if (error.errors[0]?.code === 'sign_up_if_missing_transfer') {
+      if (error?.code === 'sign_up_if_missing_transfer') {
         // The user doesn't exist - transfer to sign-up
         await handleTransfer()
         return
