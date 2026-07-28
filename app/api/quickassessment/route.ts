@@ -40,7 +40,7 @@ export async function POST(request: Request) {
   try {
     const { prompt, wordCount, intent, track, TrackInfo, salutation, receiverPosition, receiverOrganization, topic} = await request.json();
     const { senderName, receiverName } = TrackInfo || {};
-    const body = request.json()
+   // const body = request.json()
     const sanitizedPrompt = (prompt + intent || "").trim();
     const formattedMessage = track === "letter" 
       ? `SENDER: ${senderName || 'Unknown'}\nRECEIVER: ${receiverName || 'Unknown'}\nCONTEXT: ${sanitizedPrompt}`
@@ -397,17 +397,17 @@ MINIMAL EXAMPLE (structure only — do not reuse this content)
 //     });
 //   }
 // }
-const modelByTrack = track === "letter" ? "claude-haiku-4.5" : "perplexity/sonar";
+const modelByTrack = track === "letter" ? "claude-sonnet-4.6" : "perplexity/sonar";
 const result  =  streamText({
   model : modelByTrack,
   prompt : formattedMessage,
   system : systemPrompt,
-  // providerOptions : {
-  //    gateway : {
-  //  //   cache : "auto",
-  //     zeroDataRetention : true
-  //    }satisfies GatewayProviderOptions
-  // }
+   providerOptions : {
+    gateway : {
+    cache : "auto",
+   //   zeroDataRetention : true
+     }satisfies GatewayProviderOptions
+   }
 })
 
     if(result){
