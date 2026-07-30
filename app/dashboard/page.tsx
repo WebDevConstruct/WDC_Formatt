@@ -148,7 +148,7 @@ const [index, setIndex] = useState(0);
 
             {/* Slides Card */}
       {/* Slides Card - Corrected Iconography */}
-<Link href="/dashboard/Slides" className="block group">
+<Link href="#" className="block group">
   <Card className="relative overflow-hidden bg-[#F2F0E9] border-2 border-[#483C32]/40 p-1 shadow-[8px_8px_0px_0px_rgba(72,60,50,0.2)] transition-all group-hover:shadow-[12px_12px_0px_0px_rgba(72,60,50,0.4)] group-hover:border-[#483C32] group-hover:-translate-x-1 group-hover:-translate-y-1">
     <div className="bg-[#483C32]/5 p-8 md:p-12 space-y-8">
       <div className="flex justify-between items-start">
