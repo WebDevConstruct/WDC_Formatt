@@ -29,7 +29,23 @@ export async function loadFonts(pdfDoc : PDFDocument){
 export function deepSanitize<T>(data: T): T{
     if(typeof data === "string"){
         return data?.replace(/[\r\n\u000a\u000d]+/g, "")
-        .replace(/\s+/g, ' ')                // Normalizes multiple spaces
+        .replace(/\s+/g, ' ')?.replace(/₦/g,  'N')   // Naira
+    .replace(/£/g,  'GBP')   // Pound
+    .replace(/€/g,  'EUR')   // Euro
+    .replace(/¥/g,  'JPY')   // Yen / Yuan
+    .replace(/₹/g,  'INR')   // Rupee
+    .replace(/₩/g,  'KRW')   // Won
+    .replace(/₿/g,  'BTC')   // Bitcoin
+    .replace(/©/g,  '(c)')
+    .replace(/®/g,  '(R)')
+    .replace(/™/g,  '(TM)')
+    .replace(/–/g,  '-')      // en dash
+    .replace(/—/g,  '-')      // em dash
+    .replace(/'/g,  "'")      // left single quote
+    .replace(/'/g,  "'")      // right single quote
+    .replace(/"/g,  '"')      // left double quote
+    .replace(/"/g,  '"')      // right double quote
+    .replace(/…/g,  '...').replace(/[^\x00-\x7F]/g, '')             
       .trim() as T;
     } 
     if(Array?.isArray(data)){

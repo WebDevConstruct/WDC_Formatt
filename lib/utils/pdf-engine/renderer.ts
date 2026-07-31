@@ -534,15 +534,15 @@ export function renderCoverPage(
   layout : ResolvedLayout,
 
 ): void {
-    const {pageWidth, pageHeight} = layout;
-  const coverPage = state.doc.addPage([pageWidth, pageHeight]);
+   // const {pageWidth, pageHeight} = layout;
+  //const coverPage = state.doc.addPage([pageWidth, pageHeight]);
   let y = 580;
 
   
   const row = (label: string, value?: string) => {
     if (!value?.trim()) return;
     const text = label ? `${label.toUpperCase()} ${value.toUpperCase()}` : value.toUpperCase();
-    y = drawCentered(coverPage, text, fonts.serifBold, 20, y, layout);
+    y = drawCentered(state.page, text, fonts.serifBold, 20, y, layout);
     y -= 20;
   };
 

@@ -65,7 +65,7 @@ export function CustomGoogleOneTap({ children }: { children: React.ReactNode }) 
         signInFallbackRedirectUrl: process.env.AuthorizedDevRedirectUrl || "",
       })
     } catch (error) {
-      router.push('/sign-in')
+      router.push('/signin')
     }
   }
 

@@ -35,12 +35,12 @@ const {pageWidth, pageHeight, margin} = layout
   const fonts = await loadFonts(pdfDoc);
  //console.log(deepSanitize(studentData));
   const clean = deepSanitize(studentData) as StudentDataType;
-
+const coverPage = pdfDoc.addPage([pageWidth, pageHeight])
 //if(!clean) return;
   // 2. Shared render state — single source of truth for page + Y position
   const state: RenderState = {
     doc: pdfDoc,
-    page: pdfDoc.addPage([pageWidth, pageHeight]),
+    page: coverPage,
     y: pageHeight - margin,
     listIndex: 1,
     pageWidth,
@@ -96,21 +96,8 @@ const {pageWidth, pageHeight, margin} = layout
 
     if (block.role === 'lists') state.listIndex++;
   }
-  let lastPage = state.page;
-  for(const block of queue){
-    if(!block?.content?.trim()){
-        if(block.role === "subheader") state.listIndex = 1
-
-     //   const pageBefore = state.page;
-        renderToken(block, state, fonts, sizes, layout);
-        if(block.role === "lists"){
-       state.listIndex++;
-       lastPage = state.page;
-       
-        }
-       // drawSignature(lastPage, assets)
-    }
-  }
+ 
+  
 
   return pdfDoc.save();
 }
