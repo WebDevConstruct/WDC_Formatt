@@ -140,7 +140,7 @@ CRITICAL EXECUTION RULES:
 INPUTS
 prompt: <input>${prompt}</input>
 Context: <Context>${intent}</Context>
-wordCount: ${wordCount} words - <instruction>The wordings alone are the word count, not tags, hashes and any other characters not forming a valid word. The Word count must strictly be adhered to.</instruction>
+wordCount: ${wordCount} words - <instruction>This is a ${wordCount} word document. The wordings alone are the word count, not tags, hashes and any other characters not forming a valid word. The Word count must strictly be adhered to.</instruction>
 
 OUTPUT CONTRACT (read before writing anything)
 The very first characters of your response must be "# TITLE: ". No greeting, no blank line, no code fence, ever.
@@ -443,7 +443,7 @@ return result?.toTextStreamResponse()
 //   //1. Check if the user is an authorised user
 //   const cookieHeader = request?.headers.get("cookie");
 //   console.log("Cookies", cookieHeader ? "YES YOU CANT EAT YUMMY COOKIES" : "NO I CANT")
-   const {userId}=await  auth() ;
+   //const {userId}=await  auth() ;
 
   
 

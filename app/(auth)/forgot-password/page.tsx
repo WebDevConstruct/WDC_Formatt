@@ -264,7 +264,8 @@ export default function ForgotPassword() {
                 placeholder="e.g. john@doe.com"
                 value={emailAddress}
                 onChange={(e) => setEmailAddress(e.target.value)}
-                className="w-full px-4 py-2.5 bg-white border border-[#3a332d] rounded-lg text-white placeholder-neutral-500 focus:outline-none focus:border-[#d4af37] transition-colors"
+                className="w-full px-4 py-2.5 bg-white border border-[#3a332d] rounded-lg text-black
+                 placeholder-neutral-500 focus:outline-none focus:border-[#d4af37] transition-colors"
               />
               {errors?.fields?.identifier && (
                 <p className="text-red-400 text-xs mt-1.5">{errors.fields.identifier.message}</p>
@@ -293,7 +294,7 @@ export default function ForgotPassword() {
                 placeholder="Enter 6-digit code"
                 value={code}
                 onChange={(e) => setCode(e.target.value)}
-                className="w-full px-4 py-2.5 bg-white border border-[#3a332d] rounded-lg text-white placeholder-neutral-500 focus:outline-none focus:border-[#d4af37] transition-colors tracking-widest text-center"
+                className="w-full px-4 py-2.5 bg-white border border-[#3a332d] rounded-lg text-black placeholder-neutral-500 focus:outline-none focus:border-[#d4af37] transition-colors tracking-widest text-center"
               />
               {errors?.fields?.code && (
                 <p className="text-red-400 text-xs mt-1.5">{errors.fields.code.message}</p>
@@ -322,7 +323,8 @@ export default function ForgotPassword() {
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-2.5 bg-white border border-[#3a332d] rounded-lg text-white placeholder-neutral-500 focus:outline-none focus:border-[#d4af37] transition-colors"
+                className="w-full px-4 py-2.5 bg-white border border-[#3a332d] rounded-lg text-black
+                 placeholder-neutral-500 focus:outline-none focus:border-[#d4af37] transition-colors"
               />
               {errors?.fields?.password && (
                 <p className="text-red-400 text-xs mt-1.5">{errors.fields.password.message}</p>
