@@ -79,6 +79,8 @@ export async function POST(request: Request) {
           planTier: "free",
           createdAt: new Date(),
           generationsUsed: 0,
+
+
         }
       });
     }
@@ -138,7 +140,7 @@ CRITICAL EXECUTION RULES:
 INPUTS
 prompt: <input>${prompt}</input>
 Context: <Context>${intent}</Context>
-wordCount: ${wordCount} - <instruction>The wordings alone are the word count, not tags, hashes and any other characters not forming a valid word. The Word count must strictly be adhered to.</instruction>
+wordCount: ${wordCount} words - <instruction>The wordings alone are the word count, not tags, hashes and any other characters not forming a valid word. The Word count must strictly be adhered to.</instruction>
 
 OUTPUT CONTRACT (read before writing anything)
 The very first characters of your response must be "# TITLE: ". No greeting, no blank line, no code fence, ever.
@@ -441,19 +443,9 @@ return result?.toTextStreamResponse()
 //   //1. Check if the user is an authorised user
 //   const cookieHeader = request?.headers.get("cookie");
 //   console.log("Cookies", cookieHeader ? "YES YOU CANT EAT YUMMY COOKIES" : "NO I CANT")
-//   const {userId}=await  auth() ;
+   const {userId}=await  auth() ;
 
-//   if(!userId){
-//    return new Response(JSON.stringify({error : "unauthorised", sessionId : userId}), {
-//       status : 401, headers : {"Content-Type" : "application/json"}
-//     })
-//   }
-
-//   //2. get user from database
-//   const user = await db.user.findUnique({
-//     where : {clerkId : userId}
-//   }) 
-
+  
 
 //   //3. Check trial expiry (30 days per user)
   
@@ -466,20 +458,7 @@ return result?.toTextStreamResponse()
 // const username = ClerkUser?.username || "";
 
 
-//   if(!user && navigator.onLine){
-//     await db.user.create({
-//       data : {
-//       clerkId: userId,
-//       username : username,
-//       department : "",
-//     email: email || "no-email.wsc.com",
-//     planTier : "free",
-//     createdAt: new Date(),
-//     generationsUsed: 0,
-//       }
-//     })
-    
-//   }
+  
 //   // const expiredDate = user?.expiresAt ? new Date(user.expiresAt) : new Date();
   
 //   // const trialActive = expiredDate > new Date()
