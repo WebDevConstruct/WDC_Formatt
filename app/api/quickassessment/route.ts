@@ -85,8 +85,24 @@ export async function POST(request: Request) {
       });
     }
 
-    if (user?.planTier !== "free") {
-      return new Response(JSON.stringify({ error: "Trial expired" }), {
+    const isFree = !user?.planTier || user?.planTier === "free";
+    const FREE_GENERATION_LIMIT = 10;
+
+    if (isFree && (user?.generationsUsed ?? 0) >= FREE_GENERATION_LIMIT) {
+      return new Response(JSON.stringify({ 
+        error: "Generation limit reached", 
+        message: "You have reached your limit of free generations. Upgrade to continue." 
+      }), {
+        status: 403,
+        headers: { "Content-Type": "application/json" }
+      });
+    }
+
+    if (isFree && user?.expiresAt && new Date() > new Date(user.expiresAt)) {
+      return new Response(JSON.stringify({ 
+        error: "Trial expired", 
+        message: "Your free access period has expired." 
+      }), {
         status: 403,
         headers: { "Content-Type": "application/json" }
       });
@@ -409,16 +425,18 @@ const result  =  streamText({
     cache : "auto",
    //   zeroDataRetention : true
      }satisfies GatewayProviderOptions
-   }
-})
-
-    if(result){
-       await  db.user.update({
+   },
+  onFinish: async () => {
+    try {
+      await db.user.update({
         where: { clerkId: userId },
-         data: { generationsUsed: { increment: 1 } },
-      }).catch((err) => console.error('Database tracking error:', err));
+        data: { generationsUsed: { increment: 1 } },
+      });
+    } catch (err) {
+      console.error('Database tracking error:', err);
     }
-
+  }
+})
 
 return result?.toTextStreamResponse()
 

@@ -607,36 +607,58 @@ const LetterAssessment = () => {
 if(data?.content?.length > 0){
 // alert("generating Letter Response...")
     try {
-      setCreatingPDFState(true)
-    const response = await fetch("/api/letter", {
-      method : "POST",
-      headers : {
-        "Content-Type" : "application/pdf",
-        "Content-Disposition" : `attachment; filename=${sender_name}_${recipient_name}.pdf`
-      },
-      body : JSON.stringify(data)
-    })
-   // console.log(JSON.stringify({body}));
-  
-   
-    const blob = await response.blob();
-    console.log(blob);
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    const fileName = `${sender_name}_${recipient_name}.pdf`
-    a.setAttribute("download",fileName);
-    document?.body?.appendChild(a);
-    a?.click()
-    //Clean Up
-    window?.URL?.revokeObjectURL(url)
-      a?.parentNode?.removeChild(a);
-  } catch(error){
-    alert("Request failed why trying to generate your pdf")
-    throw new Error("Could not Create the Assignment");
-  }finally{
-    setCreatingPDFState(false)
-  }
+      setCreatingPDFState(true);
+      const response = await fetch("/api/letter", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data)
+      });
+
+      if (!response.ok) {
+        let errorMessage = "Failed to generate letter PDF";
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.message || errorData.error || errorMessage;
+        } catch {
+          const errorText = await response.text();
+          if (errorText) errorMessage = errorText;
+        }
+        throw new Error(errorMessage);
+      }
+
+      const blob = await response.blob();
+      const cleanSender = (sender_name || "SENDER").replace(/[^a-z0-9]/gi, '_');
+      const cleanRecipient = (recipient_name || "RECIPIENT").replace(/[^a-z0-9]/gi, '_');
+      const fileName = `${cleanSender}_${cleanRecipient}.pdf`;
+      const url = window.URL.createObjectURL(blob);
+
+      // Reliable cross-platform download (Desktop + iOS/Safari)
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+        (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+      if (isIOS) {
+        window.open(url, "_blank");
+      } else {
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+      }
+
+      // Delay revocation by 60 seconds
+      setTimeout(() => {
+        window.URL.revokeObjectURL(url);
+      }, 60000);
+    } catch (error: any) {
+      console.error("Letter PDF generation error:", error);
+      alert(error?.message || "Request failed while trying to generate your letter PDF");
+    } finally {
+      setCreatingPDFState(false);
+    }
        }else{
         alert("Unable to generate the letter..")
        }

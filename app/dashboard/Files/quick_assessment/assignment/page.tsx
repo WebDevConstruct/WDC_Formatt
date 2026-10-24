@@ -286,36 +286,58 @@ const generateAssignment = async()=> {
     console.log(body);
      const {userInput} = body;
   try {
-    setCreatingPDFState(true)
-  const response = await fetch("/api/quickassessment-template", {
-    method : "POST",
-    headers : {
-      "Content-Type" : "application/pdf",
-      "Content-Disposition" : `attachment; filename=${userInput?.assignment_title}.pdf`
-    },
-    body : JSON.stringify({body})
-  })
- // console.log(JSON.stringify({body}));
+    setCreatingPDFState(true);
+    const response = await fetch("/api/quickassessment-template", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ body })
+    });
 
- 
-  const blob = await response.blob();
-  console.log(blob);
-  const url = window.URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  const fileName = `${userInput?.assignment_title || "ASSIGNMENT"}.pdf`
-  a.setAttribute("download",fileName);
-  document?.body?.appendChild(a);
-  a?.click()
-  //Clean Up
-  window?.URL?.revokeObjectURL(url)
-    a?.parentNode?.removeChild(a);
-} catch(error){
-  alert("Request failed why trying to generate your pdf")
-  throw new Error("Could not Create the Assignment");
-}finally{
-  setCreatingPDFState(false)
-}
+    if (!response.ok) {
+      let errorMessage = "Failed to generate PDF";
+      try {
+        const errorData = await response.json();
+        errorMessage = errorData.message || errorData.error || errorMessage;
+      } catch {
+        const errorText = await response.text();
+        if (errorText) errorMessage = errorText;
+      }
+      throw new Error(errorMessage);
+    }
+
+    const blob = await response.blob();
+    const cleanTitle = (userInput?.assignment_title || "ASSIGNMENT").replace(/[^a-z0-9]/gi, '_');
+    const fileName = `${cleanTitle}.pdf`;
+    const url = window.URL.createObjectURL(blob);
+
+    // Reliable cross-platform download (Desktop + iOS/Safari)
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+      (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+    if (isIOS) {
+      // On iOS Safari, opening the blob directly opens native preview with Share -> Save to Files
+      window.open(url, "_blank");
+    } else {
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    }
+
+    // Keep blob URL in memory for 60 seconds so mobile/background downloads finish safely
+    setTimeout(() => {
+      window.URL.revokeObjectURL(url);
+    }, 60000);
+  } catch (error: any) {
+    console.error("PDF generation error:", error);
+    alert(error?.message || "Request failed while trying to generate your PDF");
+  } finally {
+    setCreatingPDFState(false);
+  }
 }
  const rawBufferChunk = useRef<string>("") ;
  const containerRef = useRef<HTMLDivElement | null>(null);
