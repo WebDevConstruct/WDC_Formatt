@@ -3,8 +3,8 @@ This code repository was created by the developers of WebDevConstruct aiming to 
 
 TECH STACK:
 NEXTJS: We leverage Next router for the calling of apis.
-VERCEL: VERCEL has been used for deployment and In terms it infrastructure we use the VERCEL_AI_GATEWAY which provides variant of LLMs.
-CLOUDFLARE: We leverage Cloudflare workers for document embeddings into the vectorize database (Ingestions), and the Cloudflare AI SEARCH for RAG to personalize and customize users responses according to both system response and the right 
+VERCEL: VERCEL has been used for deployment and In terms of infrastructure we use the VERCEL_AI_GATEWAY which provides variant of LLMs.
+CLOUDFLARE: We leverage Cloudflare workers for document embeddings into the vectorize database (Ingestions), and the Cloudflare AI SEARCH for RAG to personalize and customize users responses according to both system response.
 PRISMA: Object relations manager
 NEON: For users signed up and generations made.
 CLERK: For user authentication
