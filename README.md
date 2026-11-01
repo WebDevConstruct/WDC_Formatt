@@ -10,7 +10,7 @@ NEON: For users signed up and generations made.
 CLERK: For user authentication
 
 FEATURES:
-QUICK RESEARCH: This feature was created built on top of perplexity/sonar to help remove formatting barriers and be in more control of document editing.
+QUICK RESEARCH: This feature was created and built on top of perplexity/sonar to help remove formatting barriers and be in more control of document editing.
 CORE IN THE FEATURE SYSTEM are the PDF Engine, template generator, and the PDF download.
 
 1. PDF ENGINE: This engine created to help create a well-formatted and professional documents such as indents for paragraphs, boldness in titles, font sizes, and other text formatting. It also uses text-parsing to assign roles to texts in the documents.
@@ -24,8 +24,8 @@ CORE IN THE FEATURE SYSTEM are the PDF Engine, template generator, and the PDF d
 
 CORE IDEA: This is created to give users more contexts regarding academic literature and curb the challenges users have with reading wrong resources, giving more contextualized responses from academic sessions recommended literatures and contents. 
 
-1. CLOUDFLARE S2 Object storage: The use of Cloudflare buckets to upload documents relevant to the user
-2. VECTORIZE DATABASE:The use of Cloudflare worker to store numbered vectors and index documents divisible by chunks to provide contexts to the application.
+1. CLOUDFLARE S2 Object storage: The use of Cloudflare buckets to upload documents relevant to the user prompt search.
+2. VECTORIZE DATABASE: The use of Cloudflare worker to store numbered vectors and index documents divisible by chunks to provide contexts to the application.
 3. AI SEARCH: We leverage the Cloudflare AISearch library to fetch using prompts that match any relevant literature to the user, then we use another LLM to broaden user understanding for that feature.
 4. TEXT SEARCH: This can Also be relevant for a quick literature page search without opening a 1,000 page PDF.
 
